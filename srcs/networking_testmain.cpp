@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:21:49 by eberkau           #+#    #+#             */
-/*   Updated: 2026/05/20 00:10:18 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/05/20 04:21:12 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,23 @@
 // #include <arpa/inet.h>
 #include <iostream>
 #include <unistd.h>
+#include <fcntl.h>
+#include <poll.h>
+#include <vector>
+#include <unordered_map>
 
-int main() {
+constexpr int FOREVER = -1;
+
+int main()
+{
 
 	int serverFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (serverFd < 0) {
 		perror("socket");
 		return 1;
 	}
+	int setting = true;
+	setsockopt(serverFd, SOL_SOCKET, SO_REUSEADDR, &setting, sizeof(setting));
 
 	sockaddr_in serverAddr = {};
 	serverAddr.sin_family = AF_INET;
@@ -42,38 +51,80 @@ int main() {
 		return 1;
 	}
 
-	std::cout << "listening" << std::endl;
+	int currentFlags = fcntl(serverFd, F_GETFL);
+	fcntl(serverFd, F_SETFL, currentFlags | O_NONBLOCK);
 
-	sockaddr_in clientAddr = {};
-	socklen_t clientLen = sizeof(clientAddr);
-	int clientFd = accept(serverFd, reinterpret_cast<sockaddr*>(&clientAddr), &clientLen);
-	if (clientFd == -1) {
-		perror("accept");
-		return 1;
+	pollfd serverPoll;
+	serverPoll.fd = serverFd;
+	serverPoll.events = POLLIN;
+
+	std::vector<pollfd> pollfdArr;
+	pollfdArr.push_back(serverPoll);
+
+	std::unordered_map<int, Client> clients;
+
+	while (true) {
+		std::cout << "listening" << std::endl;
+
+		int ready = poll(pollfdArr.data(), pollfdArr.size(), FOREVER);
+
+		for (size_t i = 0; i < pollfdArr.size() && ready > 0; ++i) {
+			if (pollfdArr[i].fd == serverFd && pollfdArr[i].revents & POLLIN) {
+				sockaddr_in clientAddr = {};
+				socklen_t clientLen = sizeof(clientAddr);
+				
+				int clientFd = accept(serverFd, reinterpret_cast<sockaddr*>(&clientAddr), &clientLen);
+				if (clientFd == -1) {
+					perror("accept");
+					return 1;
+				}
+				std::cout << "client accepted" << std::endl;
+				
+				pollfd clientPoll;
+				clientPoll.fd = clientFd;
+				clientPoll.events = POLLIN;
+				
+				clients.try_emplace(clientFd, clientFd, clientAddr);
+				pollfdArr.push_back(clientPoll);
+				std::cout << "client registered: " << clientFd << std::endl;
+			}
+			else if (pollfdArr[i].fd != serverFd && pollfdArr[i].revents & POLLIN) {
+				char msg[64];
+				if (0 == recv(pollfdArr[i].fd, &msg, 64, 0)) {
+					std::cout << pollfdArr[i].fd << " disconnected" << std::endl;
+					clients.erase(pollfdArr[i].fd);
+					pollfdArr[i] = pollfdArr.back();
+					pollfdArr.pop_back();
+					--i;
+					continue;
+				}
+
+				std::cout << "Message arrived from: " << pollfdArr[i].fd << " -> " << msg << std::endl;
+				bzero(&msg, 64);
+			}
+		}
 	}
-	std::cout << "client accepted" << std::endl;
 
-	Client testUser(clientFd, clientAddr);
 
 	
-	const std::string str("Hello World!");
-	testUser.appendToOutBuf(str, sizeof(str));
-	send(testUser.getFd(), &(testUser.getOutBuf()), sizeof(testUser.getOutBuf()), 0);
+	// const std::string str("Hello World!");
+	// testUser.appendToOutBuf(str, sizeof(str));
+	// send(testUser.getFd(), &(testUser.getOutBuf()), sizeof(testUser.getOutBuf()), 0);
 	
-	sleep(10);
+	// sleep(10);
 
-	char backMsg[32];
-	recv(testUser.getFd(), &backMsg, 32, 0);
+	// char backMsg[32];
+	// recv(testUser.getFd(), &backMsg, 32, 0);
 
-	testUser.appendToInBuf(backMsg, sizeof(backMsg));
+	// testUser.appendToInBuf(backMsg, sizeof(backMsg));
 
-	std::cout << backMsg << std::endl;
-	std::cout << testUser.getInBuf() << std::endl;
+	// std::cout << backMsg << std::endl;
+	// std::cout << testUser.getInBuf() << std::endl;
 
-	send(testUser.getFd(), "okayyy lets go\n", 32, 0);
-	bzero(&backMsg, 32);
-	recv(testUser.getFd(), &backMsg, 32, 0);
-	std::cout << backMsg << std::endl;
+	// send(testUser.getFd(), "okayyy lets go\n", 32, 0);
+	// bzero(&backMsg, 32);
+	// recv(testUser.getFd(), &backMsg, 32, 0);
+	// std::cout << backMsg << std::endl;
 
 	return 0;
 }
