@@ -6,7 +6,7 @@
 #    By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/05/11 14:54:40 by eberkau           #+#    #+#              #
-#    Updated: 2026/05/19 23:58:12 by eberkau          ###   ########.fr        #
+#    Updated: 2026/05/20 23:56:24 by eberkau          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -38,6 +38,8 @@ DEFAULT		=	\033[0m
 CXXFILES	=	networking_testmain.cpp	\
 				classes/sourcefile.class.cpp	\
 				classes/Client.class.cpp	\
+				server_loop.cpp	\
+				event_handlers.cpp \
 #				and_so_on.cpp
 
 

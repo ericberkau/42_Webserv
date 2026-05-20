@@ -1,4 +1,5 @@
 TODO: remove later
 this is a list of files to add to the Makefile later after merging to avoid merge conflicts and without having to type every single one again
 
-classes/Client.class.cpp
+classes/Client.class.cpp	\
+server_loop.cpp	\
