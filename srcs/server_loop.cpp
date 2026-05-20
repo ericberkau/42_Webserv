@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 22:02:11 by eberkau           #+#    #+#             */
-/*   Updated: 2026/05/21 00:03:49 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/05/21 00:19:33 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,9 @@
 #include <iostream>
 
 constexpr int FOREVER = -1;
+constexpr int MAX_PEND_CONNECT_QUEUE = 32;
 
-int setupListeningSocket(std::vector<pollfd>& pollfdArr) {
+static int setupListeningSocket(std::vector<pollfd>& pollfdArr) {
 	int serverFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (serverFd < 0) {
 		perror("socket");
@@ -58,14 +59,14 @@ void handleIncomingData(
 	std::unordered_map<int, Client>& clients
 );
 
-void serverLoop() {
+void serverLoop(void) {
 	std::vector<pollfd> pollfdArr;
 
 	const int serverFd = setupListeningSocket(pollfdArr);
 
 	std::unordered_map<int, Client> clients;
 
-	if (0 != listen(serverFd, 32)) {
+	if (0 != listen(serverFd, MAX_PEND_CONNECT_QUEUE)) {
 		perror("listen");
 		throw 1;
 	}
@@ -77,7 +78,7 @@ void serverLoop() {
 
 		for (size_t i = 0; i < pollfdArr.size() && ready > 0; ++i) {
 			if (pollfdArr[i].fd == serverFd && pollfdArr[i].revents & POLLIN) {
-				handlePendConnects(serverFd, pollfdArr, clients);
+				handlePendConnects(pollfdArr[i].fd, pollfdArr, clients);
 				--ready;
 			}
 			else if (pollfdArr[i].fd != serverFd && pollfdArr[i].revents & POLLIN) {

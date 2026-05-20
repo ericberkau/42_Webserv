@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 23:21:39 by eberkau           #+#    #+#             */
-/*   Updated: 2026/05/21 00:04:04 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/05/21 00:09:07 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 constexpr size_t MSG_SIZE = 64;
 
 void handlePendConnects(
-	int serverFd,
+	int listeningSocket,
 	std::vector<pollfd>& pollfdArr,
 	std::unordered_map<int, Client>& clients
 ) {
@@ -27,7 +27,7 @@ void handlePendConnects(
 		sockaddr_in clientAddr = {};
 		socklen_t clientLen = sizeof(clientAddr);
 		
-		const int clientFd = accept(serverFd, reinterpret_cast<sockaddr*>(&clientAddr), &clientLen);
+		const int clientFd = accept(listeningSocket, reinterpret_cast<sockaddr*>(&clientAddr), &clientLen);
 		if (clientFd == -1) {
 			if (errno == EAGAIN || errno == EWOULDBLOCK)
 				break;
@@ -56,6 +56,7 @@ void handleIncomingData(
 	std::unordered_map<int, Client>& clients
 ) {
 	char msg[MSG_SIZE];
+	bzero(&msg, MSG_SIZE);
 
 	if (0 == recv(pollfdArr[idx].fd, &msg, MSG_SIZE, 0)) {
 		std::cout << pollfdArr[idx].fd << " disconnected" << std::endl;
