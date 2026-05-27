@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 23:21:39 by eberkau           #+#    #+#             */
-/*   Updated: 2026/05/21 00:09:07 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/05/27 02:33:26 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include <fcntl.h>
 #include <poll.h>
 
-constexpr size_t MSG_SIZE = 64;
+constexpr size_t MSG_SIZE = 8; // FIXME: provide proper size later
 
 void handlePendConnects(
 	int listeningSocket,
@@ -34,10 +34,11 @@ void handlePendConnects(
 			perror("accept");
 			throw 1;
 		}
+
 		const int currentFlags = fcntl(clientFd, F_GETFL);
 		fcntl(clientFd, F_SETFL, currentFlags | O_NONBLOCK);
 
-		std::cout << "client accepted" << std::endl;
+		std::cout << "Client accepted" << std::endl;
 		
 		pollfd clientPoll;
 		clientPoll.fd = clientFd;
@@ -46,7 +47,7 @@ void handlePendConnects(
 
 		clients.try_emplace(clientFd, clientFd, clientAddr);
 
-		std::cout << "client registered: " << clientFd << std::endl;
+		std::cout << "Client registered: " << clientFd << std::endl;
 	}
 }
 
@@ -56,20 +57,32 @@ void handleIncomingData(
 	std::unordered_map<int, Client>& clients
 ) {
 	char msg[MSG_SIZE];
-	bzero(&msg, MSG_SIZE);
+	Client& currClient = clients.at(pollfdArr[idx].fd);
+	ssize_t receivedBytes = -1;
 
-	if (0 == recv(pollfdArr[idx].fd, &msg, MSG_SIZE, 0)) {
-		std::cout << pollfdArr[idx].fd << " disconnected" << std::endl;
-		
-		clients.erase(pollfdArr[idx].fd);
-		
-		pollfdArr[idx] = pollfdArr.back();
-		pollfdArr.pop_back();
-		--idx;
+	while (true) {
+		receivedBytes = recv(pollfdArr[idx].fd, msg, MSG_SIZE, 0);
+		if (receivedBytes == -1) {
+			if (errno == EAGAIN || errno == EWOULDBLOCK)
+				break;
+			perror("recv");
+			throw 1;
+		}
+		else if (receivedBytes == 0) {
+			std::cout << "Client " << pollfdArr[idx].fd << " disconnected" << std::endl;
 
-		return;
+			clients.erase(pollfdArr[idx].fd);
+
+			pollfdArr[idx] = pollfdArr.back();
+			pollfdArr.pop_back();
+			--idx;
+
+			return;
+		}
+
+		currClient.appendToInBuf(msg, receivedBytes);
 	}
 
-	std::cout << "Message arrived from " << pollfdArr[idx].fd << " -> " << msg << std::endl;
-	bzero(&msg, MSG_SIZE);
+	std::cout << "Message arrived from " << pollfdArr[idx].fd << " -> " << currClient.getInBuf() << std::endl; // FIXME: remove later
+	currClient.clearInBuf(); // FIXME: remove later
 }
