@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 22:02:11 by eberkau           #+#    #+#             */
-/*   Updated: 2026/05/21 00:19:33 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/05/27 02:36:49 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,10 +80,11 @@ void serverLoop(void) {
 			if (pollfdArr[i].fd == serverFd && pollfdArr[i].revents & POLLIN) {
 				handlePendConnects(pollfdArr[i].fd, pollfdArr, clients);
 				--ready;
-			}
-			else if (pollfdArr[i].fd != serverFd && pollfdArr[i].revents & POLLIN) {
+			} else if (pollfdArr[i].fd != serverFd && pollfdArr[i].revents & POLLIN) {
 				handleIncomingData(pollfdArr, i, clients);
 				--ready;
+			} else if (pollfdArr[i].fd != serverFd && pollfdArr[i].revents & POLLOUT) {
+				// handleOutgoingData();
 			}
 		}
 	}
