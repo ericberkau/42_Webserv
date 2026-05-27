@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:06 by eberkau           #+#    #+#             */
-/*   Updated: 2026/05/19 23:56:55 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/05/27 02:04:26 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,8 @@ class Client {
 		const std::string&	getOutBuf();
 		const std::string&	getInBuf();
 
-		void	appendToInBuf(const std::string& input, size_t size);
-		void	appendToOutBuf(const std::string& input, size_t size);
+		void	appendToInBuf(const char* input, size_t size);
+		void	appendToOutBuf(const char* input, size_t size);
 		void	clearInBuf();
 		void	clearOutBuf();
 
