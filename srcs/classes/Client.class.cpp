@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/05/27 02:04:13 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/05/29 01:03:23 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,8 @@ Client::Client(int fd, sockaddr_in addr) : _fd(fd), _readProgress(0), _writeProg
 
 Client::Client(Client&& other) noexcept
 	:	_fd(other._fd),
-		_inputBuf(std::move(other._inputBuf)),
-		_outputBuf(std::move(other._outputBuf)),
+		_inputBuffer(std::move(other._inputBuffer)),
+		_outputBuffer(std::move(other._outputBuffer)),
 		_writeProgress(other._writeProgress),
 		_addr(other._addr)
 {
@@ -31,8 +31,8 @@ Client& Client::operator=(Client&& other) noexcept {
 			close(this->_fd); // FIXME: potential fail -> handle?
 
 		_fd = other._fd;
-		_inputBuf = std::move(other._inputBuf);
-		_outputBuf = std::move(other._outputBuf);
+		_inputBuffer = std::move(other._inputBuffer);
+		_outputBuffer = std::move(other._outputBuffer);
 		_writeProgress = other._writeProgress;
 		_addr = other._addr;
 		
@@ -47,34 +47,34 @@ Client::~Client(void) {
 		close(this->_fd);
 }
 
-int Client::getFd(void) {
+int Client::getFd(void) const {
 	return this->_fd;
 }
 
-const std::string& Client::getOutBuf() {
-	return this->_outputBuf; // FIXME: + current writeProgr maybe?
+const std::string& Client::getOutBuf(void) const {
+	return this->_outputBuffer; // FIXME: + current writeProgr maybe?
 }
 
-const std::string& Client::getInBuf() {
-	return this->_inputBuf;
+const std::string& Client::getInBuf(void) const {
+	return this->_inputBuffer;
 }
 
 void Client::appendToInBuf(const char* input, size_t size) {
-	_inputBuf.append(input, size);
+	_inputBuffer.append(input, size);
 	_readProgress += size;
 }
 
 void Client::appendToOutBuf(const char* input, size_t size) {
-	_outputBuf.append(input, size);
+	_outputBuffer.append(input, size);
 	_writeProgress += size;
 }
 
 void Client::clearInBuf(void) {
-	_inputBuf.clear();
+	_inputBuffer.clear();
 	_readProgress = 0;
 }
 
-void Client::clearOutBuf() {
-	_outputBuf.clear();
+void Client::clearOutBuf(void) {
+	_outputBuffer.clear();
 	_writeProgress = 0;
 }

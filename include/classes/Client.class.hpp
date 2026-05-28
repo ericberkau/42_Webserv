@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:06 by eberkau           #+#    #+#             */
-/*   Updated: 2026/05/27 02:04:26 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/05/29 01:03:06 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,10 +24,10 @@ class Client {
 		Client& operator=(Client&& other) noexcept;
 		~Client();
 
-		int					getFd();
-		const std::string&	getOutBuf();
-		const std::string&	getInBuf();
-
+		int					getFd() const;
+		const std::string&	getInBuf() const;
+		const std::string&	getOutBuf() const;
+		
 		void	appendToInBuf(const char* input, size_t size);
 		void	appendToOutBuf(const char* input, size_t size);
 		void	clearInBuf();
@@ -41,9 +41,9 @@ class Client {
 		Client& operator=(const Client&) = delete;
 
 		int			_fd;
-		std::string	_inputBuf; // TODO: limit size later
+		std::string	_inputBuffer; // TODO: limit size later
 		size_t		_readProgress;
-		std::string	_outputBuf;
+		std::string	_outputBuffer;
 		size_t		_writeProgress;
 		sockaddr_in	_addr;
 
