@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:06 by eberkau           #+#    #+#             */
-/*   Updated: 2026/05/29 01:03:06 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/05/29 01:04:17 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ class Client {
 		void	appendToOutBuf(const char* input, size_t size);
 		void	clearInBuf();
 		void	clearOutBuf();
+		bool	hasPendingOutput() const;
 
 
 	private:

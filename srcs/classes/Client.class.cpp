@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/05/29 01:03:23 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/05/29 01:04:26 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,10 @@ const std::string& Client::getOutBuf(void) const {
 
 const std::string& Client::getInBuf(void) const {
 	return this->_inputBuffer;
+}
+
+bool Client::hasPendingOutput(void) const {
+	return this->_writeProgress < this->_outputBuffer.size();
 }
 
 void Client::appendToInBuf(const char* input, size_t size) {

@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 22:02:11 by eberkau           #+#    #+#             */
-/*   Updated: 2026/05/27 02:36:49 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/05/29 01:02:30 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,15 @@ static int setupListeningSocket(std::vector<pollfd>& pollfdArr) {
 	return serverFd;
 }
 
+static void updatePolloutMonitoring(std::vector<pollfd>& pollfdArr, std::unordered_map<int, Client>& clients) {
+	for (size_t i = 1; i < pollfdArr.size(); ++i) {
+		if (clients.at(pollfdArr[i].fd).hasPendingOutput())
+			pollfdArr[i].events |= POLLOUT;
+		else
+			pollfdArr[i].events &= ~POLLOUT;
+	}
+}
+
 void handlePendConnects(
 	int serverFd,
 	std::vector<pollfd>& pollfdArr,
@@ -87,5 +96,7 @@ void serverLoop(void) {
 				// handleOutgoingData();
 			}
 		}
+
+		updatePolloutMonitoring(pollfdArr, clients); // FIXME: maybe do the updating later when data is queued/fullly written to avoid looping
 	}
 }
