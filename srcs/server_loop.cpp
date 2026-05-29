@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 22:02:11 by eberkau           #+#    #+#             */
-/*   Updated: 2026/05/29 01:02:30 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/05/29 02:09:22 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,11 @@ void handleIncomingData(
 	size_t& idx,
 	std::unordered_map<int, Client>& clients
 );
+void handleOutgoingData(
+	std::vector<pollfd>& pollfdArr,
+	size_t& idx,
+	std::unordered_map<int, Client>& clients
+);
 
 void serverLoop(void) {
 	std::vector<pollfd> pollfdArr;
@@ -93,10 +98,10 @@ void serverLoop(void) {
 				handleIncomingData(pollfdArr, i, clients);
 				--ready;
 			} else if (pollfdArr[i].fd != serverFd && pollfdArr[i].revents & POLLOUT) {
-				// handleOutgoingData();
+				handleOutgoingData(pollfdArr, i, clients);
 			}
 		}
 
-		updatePolloutMonitoring(pollfdArr, clients); // FIXME: maybe do the updating later when data is queued/fullly written to avoid looping
+		updatePolloutMonitoring(pollfdArr, clients); // FIXME: maybe do the updating later when data is queued/fully written to avoid looping
 	}
 }
