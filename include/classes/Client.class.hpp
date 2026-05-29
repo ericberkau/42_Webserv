@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:06 by eberkau           #+#    #+#             */
-/*   Updated: 2026/05/29 01:04:17 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/05/29 02:21:05 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,11 @@ class Client {
 		int					getFd() const;
 		const std::string&	getInBuf() const;
 		const std::string&	getOutBuf() const;
+		size_t				getOutProgress() const;
 		
+		void	advanceOutProgress(ssize_t bytes);
 		void	appendToInBuf(const char* input, size_t size);
-		void	appendToOutBuf(const char* input, size_t size);
+		void	appendToOutBuf(const std::string& input);
 		void	clearInBuf();
 		void	clearOutBuf();
 		bool	hasPendingOutput() const;
@@ -43,9 +45,9 @@ class Client {
 
 		int			_fd;
 		std::string	_inputBuffer; // TODO: limit size later
-		size_t		_readProgress;
+		size_t		_inputReadProgress;
 		std::string	_outputBuffer;
-		size_t		_writeProgress;
+		size_t		_outputWriteProgress;
 		sockaddr_in	_addr;
 
 		// int			_requestParserState;
