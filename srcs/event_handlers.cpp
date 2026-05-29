@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 23:21:39 by eberkau           #+#    #+#             */
-/*   Updated: 2026/05/29 02:17:17 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/05/29 02:28:03 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,7 @@ void handleIncomingData(
 	}
 
 	std::cout << "Message arrived from " << pollfdArr[idx].fd << " -> " << currClient.getInBuf() << std::endl; // FIXME: remove later
-	currClient.appendToOutBuf(std::string("You just sent: " + currClient.getInBuf())); // FIXME: remove later
+	currClient.appendToOutBuf(std::string("\nYou just sent -> " + currClient.getInBuf() + "\n")); // FIXME: remove later
 	currClient.clearInBuf(); // FIXME: remove later
 }
 
