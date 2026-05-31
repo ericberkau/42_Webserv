@@ -6,18 +6,19 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 22:02:11 by eberkau           #+#    #+#             */
-/*   Updated: 2026/05/31 20:03:56 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/06/01 01:01:07 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "classes/Client.class.hpp"
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <poll.h>
-#include <iostream>
+#include "networking.hpp"
+// #include "classes/Client.class.hpp"
+// #include <arpa/inet.h>
+// #include <fcntl.h>
+// #include <poll.h>
+// #include <iostream>
 
-constexpr int FOREVER = -1;
-constexpr int MAX_PEND_CONNECT_QUEUE = 32;
+// constexpr int FOREVER = -1;
+// constexpr int MAX_PEND_CONNECT_QUEUE = 32;
 
 static int setupListeningSocket(std::vector<pollfd>& pollfdArr) {
 	int serverFd = socket(AF_INET, SOCK_STREAM, 0);
@@ -57,33 +58,20 @@ static int setupListeningSocket(std::vector<pollfd>& pollfdArr) {
 // 	}
 // }
 
-void handlePendConnects(
-	int serverFd,
-	std::vector<pollfd>& pollfdArr,
-	std::unordered_map<int, Client>& clients
-);
-void handleIncomingData(
-	std::vector<pollfd>& pollfdArr,
-	size_t& idx,
-	std::unordered_map<int, Client>& clients
-);
-void handleOutgoingData(
-	std::vector<pollfd>& pollfdArr,
-	size_t& idx,
-	std::unordered_map<int, Client>& clients
-);
-
 void serverLoop(void) {
 	std::vector<pollfd> pollfdArr;
 
 	const int serverFd = setupListeningSocket(pollfdArr);
 
-	std::unordered_map<int, Client> clients;
+	std::unordered_map<int, FdContext> fdCtx;
+
+	fdCtx.emplace(serverFd, FdContext(socket_type::LISTENER));
 
 	if (0 != listen(serverFd, MAX_PEND_CONNECT_QUEUE)) {
 		perror("listen");
 		throw 1;
 	}
+	// FIXME: maybe wrap above code in subfunction later to register multiple listeners in a loop
 
 	while (true) {
 		std::cout << "listening" << std::endl;
@@ -91,14 +79,17 @@ void serverLoop(void) {
 		int ready = poll(pollfdArr.data(), pollfdArr.size(), FOREVER);
 
 		for (size_t i = 0; i < pollfdArr.size() && ready > 0; ++i) {
-			if (pollfdArr[i].fd == serverFd && pollfdArr[i].revents & POLLIN) {
-				handlePendConnects(pollfdArr[i].fd, pollfdArr, clients);
+			FdContext& currFd = fdCtx.at(pollfdArr[i].fd);
+
+			if (currFd.type == socket_type::LISTENER && pollfdArr[i].revents & POLLIN) {
+				handlePendConnects(pollfdArr[i].fd, pollfdArr, fdCtx);
 				--ready;
-			} else if (pollfdArr[i].fd != serverFd && pollfdArr[i].revents & POLLIN) {
-				handleIncomingData(pollfdArr, i, clients);
+			} else if (currFd.type == socket_type::CLIENT && pollfdArr[i].revents & POLLIN) {
+				handleIncomingData(pollfdArr, i, fdCtx);
 				--ready;
-			} else if (pollfdArr[i].fd != serverFd && pollfdArr[i].revents & POLLOUT) {
-				handleOutgoingData(pollfdArr, i, clients);
+			} else if (currFd.type == socket_type::CLIENT && pollfdArr[i].revents & POLLOUT) {
+				handleOutgoingData(pollfdArr, i, fdCtx);
+				--ready;
 			}
 		}
 

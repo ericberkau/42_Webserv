@@ -6,22 +6,23 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 23:21:39 by eberkau           #+#    #+#             */
-/*   Updated: 2026/05/31 20:06:30 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/06/01 00:32:08 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "classes/Client.class.hpp"
-#include <arpa/inet.h>
-#include <iostream>
-#include <fcntl.h>
-#include <poll.h>
+#include "networking.hpp"
+// #include "classes/Client.class.hpp"
+// #include <arpa/inet.h>
+// #include <iostream>
+// #include <fcntl.h>
+// #include <poll.h>
 
-constexpr size_t MSG_SIZE = 8; // FIXME: provide proper size later
+// constexpr size_t MSG_SIZE = 8; // FIXME: provide proper size later
 
 void handlePendConnects(
 	int listeningSocket,
 	std::vector<pollfd>& pollfdArr,
-	std::unordered_map<int, Client>& clients
+	std::unordered_map<int, FdContext>& fdCtx
 ) {
 	while (true) {
 		sockaddr_in newClientAddr = {};
@@ -45,7 +46,7 @@ void handlePendConnects(
 		newClientPoll.events = POLLIN;
 		pollfdArr.push_back(newClientPoll);
 
-		clients.try_emplace(newClientFd, newClientFd, newClientAddr);
+		fdCtx.try_emplace(newClientFd, FdContext{socket_type::CLIENT, Client(newClientFd, newClientAddr)});
 
 		std::cout << "Client registered: " << newClientFd << std::endl;
 	}
@@ -54,11 +55,11 @@ void handlePendConnects(
 static void disconnectClient(
 	std::vector<pollfd>& pollfdArr,
 	size_t& idx,
-	std::unordered_map<int, Client>& clients
+	std::unordered_map<int, FdContext>& fdCtx
 ) {
 	std::cout << "Client " << pollfdArr[idx].fd << " disconnected" << std::endl;
 
-	clients.erase(pollfdArr[idx].fd);
+	fdCtx.erase(pollfdArr[idx].fd);
 
 	pollfdArr[idx] = pollfdArr.back();
 	pollfdArr.pop_back();
@@ -68,10 +69,10 @@ static void disconnectClient(
 void handleIncomingData(
 	std::vector<pollfd>& pollfdArr,
 	size_t& idx,
-	std::unordered_map<int, Client>& clients
+	std::unordered_map<int, FdContext>& fdCtx
 ) {
 	char msg[MSG_SIZE];
-	Client& currClient = clients.at(pollfdArr[idx].fd);
+	Client& currClient = fdCtx.at(pollfdArr[idx].fd).client.value();
 	ssize_t receivedBytes = -1;
 
 	while (true) {
@@ -83,7 +84,7 @@ void handleIncomingData(
 			throw 1;
 		}
 		else if (receivedBytes == 0) {
-			disconnectClient(pollfdArr, idx, clients);
+			disconnectClient(pollfdArr, idx, fdCtx);
 			return;
 		}
 
@@ -99,9 +100,9 @@ void handleIncomingData(
 void handleOutgoingData(
 	std::vector<pollfd>& pollfdArr,
 	size_t& idx,
-	std::unordered_map<int, Client>& clients
+	std::unordered_map<int, FdContext>& fdCtx
 ) {
-	Client& currClient = clients.at(pollfdArr[idx].fd);
+	Client& currClient = fdCtx.at(pollfdArr[idx].fd).client.value();
 	ssize_t sentBytes = -1;
 
 	while (true) {
@@ -120,7 +121,7 @@ void handleOutgoingData(
 			if (errno == EAGAIN || errno == EWOULDBLOCK)
 				break;
 			else if (errno == EPIPE || errno == ECONNRESET) {
-				disconnectClient(pollfdArr, idx, clients);
+				disconnectClient(pollfdArr, idx, fdCtx);
 				return;
 			}
 			perror("send()");
