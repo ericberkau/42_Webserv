@@ -6,14 +6,18 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/05/29 02:21:32 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/06/01 00:29:02 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/Client.class.hpp"
+#include <iostream>
 #include <unistd.h>
 
-Client::Client(int fd, sockaddr_in addr) : _fd(fd), _inputReadProgress(0), _outputWriteProgress(0), _addr(addr) {}
+Client::Client(int fd, sockaddr_in addr) : _fd(fd), _inputReadProgress(0), _outputWriteProgress(0), _addr(addr)
+{
+	std::clog << "[Client] constructor called" << std::endl; // FIXME: for debugging, remove later
+}
 
 Client::Client(Client&& other) noexcept
 	:	_fd(other._fd),
@@ -22,10 +26,14 @@ Client::Client(Client&& other) noexcept
 		_outputWriteProgress(other._outputWriteProgress),
 		_addr(other._addr)
 {
+	std::clog << "[Client] move constructor called" << std::endl; // FIXME: for debugging, remove later
+
     other._fd = -1;
 }
 
 Client& Client::operator=(Client&& other) noexcept {
+	std::clog << "[Client] move operator called" << std::endl; // FIXME: for debugging, remove later
+
 	if (this != &other) {
 		if (_fd >= 0)
 			close(this->_fd); // FIXME: potential fail -> handle?
@@ -43,6 +51,8 @@ Client& Client::operator=(Client&& other) noexcept {
 }
 
 Client::~Client(void) {
+	std::clog << "[Client] destructor called on fd: " << this->_fd << std::endl; // FIXME: for debugging, remove later
+
 	if (_fd >= 0) {
 		close(this->_fd);
 		_fd = -1;
