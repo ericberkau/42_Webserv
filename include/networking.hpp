@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 22:44:52 by eberkau           #+#    #+#             */
-/*   Updated: 2026/06/01 00:32:32 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/06/01 01:44:45 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ constexpr size_t	MSG_SIZE = 8; // FIXME: provide proper size later
 
 
 enum class socket_type {
-	INVALID = -1,
+	INVALID = -1, // FIXME: evaluate if still needed
 	LISTENER,
 	CLIENT,
 	CGI_PIPE

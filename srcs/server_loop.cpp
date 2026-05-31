@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 22:02:11 by eberkau           #+#    #+#             */
-/*   Updated: 2026/06/01 01:01:07 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/06/01 01:52:06 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,56 @@ static int setupListeningSocket(std::vector<pollfd>& pollfdArr) {
 // 	}
 // }
 
+static void handleListenerEvents(
+	std::vector<pollfd>& pollfdArr,
+	size_t& idx,
+	std::unordered_map<int, FdContext>& fdCtx
+) {
+	if (pollfdArr[idx].revents & POLLIN)
+		handlePendConnects(pollfdArr[idx].fd, pollfdArr, fdCtx);
+}
+
+static void handleClientEvents(
+	std::vector<pollfd>& pollfdArr,
+	size_t& idx,
+	std::unordered_map<int, FdContext>& fdCtx
+) {
+	size_t originalIdx = idx;
+
+	if (pollfdArr[idx].revents & POLLIN)
+		handleIncomingData(pollfdArr, idx, fdCtx);
+
+	/** At this point, the client might have disconnected (idx modified in subfunction)
+	 * with still pending outgoing data, originalIdx checks if a diconnect occured. */
+	if (pollfdArr[idx].revents & POLLOUT && idx == originalIdx)
+		handleOutgoingData(pollfdArr, idx, fdCtx);
+}
+
+static void handleSingleSocket(
+	std::vector<pollfd>& pollfdArr,
+	size_t& idx,
+	std::unordered_map<int, FdContext>& fdCtx
+) {
+	FdContext& currFd = fdCtx.at(pollfdArr[idx].fd);
+
+	switch (currFd.type) {
+		case socket_type::LISTENER:
+			handleListenerEvents(pollfdArr, idx, fdCtx);
+			break;
+
+		case socket_type::CLIENT:
+			handleClientEvents(pollfdArr, idx, fdCtx);
+			break;
+
+		case socket_type::CGI_PIPE:
+			// TODO
+			break;
+
+		default:
+			break;
+	}
+}
+
 void serverLoop(void) {
 	std::vector<pollfd> pollfdArr;
 
@@ -79,18 +129,11 @@ void serverLoop(void) {
 		int ready = poll(pollfdArr.data(), pollfdArr.size(), FOREVER);
 
 		for (size_t i = 0; i < pollfdArr.size() && ready > 0; ++i) {
-			FdContext& currFd = fdCtx.at(pollfdArr[i].fd);
+			if (!pollfdArr[i].revents)
+				continue;
 
-			if (currFd.type == socket_type::LISTENER && pollfdArr[i].revents & POLLIN) {
-				handlePendConnects(pollfdArr[i].fd, pollfdArr, fdCtx);
-				--ready;
-			} else if (currFd.type == socket_type::CLIENT && pollfdArr[i].revents & POLLIN) {
-				handleIncomingData(pollfdArr, i, fdCtx);
-				--ready;
-			} else if (currFd.type == socket_type::CLIENT && pollfdArr[i].revents & POLLOUT) {
-				handleOutgoingData(pollfdArr, i, fdCtx);
-				--ready;
-			}
+			handleSingleSocket(pollfdArr, i, fdCtx);
+			--ready;
 		}
 
 		// updatePolloutMonitoring(pollfdArr, clients); // FIXME: maybe do the updating later when data is queued/fully written to avoid looping
