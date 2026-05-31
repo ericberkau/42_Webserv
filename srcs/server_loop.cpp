@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 22:02:11 by eberkau           #+#    #+#             */
-/*   Updated: 2026/05/29 02:09:22 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/05/31 20:03:56 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,14 +48,14 @@ static int setupListeningSocket(std::vector<pollfd>& pollfdArr) {
 	return serverFd;
 }
 
-static void updatePolloutMonitoring(std::vector<pollfd>& pollfdArr, std::unordered_map<int, Client>& clients) {
-	for (size_t i = 1; i < pollfdArr.size(); ++i) {
-		if (clients.at(pollfdArr[i].fd).hasPendingOutput())
-			pollfdArr[i].events |= POLLOUT;
-		else
-			pollfdArr[i].events &= ~POLLOUT;
-	}
-}
+// static void updatePolloutMonitoring(std::vector<pollfd>& pollfdArr, std::unordered_map<int, Client>& clients) {
+// 	for (size_t i = 1; i < pollfdArr.size(); ++i) {
+// 		if (clients.at(pollfdArr[i].fd).hasPendingOutput())
+// 			pollfdArr[i].events |= POLLOUT;
+// 		else
+// 			pollfdArr[i].events &= ~POLLOUT;
+// 	}
+// }
 
 void handlePendConnects(
 	int serverFd,
@@ -102,6 +102,6 @@ void serverLoop(void) {
 			}
 		}
 
-		updatePolloutMonitoring(pollfdArr, clients); // FIXME: maybe do the updating later when data is queued/fully written to avoid looping
+		// updatePolloutMonitoring(pollfdArr, clients); // FIXME: maybe do the updating later when data is queued/fully written to avoid looping
 	}
 }
