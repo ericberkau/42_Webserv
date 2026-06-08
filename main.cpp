@@ -6,7 +6,7 @@
 /*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 18:39:09 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/06/08 15:25:10 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/06/08 15:30:07 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,32 +37,32 @@ int main()
    execve(argv[0], argv, NULL);
 }
 
-// int main()
-// {
-//    int fd[2];
-//    pipe(fd);
+int main()
+{
+   int fd[2];
+   pipe(fd);
 
-//    pid_t pid = fork();
+   pid_t pid = fork();
 
-//    if (pid == 0)
-//    {
-// 	  dup2(fd[1], STDOUT_FILENO);
-//       close(fd[0]);
-//       close(fd[1]);
+   if (pid == 0)
+   {
+	  dup2(fd[1], STDOUT_FILENO);
+      close(fd[0]);
+      close(fd[1]);
 
-//       std::cout << "Hello from child\n";
-//    }
-//    else
-//    {
-//       close(fd[1]);
-//       char buffer[1024];
+      std::cout << "Hello from child\n";
+   }
+   else
+   {
+      close(fd[1]);
+      char buffer[1024];
 
-//       int n = read(fd[0], buffer, sizeof(buffer));
+      int n = read(fd[0], buffer, sizeof(buffer));
 
-//       std::cout << "Perant received: ";
-//       std::cout.write(buffer, n);
-//    }
-// }
+      std::cout << "Perant received: ";
+      std::cout.write(buffer, n);
+   }
+}
 
 // int main()
 // {
