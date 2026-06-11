@@ -6,11 +6,16 @@
 /*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 13:00:52 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/06/05 13:40:57 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/06/09 21:03:12 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CGIExecutor.hpp"
+
+CGIEnv &CGIExecutor::getEnv()
+{
+    return _env;
+}
 
 std::string CGIExecutor::execute(const std::string &scriptPath)
 {
@@ -30,6 +35,8 @@ std::string CGIExecutor::execute(const std::string &scriptPath)
 
         close(pipefd[0]);
         close(pipefd[1]);
+        
+        char **envp = _env.buildEnvp();
 
         char *argv[] =
             {
@@ -45,8 +52,11 @@ std::string CGIExecutor::execute(const std::string &scriptPath)
         // argv.push_back(const_cast<char *>(scriptPath.c_str()));
         // argv.push_back(NULL);
 
-        execve(argv[0], argv, NULL);
+        execve(argv[0], argv, envp);
 
+        CGIEnv::freeEnvp(envp);
+                
+        perror("execve");
         exit(EXIT_FAILURE);
     }
 

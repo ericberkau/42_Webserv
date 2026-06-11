@@ -6,7 +6,7 @@
 #    By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/05/20 18:36:56 by skomyshe          #+#    #+#              #
-#    Updated: 2026/06/04 13:52:34 by skomyshe         ###   ########.fr        #
+#    Updated: 2026/06/09 20:57:08 by skomyshe         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,7 @@ NAME = webserve
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++17
 
-SRCS = CGIExecutor.cpp main.cpp
+SRCS = CGIExecutor.cpp CGIEnv.cpp main.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 all: $(NAME)

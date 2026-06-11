@@ -6,22 +6,28 @@
 /*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 12:30:19 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/06/04 13:45:52 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/06/09 20:43:14 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CGIEXECUTOR_HTTP
 #define CGIEXECUTOR_HTTP
 
+#include "CGIEnv.hpp"
 #include <iostream>
 #include <string>
+#include <map>
 #include <unistd.h>
 #include <sys/wait.h>
 
 class CGIExecutor
 {
+private:
+    CGIEnv _env;
+
 public:
-    std::string execute(const std::string& scriptPath);
+    CGIEnv &getEnv();
+    std::string execute(const std::string &scriptPath);
 };
 
 // class CGIExecutor
@@ -33,8 +39,8 @@ public:
 
 // public:
 //     std::string execute(
-//         const Request &reqiest,
-//         const LocationConfig &location);
+//         const std::string &key,
+//         const std::string &value);
 // };
 
 #endif
