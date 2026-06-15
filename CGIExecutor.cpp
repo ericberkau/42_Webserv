@@ -6,7 +6,7 @@
 /*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 13:00:52 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/06/09 21:03:12 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/06/15 14:00:20 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,11 +27,19 @@ std::string CGIExecutor::execute(const std::string &scriptPath)
     pid_t pid = fork();
 
     if (pid < 0)
+    {
+        close(pipefd[0]);
+        close(pipefd[1]);
         throw std::runtime_error("fork failed");
+    }
 
     if (pid == 0)
     {
-        dup2(pipefd[1], STDOUT_FILENO);
+        if(dup2(pipefd[1], STDOUT_FILENO) == -1)
+        {
+            perror("dup2");
+            _exit(EXIT_FAILURE);
+        }
 
         close(pipefd[0]);
         close(pipefd[1]);
@@ -57,7 +65,7 @@ std::string CGIExecutor::execute(const std::string &scriptPath)
         CGIEnv::freeEnvp(envp);
                 
         perror("execve");
-        exit(EXIT_FAILURE);
+        _exit(EXIT_FAILURE);
     }
 
     close(pipefd[1]);
