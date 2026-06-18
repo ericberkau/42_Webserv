@@ -6,7 +6,7 @@
 /*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 18:39:09 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/06/09 21:08:57 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/06/15 16:13:55 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,16 +125,35 @@
 //    return 0;
 // }
 
+// int main()
+// {
+//    CGIExecutor cgi;
+
+//    cgi.getEnv().set("REQUEST_METHOD", "GET");
+//    cgi.getEnv().set("QUERY_STRING", "name=mehdi");
+//    cgi.getEnv().set("SCRIPT_NAME", "/cgi-bin/hello.py");
+
+//    std::string result = cgi.execute("./hello.py", "");
+
+//    std::cout << "CGI OUTPUT:\n";
+//    std::cout << result << std::endl;
+// }
+
 int main()
 {
    CGIExecutor cgi;
 
-   cgi.getEnv().set("REQUEST_METHOD", "GET");
-   cgi.getEnv().set("QUERY_STRING", "name=mehdi");
-   cgi.getEnv().set("SCRIPT_NAME", "/cgi-bin/hello.py");
+   std::string body = "name=mehdi&age=42";
 
-   std::string result = cgi.execute("./hello.py");
+   cgi.getEnv().set("REQUEST_METHOD", "POST");
+   // cgi.getEnv().set("CONTENT_LENGTH", "18");
+   cgi.getEnv().set("SCRIPT_NAME", "/cgi-bin/post.py");
+   cgi.getEnv().set(
+       "CONTENT_LENGTH",
+       std::to_string(body.size()));
 
-   std::cout << "CGI OUTPUT:\n";
+   std::string result =
+       cgi.execute("./post.py", body);
+
    std::cout << result << std::endl;
 }

@@ -6,7 +6,7 @@
 /*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 12:30:19 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/06/09 20:43:14 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/06/15 15:44:08 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,9 @@ private:
 
 public:
     CGIEnv &getEnv();
-    std::string execute(const std::string &scriptPath);
+    std::string execute(
+        const std::string &scriptPath,
+        const std::string &body);
 };
 
 // class CGIExecutor
