@@ -3,14 +3,14 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+         #
+#    By: dimplejanardhan <dimplejanardhan@studen    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/05/11 14:54:40 by eberkau           #+#    #+#              #
-#    Updated: 2026/05/11 15:59:41 by eberkau          ###   ########.fr        #
+#    Updated: 2026/06/21 16:38:58 by dimplejanar      ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME		=	webserv
+NAME		=	test_parser
 
 CXX			=	c++
 ERRFLAGS	=	-Wall -Wextra -Werror
@@ -36,8 +36,8 @@ DEFAULT		=	\033[0m
 
 # list source files here
 CXXFILES	=	main.cpp	\
-				classes/sourcefile.class.cpp	\
-#				and_so_on.cpp
+				HttpRequest.cpp	\
+				RequestParser.cpp
 
 
 all: $(NAME)
