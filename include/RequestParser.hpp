@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 15:15:37 by djanardh          #+#    #+#             */
-/*   Updated: 2026/06/22 16:10:16 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/06/22 19:49:52 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include "HttpRequestContainer.hpp"
 #include <string>
 #include <stdexcept>
+#include <vector>
 
 class HttpParseException : public std::exception
 {
@@ -40,7 +41,7 @@ class RequestParser
 		static void parseHeaderLine(const std::string& line, HttpRequestContainer& request);
 
 		static bool isSupportedMethod(const std::string& method);
-
+		static bool isKnownHttpMethod(const std::string& method);
 	public:
 		// So far only parsing one complete request string in one shot.
 		// (No partial/incremental handling yet - that comes after

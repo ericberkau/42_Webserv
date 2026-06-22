@@ -1,13 +1,13 @@
 /* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   RequestParser.cpp                                  :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/22 15:14:18 by djanardh          #+#    #+#             */
-/*   Updated: 2026/06/22 19:08:55 by djanardh         ###   ########.fr       */
-/*                                                                            */
+/*																			*/
+/*														:::	  ::::::::   */
+/*   RequestParser.cpp								  :+:	  :+:	:+:   */
+/*													+:+ +:+		 +:+	 */
+/*   By: djanardh <djanardh@student.42heilbronn.	+#+  +:+	   +#+		*/
+/*												+#+#+#+#+#+   +#+		   */
+/*   Created: 2026/06/22 15:14:18 by djanardh		  #+#	#+#			 */
+/*   Updated: 2026/06/22 19:27:38 by djanardh		 ###   ########.fr	   */
+/*																			*/
 /* ************************************************************************** */
 
 #include "RequestParser.hpp"
@@ -31,7 +31,7 @@ int HttpParseException::getStatusCode() const
 // Helpers
 
 // HTTP header values can have leading/trailing whitespace around the
-// colon, Ex. "Host:    example.com". We trim spaces and tabs
+// colon, Ex. "Host:	example.com". We trim spaces and tabs
 static std::string trim(const std::string& s)
 {
 	size_t start = s.find_first_not_of(" \t");
@@ -64,6 +64,14 @@ bool RequestParser::isSupportedMethod(const std::string& method)
 	return method == "GET" || method == "POST" || method == "DELETE";
 }
 
+bool RequestParser::isKnownHttpMethod(const std::string& method) 
+{
+	static const std::vector<std::string> knownMethods = {
+		"GET", "POST", "DELETE", "PUT", "HEAD", "OPTIONS", "PATCH", "TRACE", "CONNECT"
+	};
+	return std::find(knownMethods.begin(), knownMethods.end(), method) != knownMethods.end();
+}
+
 void RequestParser::parseRequestLine(const std::string& line, HttpRequestContainer& request)
 {
 	// Request line looks like: "GET /index.html HTTP/1.1"
@@ -80,24 +88,41 @@ void RequestParser::parseRequestLine(const std::string& line, HttpRequestContain
 	if (iss >> extra)
 		throw HttpParseException(400, "Bad Request: malformed request line");
 
-	if (!isSupportedMethod(method))
+	if (!isSupportedMethod(method)) 
 	{
-		// At this stage we don't know yet if the method is totally
-		// invalid (400) or just not allowed on this route (405). That
-		// distinction happens later once we match the request against
-		// config/location rules. For now we accept any all-caps token
-		// that looks like a method and let the request handler decide.
-		// We still reject obvi bogus tokens here
-		for (size_t i = 0; i < method.size(); ++i)
-		{
-			if (!std::isupper(static_cast<unsigned char>(method[i])))
-				throw HttpParseException(400, "Bad Request: invalid method token");
+		// Check if it's a valid standard HTTP method we just don't support
+		if (isKnownHttpMethod(method)) {
+			throw HttpParseException(405, "Method Not Allowed");
 		}
+
+		// If it's completely malformed (contains lowercase letters or invalid chars)
+		for (char c : method) {
+			if (!std::isupper(static_cast<unsigned char>(c))) {
+				throw HttpParseException(400, "Bad Request: invalid method token");
+			}
+		}
+
+		// It's all-caps but completely random (e.g., "MYCUSTOMMETHOD")
+		throw HttpParseException(405, "Method Not Allowed"); 
 	}
 
-	// Currently only handling origin-form URIs ("/path?query"); absolute-form?
-	if (uri.empty() || uri[0] != '/')
-		throw HttpParseException(400, "Bad Request: only origin-form URIs are supported");
+	if (uri.empty())
+		throw HttpParseException(400, "Bad Request: empty URI");
+
+	// Look for forbidden control characters/spaces
+	for (char c : uri)
+	{
+		if (!(c > 32 && c < 127))
+			throw HttpParseException(400, "Bad Request: illegal characters in URI");
+	}
+
+	// Validate form (Origin-form, Absolute-form)
+	if (uri[0] != '/') {
+		// If it doesn't start with '/', check if it is a valid absolute URI (starts with http:// or https://)
+		if (uri.rfind("http://", 0) != 0 && uri.rfind("https://", 0) != 0) {
+			throw HttpParseException(400, "Bad Request: unsupported URI format");
+		}
+	}
 
 	if (version != "HTTP/1.1" && version != "HTTP/1.0")
 		throw HttpParseException(400, "Bad Request: unsupported HTTP version");
