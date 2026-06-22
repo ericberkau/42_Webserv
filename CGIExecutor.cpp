@@ -6,7 +6,7 @@
 /*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 13:00:52 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/06/15 16:07:48 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/06/22 16:57:22 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ std::string CGIExecutor::execute(const std::string &scriptPath, const std::strin
 
         char *argv[] =
             {
-                const_cast<char *>(scriptPath.c_str()),
+                const_cast<char *>(scriptPath.data()),
                 NULL};
 
         // char *argv[] =
@@ -94,7 +94,7 @@ std::string CGIExecutor::execute(const std::string &scriptPath, const std::strin
 
     if (!body.empty())
     {
-        write(stdinpipefd[1], body.c_str(), body.size());
+        write(stdinpipefd[1], body.data(), body.size());
     }
 
     close(stdinpipefd[1]);

@@ -6,7 +6,7 @@
 /*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 12:31:01 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/06/09 20:46:59 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/06/22 16:56:36 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ char **CGIEnv::buildEnvp() const
         std::string entry = it->first + "=" + it->second;
 
         envp[i] = new char[entry.size() + 1];
-        std::strcpy(envp[i], entry.c_str());
+        std::strcpy(envp[i], entry.data());
 
         ++i;
     }
