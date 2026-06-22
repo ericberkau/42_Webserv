@@ -1,7 +1,17 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   RequestParser.cpp                                  :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/06/22 15:14:18 by djanardh          #+#    #+#             */
+/*   Updated: 2026/06/22 16:11:19 by djanardh         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "RequestParser.hpp"
 #include <sstream>
-
-// HttpParseException
 
 HttpParseException::HttpParseException(int statusCode, const std::string& reason)
 	: _statusCode(statusCode), _reason(reason) {}
@@ -54,7 +64,7 @@ bool RequestParser::isSupportedMethod(const std::string& method)
 	return method == "GET" || method == "POST" || method == "DELETE";
 }
 
-void RequestParser::parseRequestLine(const std::string& line, HttpRequest& request)
+void RequestParser::parseRequestLine(const std::string& line, HttpRequestContainer& request)
 {
 	// Request line looks like: "GET /index.html HTTP/1.1"
 	// Exactly two spaces separate exactly three tokens. Anything else
@@ -97,7 +107,7 @@ void RequestParser::parseRequestLine(const std::string& line, HttpRequest& reque
 	request.setVersion(version);
 }
 
-void RequestParser::parseHeaderLine(const std::string& line, HttpRequest& request)
+void RequestParser::parseHeaderLine(const std::string& line, HttpRequestContainer& request)
 {
 	std::string key, value;
 	if (!splitOnce(line, ':', key, value))
@@ -112,9 +122,9 @@ void RequestParser::parseHeaderLine(const std::string& line, HttpRequest& reques
 	request.addHeader(key, value);
 }
 
-HttpRequest RequestParser::parse(const std::string& raw)
+HttpRequestContainer RequestParser::parse(const std::string& raw)
 {
-	HttpRequest request;
+	HttpRequestContainer request;
 
 	// Headers are separated by CRLF ("\r\n"), and the header block ends
 	// with a blank line (CRLF CRLF). For now we assume the whole

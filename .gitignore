@@ -1,4 +1,5 @@
 .objs/
 *.o
+.vscode
 
 webserv

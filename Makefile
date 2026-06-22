@@ -1,15 +1,3 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: dimplejanardhan <dimplejanardhan@studen    +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2026/05/11 14:54:40 by eberkau           #+#    #+#              #
-#    Updated: 2026/06/21 16:38:58 by dimplejanar      ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
 NAME		=	test_parser
 
 CXX			=	c++
@@ -36,7 +24,7 @@ DEFAULT		=	\033[0m
 
 # list source files here
 CXXFILES	=	main.cpp	\
-				HttpRequest.cpp	\
+				HttpRequestContainer.cpp	\
 				RequestParser.cpp
 
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dimplejanardhan <dimplejanardhan@studen    +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/11 14:57:27 by eberkau           #+#    #+#             */
-/*   Updated: 2026/06/21 16:40:40 by dimplejanar      ###   ########.fr       */
+/*   Updated: 2026/06/22 16:10:28 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ static void runTest(const std::string& name, const std::string& raw)
 	std::cout << "=== " << name << " ===" << std::endl;
 	try
 	{
-		HttpRequest req = RequestParser::parse(raw);
+		HttpRequestContainer req = RequestParser::parse(raw);
 		std::cout << "OK, parsed:" << std::endl;
 		req.print();
 	}
