@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/11 14:57:27 by eberkau           #+#    #+#             */
-/*   Updated: 2026/06/22 16:10:28 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/06/22 19:06:04 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,9 +36,7 @@ int main()
 	// --- Valid cases ---
 
 	runTest("Simple GET",
-		"GET /index.html HTTP/1.1\r\n"
-		"Host: localhost\r\n"
-		"\r\n");
+		"GET /index.html HTTP/1.1\r\nHost: localhost\r\n\r\n");
 
 	runTest("GET with multiple headers + query string",
 		"GET /search?q=cats HTTP/1.1\r\n"
@@ -62,6 +60,11 @@ int main()
 	// --- Deliberately broken cases (this is the telnet-style poking,
 	//     just hardcoded instead of typed by hand each time) ---
 
+	runTest("Header key:value pair with space BEFORE the colon",
+		"GET / HTTP/1.1\r\n"
+		"Host   :    localhost\r\n"
+		"\r\n");
+	
 	runTest("Missing HTTP version",
 		"GET /\r\n"
 		"Host: localhost\r\n"

@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 15:14:18 by djanardh          #+#    #+#             */
-/*   Updated: 2026/06/22 16:11:19 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/06/22 19:08:55 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,10 +35,10 @@ int HttpParseException::getStatusCode() const
 static std::string trim(const std::string& s)
 {
 	size_t start = s.find_first_not_of(" \t");
-	if (start == std::string::npos)
+	if (start == std::string::npos) // no text found, only spaces & tabs
 		return "";
 	size_t end = s.find_last_not_of(" \t");
-	return s.substr(start, end - start + 1);
+	return s.substr(start, end - start + 1); // 2nd arg = length
 }
 
 // Splits a line on the first occurrence of a delimiter character.
@@ -112,6 +112,9 @@ void RequestParser::parseHeaderLine(const std::string& line, HttpRequestContaine
 	std::string key, value;
 	if (!splitOnce(line, ':', key, value))
 		throw HttpParseException(400, "Bad Request: malformed header line");
+	
+	if (!key.empty() && (key.back() == ' ' || key.back() == '\t'))
+		throw HttpParseException(400, "Bad Request: space before colon in header");
 
 	key = trim(key);
 	value = trim(value);
@@ -130,8 +133,8 @@ HttpRequestContainer RequestParser::parse(const std::string& raw)
 	// with a blank line (CRLF CRLF). For now we assume the whole
 	// request (request line + headers) is already in `raw`. ACTUAL
 	// partial-data handling should be done later
-	size_t headerEnd = raw.find("\r\n\r\n");
-	if (headerEnd == std::string::npos)
+	size_t headerEnd = raw.find("\r\n\r\n"); // Stores the index of the very first character of that (entire) match (the first \r)
+	if (headerEnd == std::string::npos) // npos is a special constant in C++ that means 'not found'.
 		throw HttpParseException(400, "Bad Request: no end of headers found");
 
 	std::string headerBlock = raw.substr(0, headerEnd);
@@ -142,11 +145,11 @@ HttpRequestContainer RequestParser::parse(const std::string& raw)
 	std::string line;
 	bool firstLine = true;
 
-	while (std::getline(stream, line))
+	while (std::getline(stream, line)) // getline() by default reads until it hits '\n'
 	{
-		// getline on "\r\n"-separated text leaves a trailing '\r' so strip it.
+		// getline on "\r\n"-separated text leaves a trailing '\r' so strip it
 		if (!line.empty() && line[line.size() - 1] == '\r')
-			line.erase(line.size() - 1);
+			line.erase(line.size() - 1); // chops it off
 
 		if (firstLine)
 		{
