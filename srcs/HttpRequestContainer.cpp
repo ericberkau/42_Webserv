@@ -1,13 +1,13 @@
 /* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   HttpRequestContainer.cpp                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/22 15:14:59 by djanardh          #+#    #+#             */
-/*   Updated: 2026/06/22 16:25:46 by djanardh         ###   ########.fr       */
-/*                                                                            */
+/*																			*/
+/*														:::	  ::::::::   */
+/*   HttpRequestContainer.cpp						   :+:	  :+:	:+:   */
+/*													+:+ +:+		 +:+	 */
+/*   By: djanardh <djanardh@student.42heilbronn.	+#+  +:+	   +#+		*/
+/*												+#+#+#+#+#+   +#+		   */
+/*   Created: 2026/06/22 15:14:59 by djanardh		  #+#	#+#			 */
+/*   Updated: 2026/06/23 20:22:13 by djanardh		 ###   ########.fr	   */
+/*																			*/
 /* ************************************************************************** */
 
 #include "HttpRequestContainer.hpp"
@@ -34,7 +34,13 @@ static std::string ft_toLower(const std::string& s)
 
 void HttpRequestContainer::addHeader(const std::string& key, const std::string& value)
 {
-	_headers[ft_toLower(key)] = value;
+	std::string lowerKey = ft_toLower(key);
+		
+	// If the header already exists append with a comma, EXCEPT for Set-Cookie headers which must remain separate - do we have to handle this too??? 
+	if (_headers.find(lowerKey) != _headers.end())
+		_headers[lowerKey] += ", " + value;
+	else
+		_headers[lowerKey] = value;
 }
 
 const std::string& HttpRequestContainer::getMethod() const { return _method; }
@@ -44,6 +50,7 @@ const std::string& HttpRequestContainer::getBody() const { return _body; }
 
 std::string HttpRequestContainer::getHeader(const std::string& key) const
 {
+	std::string lowerKey = ft_toLower(key); // to handle whatever the programmer types when they look up a header later
 	std::map<std::string, std::string>::const_iterator it = _headers.find(ft_toLower(key));
 	if (it == _headers.end())
 		return "";
@@ -53,7 +60,7 @@ std::string HttpRequestContainer::getHeader(const std::string& key) const
 void HttpRequestContainer::print() const
 {
 	std::cout << "Method:  " << _method << std::endl;
-	std::cout << "URI:     " << _uri << std::endl;
+	std::cout << "URI:	 " << _uri << std::endl;
 	std::cout << "Version: " << _version << std::endl;
 	std::cout << "Headers:" << std::endl;
 	for (std::map<std::string, std::string>::const_iterator it = _headers.begin();

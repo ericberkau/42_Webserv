@@ -132,21 +132,34 @@ void RequestParser::parseRequestLine(const std::string& line, HttpRequestContain
 	request.setVersion(version);
 }
 
+bool RequestParser::isValidHeaderKeyChar(unsigned char c)
+{
+	if (c <= 32 || c >= 127) return false; // No control characters or spaces
+	// Forbidden separators in HTTP header fields
+	std::string separators = "()<>@,;:\\\"/[]?={}";
+	return separators.find(c) == std::string::npos;
+}
+
 void RequestParser::parseHeaderLine(const std::string& line, HttpRequestContainer& request)
 {
 	std::string key, value;
 	if (!splitOnce(line, ':', key, value))
 		throw HttpParseException(400, "Bad Request: malformed header line");
 	
-	if (!key.empty() && (key.back() == ' ' || key.back() == '\t'))
-		throw HttpParseException(400, "Bad Request: space before colon in header");
-
-	key = trim(key);
-	value = trim(value);
-
 	if (key.empty())
 		throw HttpParseException(400, "Bad Request: empty header name");
+	
+	if (key.back() == ' ' || key.back() == '\t')
+		throw HttpParseException(400, "Bad Request: space before colon in header");
 
+	// Check header name for illegal characters
+	for (char c : key)
+	{
+		if (!isValidHeaderKeyChar(static_cast<unsigned char>(c)))
+			throw HttpParseException(400, "Bad Request: illegal character in header name");
+	}
+
+	value = trim(value);
 	request.addHeader(key, value);
 }
 
@@ -175,16 +188,13 @@ HttpRequestContainer RequestParser::parse(const std::string& raw)
 		// getline on "\r\n"-separated text leaves a trailing '\r' so strip it
 		if (!line.empty() && line[line.size() - 1] == '\r')
 			line.erase(line.size() - 1); // chops it off
-
 		if (firstLine)
 		{
 			parseRequestLine(line, request);
 			firstLine = false;
 		}
 		else
-		{
 			parseHeaderLine(line, request);
-		}
 	}
 
 	// NO Content-Length / chunked handling yet!!

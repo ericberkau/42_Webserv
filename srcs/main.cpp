@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/11 14:57:27 by eberkau           #+#    #+#             */
-/*   Updated: 2026/06/22 19:06:04 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/06/23 21:15:00 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,6 +93,43 @@ int main()
 		"GET / HTTP/9.9\r\n"
 		"Host: localhost\r\n"
 		"\r\n");
+
+	// --- Tests after completing header and request line parsing (I hope?) 23/06/26---
+
+	runTest("Valid Absolute URI Form",
+		"GET http://localhost:8080/index.html HTTP/1.1\r\n"
+		"Host: localhost:8080\r\n"
+		"\r\n");
+
+	runTest("Valid Empty Header Value",
+		"GET / HTTP/1.1\r\n"
+		"Host: localhost\r\n"
+		"X-Custom-Empty-Flag:\r\n"
+		"\r\n");
+		
+	runTest("Invalid URI with a physical control character (Tab)",
+		"GET /my\tpath HTTP/1.1\r\n"
+		"Host: localhost\r\n"
+		"\r\n");
+
+	runTest("Invalid Method Triage (Valid token format but unsupported)",
+		"PUT /index.html HTTP/1.1\r\n"
+		"Host: localhost\r\n"
+		"\r\n");
+
+	runTest("Invalid Method Triage",
+		"G@T /index.html HTTP/1.1\r\n"
+		"Host: localhost\r\n"
+		"\r\n");
+
+	runTest("Invalid Space Before Colon (Tab character variant)",
+		"GET / HTTP/1.1\r\n"
+		"Host\t: localhost\r\n"
+		"\r\n");
+
+
+	// runTest("Invalid Request-Line exceeding 8000 octets",
+	// 	"GET /" + std::string(8005, 'a') + " HTTP/1.1\r\nHost: localhost\r\n\r\n");
 
 	return 0;
 }

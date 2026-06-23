@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 15:15:37 by djanardh          #+#    #+#             */
-/*   Updated: 2026/06/22 19:49:52 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/06/23 19:53:54 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ class RequestParser
 		// Splits "METHOD URI VERSION" and validates each piece
 		static void parseRequestLine(const std::string& line, HttpRequestContainer& request);
 
+		static bool isValidHeaderKeyChar(unsigned char c);
 		// Splits "Key: Value" and adds it to the request
 		static void parseHeaderLine(const std::string& line, HttpRequestContainer& request);
 
