@@ -1,35 +1,58 @@
 /* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/05/11 14:57:27 by eberkau           #+#    #+#             */
-/*   Updated: 2026/06/23 21:15:00 by djanardh         ###   ########.fr       */
-/*                                                                            */
+/*																			*/
+/*														:::	  ::::::::   */
+/*   main.cpp										   :+:	  :+:	:+:   */
+/*													+:+ +:+		 +:+	 */
+/*   By: djanardh <djanardh@student.42heilbronn.	+#+  +:+	   +#+		*/
+/*												+#+#+#+#+#+   +#+		   */
+/*   Created: 2026/05/11 14:57:27 by eberkau		   #+#	#+#			 */
+/*   Updated: 2026/06/24 01:31:42 by djanardh		 ###   ########.fr	   */
+/*																			*/
 /* ************************************************************************** */
 
 #include "RequestParser.hpp"
 #include <iostream>
 
-// Helper to run one test case and print the result.
-static void runTest(const std::string& name, const std::string& raw)
+// Helper to run test cases and print the result
+// static void runTest(const std::string& name, const std::string& raw)
+// {
+// 	std::cout << "=== " << name << " ===" << std::endl;
+// 	try
+// 	{
+// 		HttpRequestContainer req = RequestParser::parse(raw);
+// 		std::cout << "OK, parsed:" << std::endl;
+// 		req.print();
+// 	}
+// 	catch (const HttpParseException& e)
+// 	{
+// 		std::cout << "REJECTED -> status " << e.getStatusCode()
+// 				   << " (" << e.what() << ")" << std::endl;
+// 	}
+// 	std::cout << std::endl;
+// }
+
+static void runTest(const std::string& testName, const std::string& rawRequest)
 {
-	std::cout << "=== " << name << " ===" << std::endl;
-	try
-	{
-		HttpRequestContainer req = RequestParser::parse(raw);
-		std::cout << "OK, parsed:" << std::endl;
-		req.print();
+	std::cout << "Running: " << testName << "\n";
+	try {
+		RequestParser parser; // Create a living instance
+		HttpRequestContainer request;
+
+		// Feed the data into the instance state machine
+		parser.feed(rawRequest, request);
+
+		if (parser.getState() == RequestParser::PARSE_COMPLETE) {
+			std::cout << "✅ Parsing success!\n";
+			request.print();
+		} else {
+			std::cout << "Request is incomplete (waiting for more chunks).\n";
+		}
 	}
-	catch (const HttpParseException& e)
-	{
-		std::cout << "REJECTED -> status " << e.getStatusCode()
-				   << " (" << e.what() << ")" << std::endl;
+	catch (const HttpParseException& e) {
+		std::cout << "❌ Caught expected/unexpected error: " << e.what() << "\n";
 	}
-	std::cout << std::endl;
 }
+
 
 int main()
 {
@@ -54,15 +77,15 @@ int main()
 
 	runTest("Header value with extra spaces around colon",
 		"GET / HTTP/1.1\r\n"
-		"Host:    localhost\r\n"
+		"Host:	localhost\r\n"
 		"\r\n");
 
 	// --- Deliberately broken cases (this is the telnet-style poking,
-	//     just hardcoded instead of typed by hand each time) ---
+	//	 just hardcoded instead of typed by hand each time) ---
 
 	runTest("Header key:value pair with space BEFORE the colon",
 		"GET / HTTP/1.1\r\n"
-		"Host   :    localhost\r\n"
+		"Host   :	localhost\r\n"
 		"\r\n");
 	
 	runTest("Missing HTTP version",

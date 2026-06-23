@@ -28,6 +28,10 @@ int HttpParseException::getStatusCode() const
 	return _statusCode;
 }
 
+RequestParser::RequestParser() : _state(PARSE_REQUEST_LINE) {}
+
+RequestParser::~RequestParser() {}
+
 // Helpers
 
 // HTTP header values can have leading/trailing whitespace around the
@@ -163,43 +167,103 @@ void RequestParser::parseHeaderLine(const std::string& line, HttpRequestContaine
 	request.addHeader(key, value);
 }
 
-HttpRequestContainer RequestParser::parse(const std::string& raw)
-{
-	HttpRequestContainer request;
-
-	// Headers are separated by CRLF ("\r\n"), and the header block ends
-	// with a blank line (CRLF CRLF). For now we assume the whole
-	// request (request line + headers) is already in `raw`. ACTUAL
-	// partial-data handling should be done later
-	size_t headerEnd = raw.find("\r\n\r\n"); // Stores the index of the very first character of that (entire) match (the first \r)
-	if (headerEnd == std::string::npos) // npos is a special constant in C++ that means 'not found'.
-		throw HttpParseException(400, "Bad Request: no end of headers found");
-
-	std::string headerBlock = raw.substr(0, headerEnd);
-	std::string rest = raw.substr(headerEnd + 4); // skip past "\r\n\r\n"
-
-	// Split headerBlock into lines on "\r\n"
-	std::istringstream stream(headerBlock);
-	std::string line;
-	bool firstLine = true;
-
-	while (std::getline(stream, line)) // getline() by default reads until it hits '\n'
-	{
-		// getline on "\r\n"-separated text leaves a trailing '\r' so strip it
-		if (!line.empty() && line[line.size() - 1] == '\r')
-			line.erase(line.size() - 1); // chops it off
-		if (firstLine)
-		{
-			parseRequestLine(line, request);
-			firstLine = false;
-		}
-		else
-			parseHeaderLine(line, request);
-	}
-
-	// NO Content-Length / chunked handling yet!!
-	// Whatever is left after the headers, we just store as-is for now
-	request.setBody(rest);
-
-	return request;
+RequestParser::ParsingState RequestParser::getState() const
+{ 
+	return _state;
 }
+
+void RequestParser::reset()
+{ 
+	_state = PARSE_REQUEST_LINE;
+	_buffer.clear();
+}
+
+void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request)
+{
+	_buffer += chunk; // Save the newly arrived data bytes to persistent cache
+
+	// Keep processing as long as there are full lines or readable blocks in the buffer
+	while (true)
+	{
+		if (_state == PARSE_REQUEST_LINE || _state == PARSE_HEADERS)
+		{
+			// Look for the standard network line break (\r\n)
+			size_t lineEnd = _buffer.find("\r\n");
+			if (lineEnd == std::string::npos)
+				return; // Incomplete line, stop and wait for more network read ticks
+
+			std::string line = _buffer.substr(0, lineEnd);
+			_buffer.erase(0, lineEnd + 2); // remove the processed line off our buffer cache
+
+			if (_state == PARSE_REQUEST_LINE)
+			{
+				parseRequestLine(line, request);
+				_state = PARSE_HEADERS;
+			}
+			else if (_state == PARSE_HEADERS)
+			{
+				// If we hit an empty line, the headers block is over
+				if (line.empty())
+				{
+					// HTTP/1.1 Mandate: Check for the required Host header
+					if (request.getHeader("host").empty())
+						throw HttpParseException(400, "Bad Request: Missing mandatory Host header");
+					_state = PARSE_BODY; // Do not break; immediately fall through to try parsing the body out of remaining buffer
+				}
+				else
+					parseHeaderLine(line, request);
+			}
+		}
+		
+		if (_state == PARSE_BODY)
+		{
+			// This is next step where u handle Content-Length or Chunked encoding
+			// For now, assume it finishes
+			_state = PARSE_COMPLETE;
+		}
+
+		if (_state == PARSE_COMPLETE || _buffer.empty())
+			break;
+	}
+}
+
+// HttpRequestContainer RequestParser::parse(const std::string& raw)
+// {
+// 	HttpRequestContainer request;
+
+// 	// Headers are separated by CRLF ("\r\n"), and the header block ends
+// 	// with a blank line (CRLF CRLF). For now we assume the whole
+// 	// request (request line + headers) is already in `raw`. ACTUAL
+// 	// partial-data handling should be done later
+// 	size_t headerEnd = raw.find("\r\n\r\n"); // Stores the index of the very first character of that (entire) match (the first \r)
+// 	if (headerEnd == std::string::npos) // npos is a special constant in C++ that means 'not found'.
+// 		throw HttpParseException(400, "Bad Request: no end of headers found");
+
+// 	std::string headerBlock = raw.substr(0, headerEnd);
+// 	std::string rest = raw.substr(headerEnd + 4); // skip past "\r\n\r\n"
+
+// 	// Split headerBlock into lines on "\r\n"
+// 	std::istringstream stream(headerBlock);
+// 	std::string line;
+// 	bool firstLine = true;
+
+// 	while (std::getline(stream, line)) // getline() by default reads until it hits '\n'
+// 	{
+// 		// getline on "\r\n"-separated text leaves a trailing '\r' so strip it
+// 		if (!line.empty() && line[line.size() - 1] == '\r')
+// 			line.erase(line.size() - 1); // chops it off
+// 		if (firstLine)
+// 		{
+// 			parseRequestLine(line, request);
+// 			firstLine = false;
+// 		}
+// 		else
+// 			parseHeaderLine(line, request);
+// 	}
+
+// 	// NO Content-Length / chunked handling yet!!
+// 	// Whatever is left after the headers, we just store as-is for now
+// 	request.setBody(rest);
+
+// 	return request;
+// }
