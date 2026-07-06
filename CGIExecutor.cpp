@@ -6,7 +6,7 @@
 /*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 13:00:52 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/06/22 16:57:22 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/07/06 16:45:36 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,15 +87,22 @@ std::string CGIExecutor::execute(const std::string &scriptPath, const std::strin
     close(stdinpipefd[0]);
     close(stdoutpipefd[1]);
 
-    write(
-        stdinpipefd[1],
-        body.c_str(),
-        body.size());
+    // write(
+    //     stdinpipefd[1],
+    //     body.c_str(),
+    //     body.size());
 
-    if (!body.empty())
+    ssize_t written = write(stdinpipefd[1], body.c_str(), body.size());
+
+    if (written == -1)
     {
-        write(stdinpipefd[1], body.data(), body.size());
+        throw std::runtime_error("write failed");
     }
+
+    // if (!body.empty())
+    // {
+    //     write(stdinpipefd[1], body.data(), body.size());
+    // }
 
     close(stdinpipefd[1]);
 
