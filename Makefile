@@ -6,7 +6,7 @@
 #    By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/05/11 14:54:40 by eberkau           #+#    #+#              #
-#    Updated: 2026/05/11 15:59:41 by eberkau          ###   ########.fr        #
+#    Updated: 2026/07/08 18:07:24 by eberkau          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -35,7 +35,7 @@ BLUE		=	\033[0;34m
 DEFAULT		=	\033[0m
 
 # list source files here
-CXXFILES	=	main.cpp	\
+CXXFILES	=	config_testmain.cpp	\
 				classes/sourcefile.class.cpp	\
 #				and_so_on.cpp
 
