@@ -6,7 +6,7 @@
 /*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 12:30:19 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/06/15 15:44:08 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/07/18 14:52:51 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,9 @@
 #include <map>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <ctime>
+#include <signal.h>
+#include <poll.h>
 
 class CGIExecutor
 {
@@ -31,18 +34,5 @@ public:
         const std::string &scriptPath,
         const std::string &body);
 };
-
-// class CGIExecutor
-// {
-// private:
-//     std::map<std::string, std::string> env;
-
-//     char **buildEnvp();
-
-// public:
-//     std::string execute(
-//         const std::string &key,
-//         const std::string &value);
-// };
 
 #endif

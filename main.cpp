@@ -6,7 +6,7 @@
 /*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 18:39:09 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/06/15 16:13:55 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/07/18 14:53:44 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,21 +139,66 @@
 //    std::cout << result << std::endl;
 // }
 
+// int main()
+// {
+//     CGIExecutor cgi;
+
+//     std::string body = "name=mehdi&age=42";
+
+//     cgi.getEnv().set("REQUEST_METHOD", "POST");
+//     // cgi.getEnv().set("CONTENT_LENGTH", "18");
+//     cgi.getEnv().set("SCRIPT_NAME", "/cgi-bin/post.py");
+//     cgi.getEnv().set(
+//         "CONTENT_LENGTH",
+//         std::to_string(body.size()));
+
+//     std::string result =
+//         cgi.execute("./post.py", body);
+
+//     std::cout << result << std::endl;
+// }
+
+// int main()
+// {
+//     CGIExecutor cgi;
+
+//     try
+//     {
+//         std::string result = cgi.execute("./slow.py", "");
+//         std::cout << result << std::endl;
+//     }
+//     catch (const std::exception &e)
+//     {
+//         std::cerr << e.what() << std::endl;
+//     }
+//     // std::string result =
+//     //     cgi.execute("./slow.py", "");
+
+//     // std::cout << result << std::endl;
+// }
+
+// int main()
+// {
+//     CGIExecutor cgi;
+
+//     try
+//     {
+//         std::string result = cgi.execute("./error.py", "");
+
+//         std::cout << result << std::endl;
+//     }
+//     catch (const std::exception &e)
+//     {
+//         std::cerr << "CGI failed: " << e.what() << std::endl;
+//     }
+// }
+
 int main()
 {
-   CGIExecutor cgi;
+    CGIExecutor cgi;
 
-   std::string body = "name=mehdi&age=42";
+    std::string result =
+        cgi.execute("./partial.py", "");
 
-   cgi.getEnv().set("REQUEST_METHOD", "POST");
-   // cgi.getEnv().set("CONTENT_LENGTH", "18");
-   cgi.getEnv().set("SCRIPT_NAME", "/cgi-bin/post.py");
-   cgi.getEnv().set(
-       "CONTENT_LENGTH",
-       std::to_string(body.size()));
-
-   std::string result =
-       cgi.execute("./post.py", body);
-
-   std::cout << result << std::endl;
+    std::cout << result << std::endl;
 }
