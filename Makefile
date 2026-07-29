@@ -6,7 +6,7 @@
 #    By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/05/11 14:54:40 by eberkau           #+#    #+#              #
-#    Updated: 2026/07/08 18:07:24 by eberkau          ###   ########.fr        #
+#    Updated: 2026/07/28 17:54:31 by eberkau          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -36,7 +36,7 @@ DEFAULT		=	\033[0m
 
 # list source files here
 CXXFILES	=	config_testmain.cpp	\
-				classes/sourcefile.class.cpp	\
+				classes/Lexer.class.cpp	\
 #				and_so_on.cpp
 
 
