@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/28 16:48:53 by eberkau           #+#    #+#             */
-/*   Updated: 2026/07/28 18:05:10 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/07/29 16:24:20 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,9 @@ std::vector<Token> Lexer::tokenize(void) {
 
 	return tokens;
 }
+
+
+/* private member functions */
 
 void Lexer::_advance(void) {
 	if (_eof())

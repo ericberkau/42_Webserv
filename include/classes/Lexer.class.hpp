@@ -6,14 +6,13 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/27 23:11:41 by eberkau           #+#    #+#             */
-/*   Updated: 2026/07/28 17:12:01 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/07/29 16:24:24 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "../token.hpp"
-#include <string>
+#include "token.hpp"
 #include <vector>
 
 class Lexer {
