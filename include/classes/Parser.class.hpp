@@ -1,0 +1,52 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Parser.class.hpp                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/07/29 16:09:13 by eberkau           #+#    #+#             */
+/*   Updated: 2026/07/29 17:11:22 by eberkau          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#pragma once
+
+#include "config.hpp"
+#include "token.hpp"
+
+class Parser {
+
+	public:
+
+		explicit Parser(const std::vector<Token>& tokens);
+		~Parser(void) = default;
+
+		Config	parse(void);
+
+	private:
+
+		void			_advance(void);
+		bool			_atEnd(void) const;
+		const Token&	_current(void) const;
+		const Token&	_previous(void) const;
+
+		bool	_check(TokenType type) const;
+		// bool	_match(TokenType type); // FIXME: check if needed
+		void	_expect(TokenType type, const std::string& msg);
+		
+		Config			_parseConfig(void);
+		ServerConfig	_parseServer(void);
+		void			_parseServerDirective(ServerConfig& server);
+		void			_parseListen(ServerConfig& server);
+
+		const std::vector<Token>&	_tokens;
+		size_t						_currentPos;
+
+		/* disallow copying or moving */
+		Parser(const Parser&) = delete;
+		Parser&	operator=(const Parser&) = delete;
+		Parser(Parser&&) = delete;
+		Parser&	operator=(Parser&&) = delete;
+
+};
