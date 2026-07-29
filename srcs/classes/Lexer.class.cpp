@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/28 16:48:53 by eberkau           #+#    #+#             */
-/*   Updated: 2026/07/29 16:24:20 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/07/30 00:26:09 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,20 +85,6 @@ char Lexer::_peek(void) const {
 	return _source[_currentPos + 1];
 }
 
-void Lexer::_skipComment(void) {
-	while (!_eof() && _current() != '\n')
-		_advance();
-}
-
-static bool isWhitespace(char c) {
-	return std::isspace(static_cast<unsigned char>(c));
-}
-
-void Lexer::_skipWhitespace(void) {
-	while (!_eof() && isWhitespace(_current()))
-		_advance();
-}
-
 static bool isDelimiter(char c) {
 	return isWhitespace(c)
 		|| c == '{'
@@ -121,4 +107,18 @@ Token Lexer::_readWord(void) {
 		startLine,
 		startCol
 	};
+}
+
+void Lexer::_skipComment(void) {
+	while (!_eof() && _current() != '\n')
+		_advance();
+}
+
+static bool isWhitespace(char c) {
+	return std::isspace(static_cast<unsigned char>(c));
+}
+
+void Lexer::_skipWhitespace(void) {
+	while (!_eof() && isWhitespace(_current()))
+		_advance();
 }

@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:09:13 by eberkau           #+#    #+#             */
-/*   Updated: 2026/07/29 17:11:22 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/07/30 00:32:03 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ class Parser {
 
 		Config	parse(void);
 
+
 	private:
 
 		void			_advance(void);
@@ -34,7 +35,7 @@ class Parser {
 		bool	_check(TokenType type) const;
 		// bool	_match(TokenType type); // FIXME: check if needed
 		void	_expect(TokenType type, const std::string& msg);
-		
+
 		Config			_parseConfig(void);
 		ServerConfig	_parseServer(void);
 		void			_parseServerDirective(ServerConfig& server);
