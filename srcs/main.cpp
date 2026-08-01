@@ -154,6 +154,112 @@ int main()
 	// runTest("Invalid Request-Line exceeding 8000 octets",
 	// 	"GET /" + std::string(8005, 'a') + " HTTP/1.1\r\nHost: localhost\r\n\r\n");
 
+
+
+	// --- Advanced Body Parsing Fragmented Tests ---
+
+	// 1. Content-Length: Arriving in two split network packets
+	{
+		std::cout << "Running: Content-Length Fragmented Packet Test\n";
+		RequestParser parser;
+		HttpRequestContainer request;
+
+		// Packet 1: Contains request-line, headers, and only the FIRST half of the body
+		std::string packet1 = "POST /submit HTTP/1.1\r\nHost: localhost\r\nContent-Length: 10\r\n\r\nhello";
+		parser.feed(packet1, request);
+		
+		if (parser.getState() != RequestParser::PARSE_BODY)
+			std::cout << "❌ Error: State should be PARSE_BODY while waiting for rest of data\n";
+
+		// Packet 2: The remaining data bytes finally arrive
+		std::string packet2 = "world";
+		parser.feed(packet2, request);
+
+		if (parser.getState() == RequestParser::PARSE_COMPLETE && request.getBody() == "helloworld")
+			std::cout << "✅ Success: Fragmented Content-Length parsed correctly!\n";
+		else
+			std::cout << "❌ Error: Fragmented Content-Length failed. Body was: " << request.getBody() << "\n";
+	}
+
+	// 2. Chunked Transfer Encoding: Arriving sequentially 
+	{
+		std::cout << "Running: Valid Chunked Stream Test\n";
+		RequestParser parser;
+		HttpRequestContainer request;
+
+		std::string chunkedRequest = 
+			"POST /stream HTTP/1.1\r\n"
+			"Host: localhost\r\n"
+			"Transfer-Encoding: chunked\r\n"
+			"\r\n"
+			"5\r\n"
+			"Hello\r\n"
+			"6\r\n"
+			" World\r\n"
+			"0\r\n\r\n"; // Terminating block
+
+		parser.feed(chunkedRequest, request);
+
+		if (parser.getState() == RequestParser::PARSE_COMPLETE && request.getBody() == "Hello World")
+			std::cout << "✅ Success: Chunked body decoded perfectly!\n";
+		else
+			std::cout << "❌ Error: Chunked stream failed. Body was: " << request.getBody() << "\n";
+	}
+
+	// 3. Chunked Transfer Encoding: Split directly in the middle of a hex size line
+	{
+		std::cout << "Running: Fragmented Chunked Line Test\n";
+		RequestParser parser;
+		HttpRequestContainer request;
+
+		// Feed headers and the start of a chunk size line, but cut it off!
+		parser.feed("POST / HTTP/1.1\r\nHost: local\r\nTransfer-Encoding: chunked\r\n\r\n4", request);
+		
+		// Feed the rest of the size line and its payload
+		parser.feed("\r\ntest\r\n0\r\n\r\n", request);
+
+		if (parser.getState() == RequestParser::PARSE_COMPLETE && request.getBody() == "test")
+			std::cout << "✅ Success: Fragmented chunked sizes handled gracefully!\n";
+		else
+			std::cout << "❌ Error: Fragmented chunked parser failed.\n";
+	}
+
+	// 4. Missing Length on POST Request (411 Check)
+	{
+		std::cout << "Running: POST Missing Length Headers Test (411 Check)\n";
+		try {
+			RequestParser parser;
+			HttpRequestContainer request;
+			parser.feed("POST /submit HTTP/1.1\r\nHost: localhost\r\n\r\n", request);
+			std::cout << "❌ Error: Server accepted a POST request with no body size declarations!\n";
+		}
+		catch (const HttpParseException& e) {
+			if (e.getStatusCode() == 411)
+				std::cout << "✅ Success: Correctly rejected with 411 Length Required\n";
+			else
+				std::cout << "❌ Error: Threw wrong code " << e.getStatusCode() << "\n";
+		}
+	}
+
+	// 5. Max Body Limit Breach (413 Check)
+	{
+		std::cout << "Running: Payload Too Large Test (413 Check)\n";
+		try {
+			RequestParser parser;
+			HttpRequestContainer request;
+			// Tell the parser 60 Million bytes are coming (Our limit is 50 Million)
+			parser.feed("POST /big-upload HTTP/1.1\r\nHost: localhost\r\nContent-Length: 60000000\r\n\r\n", request);
+			std::cout << "❌ Error: Allowed a size metadata overflow!\n";
+		}
+		catch (const HttpParseException& e) {
+			if (e.getStatusCode() == 413)
+				std::cout << "✅ Success: Correctly blocked oversized payload with 413\n";
+			else
+				std::cout << "❌ Error: Threw wrong code " << e.getStatusCode() << "\n";
+		}
+	}
+
+
 	return 0;
 }
 

@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 15:15:37 by djanardh          #+#    #+#             */
-/*   Updated: 2026/06/24 01:46:08 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/08/01 17:41:07 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,9 +32,9 @@ class HttpParseException : public std::exception
 };
 
 class RequestParser
-{
+{		
 	public:
-		enum ParsingState 
+			enum ParsingState 
 		{ 
 			PARSE_REQUEST_LINE, // or CHOOSE_REQUEST_LINE(?)
 			PARSE_HEADERS, 
@@ -50,10 +50,13 @@ class RequestParser
 		void parseHeaderLine(const std::string& line, HttpRequestContainer& request); // Splits "Key: Value" and adds it to the request
 		bool isSupportedMethod(const std::string& method);
 		bool isKnownHttpMethod(const std::string& method);
+		size_t _expectedBodyBytes; // Stores Content-Length or current chunk size
+		bool _chunkSizeParsed; // Tracks if we are waiting for a chunk size line or chunk data bytes
 		
 	public:
 		RequestParser();
 		~RequestParser();
+
 		// So far only parsing one complete request string in one shot.
 		// (No partial/incremental handling yet - that comes after
 		// body parsing is added and then this should be hooked up to real recv() data later)
