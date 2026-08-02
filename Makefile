@@ -25,7 +25,8 @@ DEFAULT		=	\033[0m
 # list source files here
 CXXFILES	=	main.cpp	\
 				HttpRequestContainer.cpp	\
-				RequestParser.cpp
+				RequestParser.cpp \
+				RequestHandler.cpp
 
 
 all: $(NAME)
