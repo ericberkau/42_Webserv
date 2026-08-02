@@ -334,7 +334,7 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 						request.setBody(request.getBody() + chunkData);
 						
 						// Enforce Max Body Limit (Webserv client_max_body_size requirement)
-						// ⚠️ Replace 50000000 with your context config rule variable later
+						// DON'T FORGET TO replace 50000000 with the variable from the config structs file!
 						if (request.getBody().size() > 50000000) 
 							throw HttpParseException(413, "Payload Too Large");
 

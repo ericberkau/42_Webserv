@@ -1,5 +1,5 @@
 // this file is only to test the current (01/08/26) RequestHandler
-// (just temporary, no response builder yet, so output in strings and file creation)
+// (just temporary, no response builder yet, so output in strings)
 
 #include "RequestHandler.hpp"
 #include "HttpRequestContainer.hpp"
