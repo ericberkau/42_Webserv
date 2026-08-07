@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:09:13 by eberkau           #+#    #+#             */
-/*   Updated: 2026/07/30 15:45:12 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/07 17:31:51 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ class Parser {
 		ServerConfig	_parseServer(void);
 		void			_parseServerDirective(ServerConfig& server);
 		void			_parseListen(ServerConfig& server);
+		void			_parseClientMaxBodySize(ServerConfig& server);
 
 		const std::vector<Token>&	_tokens;
 		size_t						_currentPos;

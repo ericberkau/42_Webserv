@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:35:46 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/07 17:12:25 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/07 18:18:31 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,6 +110,9 @@ void Parser::_parseServerDirective(ServerConfig& server) {
 	if (directive.lexeme == "listen") {
 		_advance();
 		_parseListen(server);
+	} else if (directive.lexeme == "client_max_body_size") {
+		_advance();
+		_parseClientMaxBodySize(server);
 	}
 	else
 		error(directive, "unknown server directive '" + directive.lexeme + "'");
@@ -132,7 +135,7 @@ void Parser::_parseListen(ServerConfig& server) {
 	const Token& addressToken = _current();
 	_advance();
 	
-	_expect(TokenType::SEMICOLON, "expected ';' after listen directive");
+	_expect(TokenType::SEMICOLON, "expected ';' after listening address");
 	_advance();
 
 	const std::string& address = addressToken.lexeme;
@@ -166,4 +169,32 @@ void Parser::_parseListen(ServerConfig& server) {
 	listen.port = static_cast<std::uint16_t>(port);
 
 	server.listen.push_back(listen);
+}
+
+static size_t parseSizeValue(const Token& token) {
+	if (!isDigits(token.lexeme))
+		error(token, "size must be a positive integer");
+
+	try {
+		return std::stoull(token.lexeme);
+	} catch (const std::exception&) {
+		error(token, "invalid size value");
+	}
+}
+
+void Parser::_parseClientMaxBodySize(ServerConfig& server) {
+	_expect(TokenType::WORD, "expected size value after 'client_max_body_size'");
+
+	const Token& sizeToken = _current();
+	_advance();
+
+	_expect(TokenType::SEMICOLON, "expected ';' after client_max_body_size value");
+	_advance();
+
+	const size_t size = parseSizeValue(sizeToken);
+
+	if (size == 0 || size > 1024 * 1024 * 10)
+			error(sizeToken, "size exceeds limits (0 < size <= 10 MiB)"); // FIXME: 10 MiB as upper client body limit?
+
+	server.clientMaxBodySize = size;
 }

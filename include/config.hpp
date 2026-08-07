@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:11:25 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/07 16:52:41 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/07 17:30:51 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,9 @@ struct ListenDirective {
 
 struct ServerConfig {
 	std::vector<ListenDirective>	listen;
+	size_t							clientMaxBodySize;
+
+	ServerConfig(void) : clientMaxBodySize(1024 * 1024) {} // default 1 MiB
 };
 
 struct Config {
