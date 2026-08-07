@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:11:25 by eberkau           #+#    #+#             */
-/*   Updated: 2026/07/29 16:05:41 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/07 16:52:41 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@
 // using t_config = s_config;
 
 struct ListenDirective {
-	std::string		ip;
+	std::string		host;
 	std::uint16_t	port;
 };
 

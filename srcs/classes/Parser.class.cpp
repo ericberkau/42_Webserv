@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:35:46 by eberkau           #+#    #+#             */
-/*   Updated: 2026/07/30 15:55:13 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/07 17:12:25 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,6 +115,17 @@ void Parser::_parseServerDirective(ServerConfig& server) {
 		error(directive, "unknown server directive '" + directive.lexeme + "'");
 }
 
+static bool isDigits(const std::string& str) {
+	if (str.empty())
+		return false;
+
+	for (char c : str) {
+		if (!std::isdigit(static_cast<unsigned char>(c)))
+			return false;
+	}
+	return true;
+}
+
 void Parser::_parseListen(ServerConfig& server) {
 	_expect(TokenType::WORD, "expected address after 'listen'");
 
@@ -124,5 +135,35 @@ void Parser::_parseListen(ServerConfig& server) {
 	_expect(TokenType::SEMICOLON, "expected ';' after listen directive");
 	_advance();
 
-	//TODO
+	const std::string& address = addressToken.lexeme;
+	const std::size_t colonPos = address.find(':');
+
+	if (colonPos == std::string::npos)
+		error(addressToken, "listen must be in '<host>:<port>' format");
+
+	const std::string host = address.substr(0, colonPos);
+	const std::string portStr = address.substr(colonPos + 1);
+
+	if (host.empty())
+		error(addressToken, "host cannot be empty");
+	if (!isDigits(portStr))
+		error(addressToken, "port must be numeric");
+
+	unsigned long port;
+
+	try {
+		port = std::stoul(portStr);
+	} catch (const std::exception&) {
+		error(addressToken, "invalid port number");
+	}
+
+	if (port == 0 || port > 65535)
+		error(addressToken, "port out of range");
+
+	ListenDirective listen;
+
+	listen.host = host;
+	listen.port = static_cast<std::uint16_t>(port);
+
+	server.listen.push_back(listen);
 }
