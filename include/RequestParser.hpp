@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 15:15:37 by djanardh          #+#    #+#             */
-/*   Updated: 2026/08/01 17:41:07 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/08/07 19:34:45 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ class RequestParser
 	public:
 			enum ParsingState 
 		{ 
-			PARSE_REQUEST_LINE, // or CHOOSE_REQUEST_LINE(?)
+			PARSE_REQUEST_LINE,
 			PARSE_HEADERS, 
 			PARSE_BODY, 
 			PARSE_COMPLETE 
