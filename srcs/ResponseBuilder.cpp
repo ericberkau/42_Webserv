@@ -1,0 +1,101 @@
+#include "ResponseBuilder.hpp"
+#include <sstream>
+
+ResponseBuilder::ResponseBuilder() : _httpVersion("HTTP/1.1"), _statusCode(200), _statusMessage("OK") {}
+ResponseBuilder::~ResponseBuilder() {}
+
+// Dictionary lookup for standard HTTP text statuses required by the protocol
+std::string ResponseBuilder::getStandardStatusMessage(int code) const {
+	switch (code) {
+		case 200: return "OK";
+		case 201: return "Created";
+		case 204: return "No Content";
+		case 301: return "Moved Permanently";
+		case 400: return "Bad Request";
+		case 403: return "Forbidden";
+		case 404: return "Not Found";
+		case 405: return "Method Not Allowed";
+		case 411: return "Length Required";
+		case 413: return "Payload Too Large";
+		case 414: return "URI Too Long";
+		case 500: return "Internal Server Error";
+		case 501: return "Not Implemented";
+		default:  return "Unknown Status";
+	}
+}
+
+void ResponseBuilder::setStatus(int code) {
+	_statusCode = code;
+	_statusMessage = getStandardStatusMessage(code);
+}
+
+void ResponseBuilder::setStatus(int code, const std::string& customMessage) {
+	_statusCode = code;
+	_statusMessage = customMessage;
+}
+
+void ResponseBuilder::addHeader(const std::string& key, const std::string& value) {
+	_headers[key] = value;
+}
+
+void ResponseBuilder::setBody(const std::string& body) {
+	_body = body;
+	setContentLength(_body.size()); // Automatically sync the header size!
+}
+
+void ResponseBuilder::setHttpVersion(const std::string& version) {
+	_httpVersion = version;
+}
+
+void ResponseBuilder::setContentType(const std::string& contentType) {
+	addHeader("Content-Type", contentType);
+}
+
+void ResponseBuilder::setContentLength(size_t length) {
+	std::stringstream ss;
+	ss << length;
+	addHeader("Content-Length", ss.str());
+}
+
+// Generates a standard default fallback HTML view if no custom error file is found
+void ResponseBuilder::generateDefaultErrorPage(int code) {
+	setStatus(code);
+		
+	std::stringstream bodyStream;
+	bodyStream << "<html><head><title>" << _statusCode << " " << _statusMessage << "</title></head>"
+			   << "<body bgcolor=\"white\"><center><h1>" << _statusCode << " " << _statusMessage << "</h1></center>"
+			   << "<hr><center>webserv/1.0</center></body></html>";
+			   
+	setContentType("text/html");
+	setBody(bodyStream.str());
+}
+
+// 🧱 The Sticher: Merges everything into the exact byte packet the network socket needs
+std::string ResponseBuilder::buildString() const {
+	std::stringstream packet;
+
+	// 1. Status Line (Ex: HTTP/1.1 200 OK\r\n)
+	packet << _httpVersion << " " << _statusCode << " " << _statusMessage << "\r\n";
+
+	// 2. Headers Block (Ex: Content-Length: 42\r\n)
+	std::map<std::string, std::string>::const_iterator it;
+	for (it = _headers.begin(); it != _headers.end(); ++it) {
+		packet << it->first << ": " << it->second << "\r\n";
+	}
+
+	// 3. The Mandatory Blank Line marking the end of headers
+	packet << "\r\n";
+
+	// 4. The Payload Body (if any exists)
+	packet << _body;
+
+	return packet.str();
+}
+
+void ResponseBuilder::clear() {
+	_httpVersion = "HTTP/1.1";
+	_statusCode = 200;
+	_statusMessage = "OK";
+	_headers.clear();
+	_body.clear();
+}
