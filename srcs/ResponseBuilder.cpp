@@ -70,7 +70,7 @@ void ResponseBuilder::generateDefaultErrorPage(int code) {
 	setBody(bodyStream.str());
 }
 
-// 🧱 The Sticher: Merges everything into the exact byte packet the network socket needs
+// Sticher: Merges everything into the exact byte packet the network socket needs
 std::string ResponseBuilder::buildString() const {
 	std::stringstream packet;
 

@@ -209,7 +209,7 @@ std::string RequestHandler::handleDelete(const std::string& physicalPath)
 // 		throw std::runtime_error("501"); // Not Implemented fallback guard
 // 	}
 // 	catch (const std::runtime_error& errorMsg) {
-// 		// This is where your upcoming Response Builder takes over to format an Error Response packet!
+// 		// This is where the upcoming Response Builder takes over to format an Error Response packet
 // 		std::string status = errorMsg.what();
 // 		std::cout << "Handling Error Status Code: " << status << "\n";
 // 		return "HTTP/1.1 " + status + " Error\r\n\r\n"; // Temporary mock string
