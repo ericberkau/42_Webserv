@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/01 17:58:03 by djanardh          #+#    #+#             */
-/*   Updated: 2026/08/01 17:58:05 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/08/12 16:58:43 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ struct ServerConfig {
 	std::string root;				 // Default fallback root
 	std::string index;				// Default fallback index file
 	size_t clientMaxBodySize;
+	std::map<int, std::string> errorPages;
 	std::vector<LocationConfig> locations;
 		
 	ServerConfig() : port(80), clientMaxBodySize(1000000) {} // Default 1MB

@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 12:54:09 by djanardh          #+#    #+#             */
-/*   Updated: 2026/08/02 12:54:11 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/08/12 16:40:55 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 #include "HttpRequestContainer.hpp"
 #include "ConfigStructures.hpp"
 #include <string>
+#include <sys/types.h>
+#include <dirent.h>
 
 class RequestHandler {
 private:

@@ -12,6 +12,7 @@
 
 #include "RequestHandler.hpp"
 #include "ResponseBuilder.hpp"
+#include "RequestParser.hpp"
 #include <sys/stat.h> // for checking if files exist
 #include <fstream>
 #include <sstream>
@@ -66,54 +67,99 @@ std::string RequestHandler::translateToPhysicalPath(const std::string& uri, cons
 	std::string baseRoot = location ? location->root : _config.root;
 	std::string path = baseRoot + uri;
 
-	// check if the resulting path targets a directory. If it does, try to append the index file name
 	struct stat pathStat;
-	if (stat(path.c_str(), &pathStat) == 0) {
-		if (S_ISDIR(pathStat.st_mode)) {
+	if (stat(path.c_str(), &pathStat) == 0)
+	{
+		if (S_ISDIR(pathStat.st_mode))
+		{
 			std::string indexFile = location ? location->index : _config.index;
-			if (indexFile.empty()) indexFile = "index.html"; // Standard fallback
-			
-			if (path.back() == '/') path += indexFile;
-			else					path += "/" + indexFile;
+			if (indexFile.empty()) indexFile = "index.html";
+
+			std::string fullIndexPath = path;
+			if (fullIndexPath.back() == '/') 
+				fullIndexPath += indexFile;
+			else							 
+				fullIndexPath += "/" + indexFile;
+
+			// check if index.html actually exists on disk.
+			struct stat indexStat;
+			if (stat(fullIndexPath.c_str(), &indexStat) == 0) {
+				return fullIndexPath; // If it exists, use it!
+			}
+			// if index.html DOES NOT exist, leave the path pointing to the directory 
+			// so handleGet can trigger autoindex logic later!
 		}
 	}
 	return path;
 }
 
+
 // attempts to open a file on our hard drive. If it exists, it reads the content and builds a 200 OK response
 // If it doesn't exist, it throws a 404 Not Found error
 std::string RequestHandler::handleGet(const std::string& physicalPath, const LocationConfig* location)
 {
-	(void)location; // Unused for now, but useful later if you add autoindex
+	ResponseBuilder response;
 
-	// attempt to open the requested file in binary read mode
-	std::ifstream file(physicalPath.c_str(), std::ios::binary);
-	if (!file.is_open()) {
-		throw std::runtime_error("404"); // file does not exist -> 404 Not Found
+	struct stat pathStat;
+	if (stat(physicalPath.c_str(), &pathStat) != 0)
+		throw std::runtime_error("404"); // Path doesn't exist at all -> 404
+
+	// CASE 1: The path is a directory (meaning index.html was missing)
+	if (S_ISDIR(pathStat.st_mode))
+	{
+		// If config turned autoindex off, deny access!
+		bool isAutoindexEnabled = location ? location->autoindex : false;
+		if (!isAutoindexEnabled)
+			throw std::runtime_error("403"); // 403 Forbidden
+
+		// Open the directory folder stream
+		DIR* dir = opendir(physicalPath.c_str());
+		if (!dir)
+			throw std::runtime_error("500"); // Internal Server Error
+
+		std::stringstream html;
+		html << "<html><head><title>Index of " << (location ? location->path : "/") << "</title></head>";
+		html << "<body><h1>Index of " << (location ? location->path : "/") << "</h1><hr><pre>";
+
+		struct dirent* entry;
+		// Loop through every file and item inside the folder
+		while ((entry = readdir(dir)) != NULL)
+		{
+			std::string name = entry->d_name;
+			
+			// Skip hidden current directory "." references to look clean
+			if (name == ".") continue;
+
+			// Generate an HTML hyperlink anchor block for each asset
+			html << "<a href=\"" << name << "\">" << name << "</a>\n";
+		}
+		closedir(dir);
+
+		html << "</pre><hr></body></html>";
+
+		response.setStatus(200);
+		response.setContentType("text/html");
+		response.setBody(html.str());
+		return response.buildString();
 	}
 
-	// read the entire file content into a string stream
+	// CASE 2: The path is a normal standalone asset file
+	std::ifstream file(physicalPath.c_str(), std::ios::binary);
+	if (!file.is_open())
+		throw std::runtime_error("404");
+
 	std::stringstream buffer;
 	buffer << file.rdbuf();
 	std::string fileContent = buffer.str();
 	file.close();
 
-	// determine the length of the file content
-	std::stringstream lengthStream;
-	lengthStream << fileContent.size();
-	std::string contentLength = lengthStream.str();
+	response.setStatus(200);
+	response.setContentTypeFromExtension(physicalPath); // Automatically select MIME type
+	response.setBody(fileContent);
 
-	// build a simple standard HTTP response
-	std::string response = 
-		"HTTP/1.1 200 OK\r\n"
-		"Content-Length: " + contentLength + "\r\n"
-		"Content-Type: text/html\r\n" // defaulting to HTML for simplicity
-		"Connection: keep-alive\r\n"
-		"\r\n" + 
-		fileContent;
-
-	return response;
+	return response.buildString();
 }
+
 
 // this function takes the raw body data sent by the client and saves it as a new file on your hard drive
 // if successful, it returns a 201 Created response.

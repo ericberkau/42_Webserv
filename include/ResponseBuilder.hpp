@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/11 16:05:34 by djanardh          #+#    #+#             */
-/*   Updated: 2026/08/11 16:06:01 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/08/12 16:36:33 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,8 @@ public:
 
 	// Clears the builder state so it can be reused on keep-alive loops
 	void clear();
+
+	void setContentTypeFromExtension(const std::string& physicalPath);
 };
 
 #endif

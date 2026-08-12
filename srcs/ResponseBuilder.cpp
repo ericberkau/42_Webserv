@@ -99,3 +99,31 @@ void ResponseBuilder::clear() {
 	_headers.clear();
 	_body.clear();
 }
+
+void ResponseBuilder::setContentTypeFromExtension(const std::string& physicalPath) {
+	size_t dotPos = physicalPath.find_last_of('.');
+		
+	// if there is no dot or extension, defaulting safely to raw octet stream/binary
+	if (dotPos == std::string::npos || dotPos == physicalPath.size() - 1) {
+		setContentType("application/octet-stream");
+		return;
+	}
+
+	std::string ext = physicalPath.substr(dotPos + 1);
+	// Convert to lowercase just in case (Ex: .PNG -> .png)
+	for (size_t i = 0; i < ext.size(); ++i) {
+		ext[i] = std::tolower(static_cast<unsigned char>(ext[i]));
+	}
+
+	// map common file types standard web browsers expect
+	if (ext == "html" || ext == "htm") setContentType("text/html");
+	else if (ext == "css")			   setContentType("text/css");
+	else if (ext == "js")				setContentType("application/javascript");
+	else if (ext == "png")			   setContentType("image/png");
+	else if (ext == "jpg" || ext == "jpeg") setContentType("image/jpeg");
+	else if (ext == "gif")			   setContentType("image/gif");
+	else if (ext == "txt")			   setContentType("text/plain");
+	else if (ext == "json")			  setContentType("application/json");
+	else								 setContentType("application/octet-stream");
+}
+

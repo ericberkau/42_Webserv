@@ -23,10 +23,11 @@ BLUE		=	\033[0;34m
 DEFAULT		=	\033[0m
 
 # list source files here
-CXXFILES	=	main2.cpp	\
+CXXFILES	=	main3.cpp	\
 				HttpRequestContainer.cpp	\
 				RequestParser.cpp \
-				RequestHandler.cpp
+				RequestHandler.cpp \
+				ResponseBuilder.cpp
 
 
 all: $(NAME)
