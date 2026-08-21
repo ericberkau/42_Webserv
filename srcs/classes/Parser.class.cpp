@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:35:46 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/07 18:18:31 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/22 00:27:01 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,6 +113,9 @@ void Parser::_parseServerDirective(ServerConfig& server) {
 	} else if (directive.lexeme == "client_max_body_size") {
 		_advance();
 		_parseClientMaxBodySize(server);
+	} else if (directive.lexeme == "location") {
+		_advance();
+		server.locations.push_back(_parseLocation());
 	}
 	else
 		error(directive, "unknown server directive '" + directive.lexeme + "'");
@@ -197,4 +200,66 @@ void Parser::_parseClientMaxBodySize(ServerConfig& server) {
 			error(sizeToken, "size exceeds limits (0 < size <= 10 MiB)"); // FIXME: 10 MiB as upper client body limit?
 
 	server.clientMaxBodySize = size;
+}
+
+LocationConfig Parser::_parseLocation(void) {
+	_expect(TokenType::WORD, "expected path after 'location'");
+
+	LocationConfig location;
+	location.path = _current().lexeme;
+	_advance();
+
+	_expect(TokenType::BRACE_LEFT, "expected '{' after location path");
+	_advance();
+
+	while (!_check(TokenType::BRACE_RIGHT)) {
+		if (_atEnd())
+			error(_current(), "expected '}' after location block");
+
+		_parseLocationDirective(location);
+	}
+	_advance();
+
+	return location;
+}
+
+void Parser::_parseLocationDirective(LocationConfig& location) {
+	_expect(TokenType::WORD, "expected location directive");
+
+	const Token& directive = _current();
+
+	if (directive.lexeme == "root") {
+		_advance();
+		_parseRoot(location);
+	} else if (directive.lexeme == "autoindex") {
+		_advance();
+		_parseAutoIndex(location);
+	}
+	else
+		error(directive, "unknown location directive '" + directive.lexeme + "'");
+}
+
+void Parser::_parseRoot(LocationConfig& location) {
+	_expect(TokenType::WORD, "expected path after 'root'");
+	location.root = _current().lexeme;
+	_advance();
+
+	_expect(TokenType::SEMICOLON, "expected ';' after root path");
+	_advance();
+}
+
+void Parser::_parseAutoIndex(LocationConfig& location) {
+	_expect(TokenType::WORD, "expected 'on' or 'off'");
+	const std::string& setting = _current().lexeme;
+
+	if (setting == "on")
+		location.autoIndex = true;
+	else if (setting == "off")
+		location.autoIndex = false;
+	else
+		error(_current(), "unknown autoindex setting, must be 'on' or 'off'");
+
+	_advance();
+	_expect(TokenType::SEMICOLON, "expected ';' after autoindex setting");
+	_advance();
 }
