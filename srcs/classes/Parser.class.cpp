@@ -6,23 +6,21 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:35:46 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/22 00:27:01 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/22 01:44:06 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/Parser.class.hpp"
 #include <sstream>
 
-Parser::Parser(const std::vector<Token>& tokens)
-	: _tokens(tokens), _currentPos(0)
-{}
+Parser::Parser(const std::vector<Token>& tokens) : _tokens(tokens), _currentPos(0) {}
 
 Config Parser::parse(void) {
 	return _parseConfig();
 }
 
 
-/* private member functions */
+/* ------- private member functions ------- */
 
 void Parser::_advance(void) {
 	if (!_atEnd())
@@ -37,11 +35,11 @@ const Token& Parser::_current(void) const {
 	return _tokens[_currentPos];
 }
 
-const Token& Parser::_previous(void) const {
-	if (_currentPos > 0)
-		return _tokens[_currentPos - 1];
-	return _tokens.back();
-} // FIXME: check if needed
+// const Token& Parser::_previous(void) const {
+// 	if (_currentPos > 0)
+// 		return _tokens[_currentPos - 1];
+// 	return _tokens.back();
+// } // FIXME: check if needed
 
 bool Parser::_check(TokenType type) const {
 	return _current().type == type;
@@ -70,10 +68,13 @@ void Parser::_expect(TokenType type, const std::string& errMsg) {
 		error(_current(), errMsg);
 }
 
-void Parser::_expect(const std::string& lexeme, const std::string& errMsg) {
-	if (!_check(TokenType::WORD) || _current().lexeme != lexeme)
+void Parser::_expect(const std::string& keyword, const std::string& errMsg) {
+	if (!_check(TokenType::WORD) || _current().lexeme != keyword)
 		error(_current(), errMsg);
 }
+
+
+/* ------- actual parsing functions ------- */
 
 Config Parser::_parseConfig(void) {
 	Config config;
@@ -85,7 +86,7 @@ Config Parser::_parseConfig(void) {
 }
 
 ServerConfig Parser::_parseServer(void) {
-	_expect("server", "expected 'server'");
+	_expect("server", "expected 'server'"); // FIXME: might change, if _parseConfig() gets an if-elseif chain to account for 'events' as well
 	_advance();
 	_expect(TokenType::BRACE_LEFT, "expected '{' after 'server'");
 	_advance();
@@ -121,7 +122,7 @@ void Parser::_parseServerDirective(ServerConfig& server) {
 		error(directive, "unknown server directive '" + directive.lexeme + "'");
 }
 
-static bool isDigits(const std::string& str) {
+static bool isOnlyDigits(const std::string& str) {
 	if (str.empty())
 		return false;
 
@@ -152,7 +153,7 @@ void Parser::_parseListen(ServerConfig& server) {
 
 	if (host.empty())
 		error(addressToken, "host cannot be empty");
-	if (!isDigits(portStr))
+	if (!isOnlyDigits(portStr))
 		error(addressToken, "port must be numeric");
 
 	unsigned long port;
@@ -175,7 +176,7 @@ void Parser::_parseListen(ServerConfig& server) {
 }
 
 static size_t parseSizeValue(const Token& token) {
-	if (!isDigits(token.lexeme))
+	if (!isOnlyDigits(token.lexeme))
 		error(token, "size must be a positive integer");
 
 	try {

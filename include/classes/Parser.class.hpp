@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:09:13 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/22 00:04:56 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/22 01:40:10 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ class Parser {
 		void			_advance(void);
 		bool			_atEnd(void) const;
 		const Token&	_current(void) const;
-		const Token&	_previous(void) const; // FIXME: check if needed
+		// const Token&	_previous(void) const; // FIXME: check if needed
 
 		bool	_check(TokenType type) const;
 		// bool	_match(TokenType type); // FIXME: check if needed
