@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:35:46 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/22 01:44:06 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/22 02:52:14 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -232,9 +232,15 @@ void Parser::_parseLocationDirective(LocationConfig& location) {
 	if (directive.lexeme == "root") {
 		_advance();
 		_parseRoot(location);
+	} else if (directive.lexeme == "index") {
+		_advance();
+		_parseIndex(location);
 	} else if (directive.lexeme == "autoindex") {
 		_advance();
 		_parseAutoIndex(location);
+	} else if (directive.lexeme == "allow_methods") {
+		_advance();
+		_parseAllowMethods(location);
 	}
 	else
 		error(directive, "unknown location directive '" + directive.lexeme + "'");
@@ -246,6 +252,15 @@ void Parser::_parseRoot(LocationConfig& location) {
 	_advance();
 
 	_expect(TokenType::SEMICOLON, "expected ';' after root path");
+	_advance();
+}
+
+void Parser::_parseIndex(LocationConfig& location) {
+	_expect(TokenType::WORD, "expected filename affter 'index'");
+	location.index = _current().lexeme;
+	_advance();
+
+	_expect(TokenType::SEMICOLON, "expected ';' after index file");
 	_advance();
 }
 
@@ -262,5 +277,31 @@ void Parser::_parseAutoIndex(LocationConfig& location) {
 
 	_advance();
 	_expect(TokenType::SEMICOLON, "expected ';' after autoindex setting");
+	_advance();
+}
+
+static HttpMethod parseHttpMethod(const Token& token) {
+	if (token.lexeme == "GET")
+		return HttpMethod::GET;
+	else if (token.lexeme == "POST")
+		return HttpMethod::POST;
+	else if (token.lexeme == "DELETE")
+		return HttpMethod::DELETE;
+	else
+		error(token, "unknown HTTP method '" + token.lexeme + "'");
+}
+
+void Parser::_parseAllowMethods(LocationConfig& location) {
+	location.allowedMethods.clear(); // override constructor default
+
+	if (_check(TokenType::SEMICOLON))
+		error(_current(), "'allow_methods' requires at least one method");
+
+	while (!_check(TokenType::SEMICOLON)) {
+		_expect(TokenType::WORD, "expected allowed HTTP method");
+
+		location.allowedMethods.push_back(parseHttpMethod(_current()));
+		_advance();
+	}
 	_advance();
 }
