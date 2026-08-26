@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:11:25 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/22 02:44:16 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/27 01:29:53 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 // struct s_config {
 // 	std::list<std::string>	portsToListen;
@@ -47,6 +48,8 @@ struct LocationConfig {
 	bool		hasRedirect;
 	int			redirectStatusCode;
 	std::string	redirectTarget;
+
+	std::map<std::string, std::string>	cgiHandlers;
 	
 	/* default inits */
 	LocationConfig(void)

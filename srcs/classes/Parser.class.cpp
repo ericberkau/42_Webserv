@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:35:46 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/27 00:25:12 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/27 01:45:50 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -243,6 +243,8 @@ void Parser::_parseLocationDirective(LocationConfig& location) {
 		_parseBoolSetting(location.uploadEnabled);
 	else if (directive.lexeme == "upload_path")
 		_parsePathSetting(location.uploadPath);
+	else if (directive.lexeme == "cgi")
+		_parseCgi(location);
 	else
 		error(directive, "unknown location directive '" + directive.lexeme + "'");
 }
@@ -343,6 +345,7 @@ void Parser::_parseBoolSetting(bool& configOption) {
 		error(_current(), "unknown " + directive.lexeme + " setting, must be 'on' or 'off'");
 
 	_advance();
+
 	_expect(TokenType::SEMICOLON, "expected ';' after " + directive.lexeme + " setting");
 	_advance();
 }
@@ -357,4 +360,27 @@ void Parser::_parsePathSetting(std::string& configOption) {
 
 	_expect(TokenType::SEMICOLON, "expected ';' after " + directive.lexeme + " path");
 	_advance();
+}
+
+void Parser::_parseCgi(LocationConfig& location) {
+	_advance();
+
+	_expect(TokenType::WORD, "expected file extension after 'cgi'");
+	const std::string& extension = _current().lexeme;
+
+	if (extension.size() < 2 || extension[0] != '.')
+		error(_current(), "invalid file extension: " + extension);
+	if (location.cgiHandlers.count(extension))
+		error(_current(), "duplicate cgi directive for file extension '" + extension + "'");
+
+	_advance();
+
+	_expect(TokenType::WORD, "expected CGI executable path after file extension");
+	const std::string& executable = _current().lexeme;
+	_advance();
+
+	_expect(TokenType::SEMICOLON, "expected ';' after CGI executable path");
+	_advance();
+
+	location.cgiHandlers[extension] = executable;
 }
