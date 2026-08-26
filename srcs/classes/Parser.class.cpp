@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:35:46 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/22 02:52:14 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/27 00:25:12 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -229,56 +229,41 @@ void Parser::_parseLocationDirective(LocationConfig& location) {
 
 	const Token& directive = _current();
 
-	if (directive.lexeme == "root") {
-		_advance();
-		_parseRoot(location);
-	} else if (directive.lexeme == "index") {
-		_advance();
-		_parseIndex(location);
-	} else if (directive.lexeme == "autoindex") {
-		_advance();
-		_parseAutoIndex(location);
-	} else if (directive.lexeme == "allow_methods") {
-		_advance();
+	if (directive.lexeme == "root")
+		_parsePathSetting(location.root);
+	else if (directive.lexeme == "index")
+		_parsePathSetting(location.index);
+	else if (directive.lexeme == "autoindex")
+		_parseBoolSetting(location.autoIndex);
+	else if (directive.lexeme == "allow_methods")
 		_parseAllowMethods(location);
-	}
+	else if (directive.lexeme == "return")
+		_parseReturn(location);
+	else if (directive.lexeme == "upload_enable")
+		_parseBoolSetting(location.uploadEnabled);
+	else if (directive.lexeme == "upload_path")
+		_parsePathSetting(location.uploadPath);
 	else
 		error(directive, "unknown location directive '" + directive.lexeme + "'");
 }
 
-void Parser::_parseRoot(LocationConfig& location) {
-	_expect(TokenType::WORD, "expected path after 'root'");
-	location.root = _current().lexeme;
-	_advance();
+// void Parser::_parseRoot(LocationConfig& location) {
+// 	_expect(TokenType::WORD, "expected path after 'root'");
+// 	location.root = _current().lexeme;
+// 	_advance();
 
-	_expect(TokenType::SEMICOLON, "expected ';' after root path");
-	_advance();
-}
+// 	_expect(TokenType::SEMICOLON, "expected ';' after root path");
+// 	_advance();
+// } // FIXME: delete
 
-void Parser::_parseIndex(LocationConfig& location) {
-	_expect(TokenType::WORD, "expected filename affter 'index'");
-	location.index = _current().lexeme;
-	_advance();
+// void Parser::_parseIndex(LocationConfig& location) {
+// 	_expect(TokenType::WORD, "expected filename after 'index'");
+// 	location.index = _current().lexeme;
+// 	_advance();
 
-	_expect(TokenType::SEMICOLON, "expected ';' after index file");
-	_advance();
-}
-
-void Parser::_parseAutoIndex(LocationConfig& location) {
-	_expect(TokenType::WORD, "expected 'on' or 'off'");
-	const std::string& setting = _current().lexeme;
-
-	if (setting == "on")
-		location.autoIndex = true;
-	else if (setting == "off")
-		location.autoIndex = false;
-	else
-		error(_current(), "unknown autoindex setting, must be 'on' or 'off'");
-
-	_advance();
-	_expect(TokenType::SEMICOLON, "expected ';' after autoindex setting");
-	_advance();
-}
+// 	_expect(TokenType::SEMICOLON, "expected ';' after index file");
+// 	_advance();
+// } // FIXME: delete
 
 static HttpMethod parseHttpMethod(const Token& token) {
 	if (token.lexeme == "GET")
@@ -293,6 +278,7 @@ static HttpMethod parseHttpMethod(const Token& token) {
 
 void Parser::_parseAllowMethods(LocationConfig& location) {
 	location.allowedMethods.clear(); // override constructor default
+	_advance();
 
 	if (_check(TokenType::SEMICOLON))
 		error(_current(), "'allow_methods' requires at least one method");
@@ -303,5 +289,72 @@ void Parser::_parseAllowMethods(LocationConfig& location) {
 		location.allowedMethods.push_back(parseHttpMethod(_current()));
 		_advance();
 	}
+	_advance();
+}
+
+static int parseStatusCode(const Token& token) {
+	if (!isOnlyDigits(token.lexeme))
+		error(token, "expected numeric redirect status code after 'return'");
+
+	int code;
+
+	try {
+		code = std::stoi(token.lexeme);
+	} catch (...) {
+		error(token, "invalid redirect status code");
+	}
+
+	if (code < 300 || code > 399)
+		error(token, "redirect status code must be between 300 and 399");
+
+	return code;
+}
+
+void Parser::_parseReturn(LocationConfig& location) {
+	if (location.hasRedirect)
+		error(_current(), "duplicate return directive");
+	_advance();
+
+	_expect(TokenType::WORD, "expected redirect status code");
+	location.redirectStatusCode = parseStatusCode(_current());
+	location.hasRedirect = true;
+	_advance();
+
+	_expect(TokenType::WORD, "expected redirect target");
+	location.redirectTarget = _current().lexeme;
+	_advance();
+
+	_expect(TokenType::SEMICOLON, "expected ';' after redirect target");
+	_advance();
+}
+
+void Parser::_parseBoolSetting(bool& configOption) {
+	const Token& directive = _current();
+	_advance();
+
+	_expect(TokenType::WORD, "expected 'on' or 'off' after '" + directive.lexeme + "'");
+	const std::string& setting = _current().lexeme;
+
+	if (setting == "on")
+		configOption = true;
+	else if (setting == "off")
+		configOption = false;
+	else
+		error(_current(), "unknown " + directive.lexeme + " setting, must be 'on' or 'off'");
+
+	_advance();
+	_expect(TokenType::SEMICOLON, "expected ';' after " + directive.lexeme + " setting");
+	_advance();
+}
+
+void Parser::_parsePathSetting(std::string& configOption) {
+	const Token& directive = _current();
+	_advance();
+
+	_expect(TokenType::WORD, "expected path after '" + directive.lexeme + "'");
+	configOption = _current().lexeme;
+	_advance();
+
+	_expect(TokenType::SEMICOLON, "expected ';' after " + directive.lexeme + " path");
 	_advance();
 }

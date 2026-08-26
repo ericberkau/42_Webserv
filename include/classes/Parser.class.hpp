@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:09:13 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/22 02:14:57 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/27 00:16:42 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,10 +46,12 @@ class Parser {
 
 		LocationConfig	_parseLocation(void);
 		void			_parseLocationDirective(LocationConfig& location);
-		void			_parseRoot(LocationConfig& location);
-		void			_parseIndex(LocationConfig& location);
-		void			_parseAutoIndex(LocationConfig& location);
+		// void			_parseRoot(LocationConfig& location); // FIXME: delete
+		// void			_parseIndex(LocationConfig& location); // FIXME: delete
 		void			_parseAllowMethods(LocationConfig& location);
+		void			_parseReturn(LocationConfig& location);
+		void			_parseBoolSetting(bool& configOption);
+		void			_parsePathSetting(std::string& configOption);
 
 		const std::vector<Token>&	_tokens;
 		size_t						_currentPos;
