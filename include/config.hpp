@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:11:25 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/27 01:29:53 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/27 02:50:08 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,7 @@ struct ServerConfig {
 	std::vector<ListenDirective>	listen;
 	size_t							clientMaxBodySize;
 	std::vector<LocationConfig>		locations;
+	std::map<int, std::string>		errorPages;
 
 	ServerConfig(void) : clientMaxBodySize(1024 * 1024) {} // default body size: 1 MiB
 };

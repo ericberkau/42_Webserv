@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:09:13 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/27 01:31:07 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/27 03:05:55 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ class Parser {
 		void			_parseServerDirective(ServerConfig& server);
 		void			_parseListen(ServerConfig& server);
 		void			_parseClientMaxBodySize(ServerConfig& server);
+		void			_parseErrorPage(ServerConfig& server);
 
 		LocationConfig	_parseLocation(void);
 		void			_parseLocationDirective(LocationConfig& location);

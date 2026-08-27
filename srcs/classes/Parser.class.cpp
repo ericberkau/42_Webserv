@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:35:46 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/27 02:35:17 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/27 03:17:54 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,7 @@ void Parser::_expect(const std::string& keyword, const std::string& errMsg) {
 
 
 /* ------- actual parsing functions ------- */
+// TODO: check where duplicates are still accepted adn overwrite each other
 
 Config Parser::_parseConfig(void) {
 	Config config;
@@ -307,20 +308,20 @@ void Parser::_parseAllowMethods(LocationConfig& location) {
 	_advance();
 }
 
-static int parseStatusCode(const Token& token) {
-	if (!containsOnlyDigits(token.lexeme))
-		error(token, "expected numeric redirect status code after 'return'");
+static int parseStatusCode(const Token& codeToken, int minCode, int maxCode) {
+	if (!containsOnlyDigits(codeToken.lexeme))
+		error(codeToken, "expected numeric redirect status code");
 
 	int code;
 
 	try {
-		code = std::stoi(token.lexeme);
+		code = std::stoi(codeToken.lexeme);
 	} catch (...) {
-		error(token, "invalid redirect status code");
+		error(codeToken, "invalid status code");
 	}
 
-	if (code < 300 || code > 399)
-		error(token, "redirect status code must be between 300 and 399");
+	if (code < minCode || code > maxCode)
+		error(codeToken, "status code must be between " + std::to_string(minCode) + " and " + std::to_string(maxCode));
 
 	return code;
 }
@@ -331,7 +332,7 @@ void Parser::_parseReturn(LocationConfig& location) {
 	_advance();
 
 	_expect(TokenType::WORD, "expected redirect status code");
-	location.redirectStatusCode = parseStatusCode(_current());
+	location.redirectStatusCode = parseStatusCode(_current(), 300, 399);
 	location.hasRedirect = true;
 	_advance();
 
@@ -384,7 +385,7 @@ void Parser::_parseCgi(LocationConfig& location) {
 	if (extension.size() < 2 || extension[0] != '.')
 		error(_current(), "invalid file extension: " + extension);
 	if (location.cgiHandlers.count(extension))
-		error(_current(), "duplicate cgi directive for file extension '" + extension + "'");
+		error(_current(), "duplicate 'cgi' directive for file extension '" + extension + "'");
 
 	_advance();
 
@@ -396,4 +397,25 @@ void Parser::_parseCgi(LocationConfig& location) {
 	_advance();
 
 	location.cgiHandlers[extension] = executable;
+}
+
+void Parser::_parseErrorPage(ServerConfig& server) {
+	_advance();
+
+	_expect(TokenType::WORD, "expected HTTP status code after 'error_page'");
+	const Token& codeToken = _current();
+	const int code = parseStatusCode(codeToken, 100, 599);
+	_advance();
+
+	_expect(TokenType::WORD, "expected error page path");
+	const std::string& path = _current().lexeme;
+	_advance();
+
+	_expect(TokenType::SEMICOLON, "expected ';' after error page path");
+	_advance();
+
+	if (server.errorPages.count(code))
+		error(codeToken, "duplicate error page definition for status " + codeToken.lexeme);
+
+	server.errorPages[code] = path;
 }
