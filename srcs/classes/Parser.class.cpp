@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:35:46 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/27 04:03:39 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/27 21:30:30 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,7 @@ Config Parser::_parseConfig(void) {
 	while (!_atEnd())
 		config.servers.push_back(_parseServer());
 
+	// TODO: add config verification?
 	return config;
 }
 
@@ -115,6 +116,8 @@ void Parser::_parseServerDirective(ServerConfig& server) {
 		_parseClientMaxBodySize(server);
 	else if (directive.lexeme == "location")
 		server.locations.push_back(_parseLocation());
+	else if (directive.lexeme == "error_page")
+		_parseErrorPage(server);
 	else
 		error(directive, "unknown server directive '" + directive.lexeme + "'");
 }
