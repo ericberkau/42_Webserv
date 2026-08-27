@@ -15,18 +15,21 @@ LOCATION_DIRECTIVE	::=	ROOT
 					|	AUTOINDEX
 					|	RETURN
 					|	CGI
-					|	UPLOAD
+					|	UPLOAD_ENABLE
 					|	UPLOAD_PATH
 
 LISTEN					::=	"listen" WORD ";"
 CLIENT_MAX_BODY_SIZE	::=	"client_max_body_size" WORD ";"
 ERROR_PAGE				::=	"error_page" WORD WORD ";"
 
+
 ROOT					::=	"root" WORD ";"
 INDEX					::=	"index" WORD ";"
+UPLOAD_PATH				::=	"upload_path" WORD ";"
+
+UPLOAD_ENABLE			::=	"upload_enable" ("on" | "off") ";"
+AUTOINDEX				::=	"autoindex" ("on" | "off") ";"
+
 ALLOW_METHODS			::=	"allow_methods" WORD+ ";"
-AUTOINDEX				::=	"autoindex" WORD ";"
 RETURN					::=	"return" WORD WORD ";"
 CGI						::=	"cgi" WORD WORD ";"
-UPLOAD					::=	"upload" WORD ";"
-UPLOAD_PATH				::=	"upload_path" WORD ";"
