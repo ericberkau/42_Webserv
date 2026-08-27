@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:35:46 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/27 03:17:54 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/27 04:03:39 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ void Parser::_expect(const std::string& keyword, const std::string& errMsg) {
 
 
 /* ------- actual parsing functions ------- */
-// TODO: check where duplicates are still accepted adn overwrite each other
+// TODO: check where duplicates are still accepted and can overwrite each other (work-in-progress)
 
 Config Parser::_parseConfig(void) {
 	Config config;
@@ -199,7 +199,7 @@ static size_t parseSizeValue(const Token& token) {
 }
 
 void Parser::_parseClientMaxBodySize(ServerConfig& server) {
-	_advance();
+		_advance();
 
 	_expect(TokenType::WORD, "expected size value after 'client_max_body_size'");
 	const Token& sizeToken = _current();
@@ -293,7 +293,7 @@ static HttpMethod parseHttpMethod(const Token& token) {
 }
 
 void Parser::_parseAllowMethods(LocationConfig& location) {
-	location.allowedMethods.clear(); // override constructor default
+		location.allowedMethods.clear(); // override constructor default
 	_advance();
 
 	if (_check(TokenType::SEMICOLON))
@@ -405,6 +405,10 @@ void Parser::_parseErrorPage(ServerConfig& server) {
 	_expect(TokenType::WORD, "expected HTTP status code after 'error_page'");
 	const Token& codeToken = _current();
 	const int code = parseStatusCode(codeToken, 100, 599);
+
+	if (server.errorPages.count(code))
+		error(codeToken, "duplicate error page definition for status " + codeToken.lexeme);
+
 	_advance();
 
 	_expect(TokenType::WORD, "expected error page path");
@@ -413,9 +417,6 @@ void Parser::_parseErrorPage(ServerConfig& server) {
 
 	_expect(TokenType::SEMICOLON, "expected ';' after error page path");
 	_advance();
-
-	if (server.errorPages.count(code))
-		error(codeToken, "duplicate error page definition for status " + codeToken.lexeme);
 
 	server.errorPages[code] = path;
 }
