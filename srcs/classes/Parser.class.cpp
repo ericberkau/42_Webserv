@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:35:46 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/27 02:01:09 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/27 02:35:17 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,18 @@ void Parser::_parseServerDirective(ServerConfig& server) {
 		error(directive, "unknown server directive '" + directive.lexeme + "'");
 }
 
-static bool isOnlyDigits(const std::string& str) {
+static bool isDuplicate(
+	const std::vector<ListenDirective>& existing,
+	const ListenDirective& newListen)
+{
+	for (const ListenDirective& entry : existing) {
+		if (entry.host == newListen.host && entry.port == newListen.port)
+			return true;
+	}
+	return false;
+}
+
+static bool containsOnlyDigits(const std::string& str) {
 	if (str.empty())
 		return false;
 
@@ -135,7 +146,7 @@ void Parser::_parseListen(ServerConfig& server) {
 	_expect(TokenType::WORD, "expected address after 'listen'");
 	const Token& addressToken = _current();
 	_advance();
-	
+
 	_expect(TokenType::SEMICOLON, "expected ';' after listening address");
 	_advance();
 
@@ -150,14 +161,14 @@ void Parser::_parseListen(ServerConfig& server) {
 
 	if (host.empty())
 		error(addressToken, "host cannot be empty");
-	if (!isOnlyDigits(portStr))
+	if (!containsOnlyDigits(portStr))
 		error(addressToken, "port must be numeric");
 
 	unsigned long port;
 
 	try {
 		port = std::stoul(portStr);
-	} catch (const std::exception&) {
+	} catch (...) {
 		error(addressToken, "invalid port number");
 	}
 
@@ -169,11 +180,14 @@ void Parser::_parseListen(ServerConfig& server) {
 	newListen.host = host;
 	newListen.port = static_cast<std::uint16_t>(port);
 
-	server.listen.push_back(newListen); // FIXME: reject duplicates?
+	if (isDuplicate(server.listen, newListen))
+		error(addressToken, "duplicate listen address: " + addressToken.lexeme);
+
+	server.listen.push_back(newListen);
 }
 
 static size_t parseSizeValue(const Token& token) {
-	if (!isOnlyDigits(token.lexeme))
+	if (!containsOnlyDigits(token.lexeme))
 		error(token, "max body size must be a positive integer");
 
 	try {
@@ -294,7 +308,7 @@ void Parser::_parseAllowMethods(LocationConfig& location) {
 }
 
 static int parseStatusCode(const Token& token) {
-	if (!isOnlyDigits(token.lexeme))
+	if (!containsOnlyDigits(token.lexeme))
 		error(token, "expected numeric redirect status code after 'return'");
 
 	int code;
