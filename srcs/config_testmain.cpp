@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:07:00 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/22 00:57:32 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/27 22:18:33 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@
 
 
 
-/* testing parser */
+/* extended parser testing */
 #include "classes/Lexer.class.hpp"
 #include "classes/Parser.class.hpp"
 
@@ -61,51 +61,151 @@
 #include <iostream>
 #include <sstream>
 
-static void printConfig(const Config& config)
+static std::string methodToString(HttpMethod method)
 {
-	for (size_t i = 0; i < config.servers.size(); ++i)
+	switch (method)
 	{
-		const ServerConfig& server = config.servers[i];
+		case HttpMethod::GET:
+			return "GET";
 
-		std::cout << "SERVER #" << i << '\n';
+		case HttpMethod::POST:
+			return "POST";
 
-		for (size_t j = 0; j < server.listen.size(); ++j)
-		{
-			std::cout
-				<< "  listen: "
-				<< server.listen[j].host
-				<< ':'
-				<< server.listen[j].port
-				<< '\n';
-		}
+		case HttpMethod::DELETE:
+			return "DELETE";
+	}
 
+	return "UNKNOWN";
+}
+
+static void printLocation(const LocationConfig& loc) {
+	std::cout
+		<< "\nlocation "
+		<< loc.path
+		<< '\n';
+
+	std::cout
+		<< "  root: "
+		<< loc.root
+		<< '\n';
+
+	std::cout
+		<< "  index: "
+		<< loc.index
+		<< '\n';
+
+	std::cout
+		<< "  autoindex: "
+		<< (loc.autoIndex ? "on" : "off")
+		<< '\n';
+
+	std::cout
+		<< "  upload_enable: "
+		<< (loc.uploadEnabled ? "on" : "off")
+		<< '\n';
+
+	std::cout
+		<< "  upload_path: "
+		<< loc.uploadPath
+		<< '\n';
+
+	std::cout
+		<< "  methods: ";
+
+	for (std::size_t m = 0;
+		m < loc.allowedMethods.size();
+		++m)
+	{
 		std::cout
-			<< "  client_max_body_size: "
-			<< server.clientMaxBodySize
+			<< methodToString(loc.allowedMethods[m])
+			<< ' ';
+	}
+
+	std::cout << '\n';
+
+	if (loc.hasRedirect)
+	{
+		std::cout
+			<< "  redirect: "
+			<< loc.redirectStatusCode
+			<< " -> "
+			<< loc.redirectTarget
 			<< '\n';
+	}
 
-		for (size_t j = 0; j < server.locations.size(); ++j)
+	if (!loc.cgiHandlers.empty())
+	{
+		std::cout << "  cgi:\n";
+
+		for (std::map<
+				std::string,
+				std::string>::const_iterator
+			it = loc.cgiHandlers.begin();
+			it != loc.cgiHandlers.end();
+			++it)
 		{
-			const LocationConfig& location =
-				server.locations[j];
-
 			std::cout
-				<< "  location "
-				<< location.path
-				<< '\n';
-
-			std::cout
-				<< "    root: "
-				<< location.root
-				<< '\n';
-
-			std::cout
-				<< "    autoindex: "
-				<< (location.autoIndex ? "on" : "off")
+				<< "    "
+				<< it->first
+				<< " -> "
+				<< it->second
 				<< '\n';
 		}
+	}
+}
 
-		std::cout << '\n';
+static void printServer(const ServerConfig& server, size_t serverIndex) {
+	std::cout
+		<< "SERVER #" << serverIndex + 1
+		<< "\n-------------------------\n";
+
+	for (std::size_t j = 0; j < server.listen.size(); ++j)
+	{
+		std::cout
+			<< "listen: "
+			<< server.listen[j].host
+			<< ':'
+			<< server.listen[j].port
+			<< '\n';
+	}
+
+	std::cout
+		<< "client_max_body_size: "
+		<< server.clientMaxBodySize
+		<< '\n';
+
+	std::cout << "\nerror pages:\n";
+
+	for (std::map<int, std::string>::const_iterator
+		it = server.errorPages.begin();
+		it != server.errorPages.end();
+		++it)
+	{
+		std::cout
+			<< "  "
+			<< it->first
+			<< " -> "
+			<< it->second
+			<< '\n';
+	}
+
+	std::cout << "\nlocations:\n";
+
+	for (std::size_t k = 0;
+		k < server.locations.size();
+		++k)
+	{
+		printLocation(server.locations[k]);
+	}
+
+}
+
+static void printConfig(const Config& config) {
+	for (std::size_t i = 0; i < config.servers.size(); ++i)
+	{
+		printServer(config.servers[i], i);
+
+		std::cout << "\n\n";
 	}
 }
 
@@ -137,18 +237,29 @@ int main(int argc, char** argv)
 		const std::string input = readFile(argv[1]);
 
 		Lexer lexer(input);
+
 		std::vector<Token> tokens = lexer.tokenize();
 
+		std::cout
+			<< "Token count: "
+			<< tokens.size()
+			<< '\n';
+
 		Parser parser(tokens);
+
 		Config config = parser.parse();
 
-		std::cout << "Config parsed successfully.\n";
+		std::cout << "\n===== CONFIG PARSED SUCCESSFULLY =====\n\n";
 
 		printConfig(config);
 	}
 	catch (const std::exception& e)
 	{
-		std::cerr << e.what() << '\n';
+		std::cerr
+			<< "ERROR: "
+			<< e.what()
+			<< '\n';
+
 		return 1;
 	}
 
