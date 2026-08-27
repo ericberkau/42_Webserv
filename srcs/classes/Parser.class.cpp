@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:35:46 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/27 01:45:50 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/27 02:01:09 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,16 +108,12 @@ void Parser::_parseServerDirective(ServerConfig& server) {
 	_expect(TokenType::WORD, "expected server directive");
 	const Token& directive = _current();
 
-	if (directive.lexeme == "listen") {
-		_advance();
+	if (directive.lexeme == "listen")
 		_parseListen(server);
-	} else if (directive.lexeme == "client_max_body_size") {
-		_advance();
+	else if (directive.lexeme == "client_max_body_size")
 		_parseClientMaxBodySize(server);
-	} else if (directive.lexeme == "location") {
-		_advance();
+	else if (directive.lexeme == "location")
 		server.locations.push_back(_parseLocation());
-	}
 	else
 		error(directive, "unknown server directive '" + directive.lexeme + "'");
 }
@@ -134,8 +130,9 @@ static bool isOnlyDigits(const std::string& str) {
 }
 
 void Parser::_parseListen(ServerConfig& server) {
-	_expect(TokenType::WORD, "expected address after 'listen'");
+	_advance();
 
+	_expect(TokenType::WORD, "expected address after 'listen'");
 	const Token& addressToken = _current();
 	_advance();
 	
@@ -167,28 +164,29 @@ void Parser::_parseListen(ServerConfig& server) {
 	if (port == 0 || port > 65535)
 		error(addressToken, "port out of range");
 
-	ListenDirective listen;
+	ListenDirective newListen;
 
-	listen.host = host;
-	listen.port = static_cast<std::uint16_t>(port);
+	newListen.host = host;
+	newListen.port = static_cast<std::uint16_t>(port);
 
-	server.listen.push_back(listen);
+	server.listen.push_back(newListen); // FIXME: reject duplicates?
 }
 
 static size_t parseSizeValue(const Token& token) {
 	if (!isOnlyDigits(token.lexeme))
-		error(token, "size must be a positive integer");
+		error(token, "max body size must be a positive integer");
 
 	try {
 		return std::stoull(token.lexeme);
-	} catch (const std::exception&) {
-		error(token, "invalid size value");
+	} catch (...) {
+		error(token, "invalid body size value: " + token.lexeme);
 	}
 }
 
 void Parser::_parseClientMaxBodySize(ServerConfig& server) {
-	_expect(TokenType::WORD, "expected size value after 'client_max_body_size'");
+	_advance();
 
+	_expect(TokenType::WORD, "expected size value after 'client_max_body_size'");
 	const Token& sizeToken = _current();
 	_advance();
 
@@ -204,8 +202,9 @@ void Parser::_parseClientMaxBodySize(ServerConfig& server) {
 }
 
 LocationConfig Parser::_parseLocation(void) {
-	_expect(TokenType::WORD, "expected path after 'location'");
+	_advance();
 
+	_expect(TokenType::WORD, "expected path after 'location'");
 	LocationConfig location;
 	location.path = _current().lexeme;
 	_advance();
