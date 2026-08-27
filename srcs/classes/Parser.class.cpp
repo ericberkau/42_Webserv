@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:35:46 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/27 21:30:30 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/27 22:35:15 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,23 +35,9 @@ const Token& Parser::_current(void) const {
 	return _tokens[_currentPos];
 }
 
-// const Token& Parser::_previous(void) const {
-// 	if (_currentPos > 0)
-// 		return _tokens[_currentPos - 1];
-// 	return _tokens.back();
-// } // FIXME: check if needed
-
 bool Parser::_check(TokenType type) const {
 	return _current().type == type;
 }
-
-// bool Parser::_match(TokenType type) {
-// 	if (!_check(type))
-// 		return false;
-
-// 	_advance();
-// 	return true;
-// } // FIXME: check if needed
 
 [[noreturn]]
 static void error(const Token& token, const std::string& msg) {
@@ -265,24 +251,6 @@ void Parser::_parseLocationDirective(LocationConfig& location) {
 	else
 		error(directive, "unknown location directive '" + directive.lexeme + "'");
 }
-
-// void Parser::_parseRoot(LocationConfig& location) {
-// 	_expect(TokenType::WORD, "expected path after 'root'");
-// 	location.root = _current().lexeme;
-// 	_advance();
-
-// 	_expect(TokenType::SEMICOLON, "expected ';' after root path");
-// 	_advance();
-// } // FIXME: delete
-
-// void Parser::_parseIndex(LocationConfig& location) {
-// 	_expect(TokenType::WORD, "expected filename after 'index'");
-// 	location.index = _current().lexeme;
-// 	_advance();
-
-// 	_expect(TokenType::SEMICOLON, "expected ';' after index file");
-// 	_advance();
-// } // FIXME: delete
 
 static HttpMethod parseHttpMethod(const Token& token) {
 	if (token.lexeme == "GET")
