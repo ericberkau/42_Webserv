@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:11:25 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/27 02:50:08 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/28 00:12:06 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,18 +15,6 @@
 #include <string>
 #include <vector>
 #include <map>
-
-// struct s_config {
-// 	std::list<std::string>	portsToListen;
-// 	size_t					clientReqMaxSize;
-// 	std::list<std::string>	acceptedHttpsMethods;
-// 	std::string				rootedDir;
-// 	bool					dirListing;
-// 	bool					uploadAllowed;
-// 	// defaultErrorPages;
-// };
-
-// using t_config = s_config;
 
 enum class HttpMethod {
 	GET,
