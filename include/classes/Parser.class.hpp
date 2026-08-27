@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:09:13 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/27 23:47:02 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/28 00:05:40 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ class Parser {
 		void			_parsePathSetting(std::string& configOption);
 		void			_parseReturn(LocationConfig& location);
 
+		/* parser state */
 		const std::vector<Token>&	_tokens;
 		size_t						_currentPos;
 
