@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:09:13 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/27 22:36:12 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/27 23:47:02 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,29 +27,32 @@ class Parser {
 
 	private:
 
+		/* token traversal*/
 		void			_advance(void);
 		bool			_atEnd(void) const;
 		const Token&	_current(void) const;
 
-		bool	_check(TokenType type) const;
-		void	_expect(TokenType type, const std::string& msg);
-		void	_expect(const std::string& lexeme, const std::string& msg);
-
+		/* parsing foundation */
+		bool			_check(TokenType type) const;
+		void			_expect(TokenType type, const std::string& msg);
+		void			_expect(const std::string& lexeme, const std::string& msg);
 		Config			_parseConfig(void);
 
+		/* server parsing */
 		ServerConfig	_parseServer(void);
 		void			_parseServerDirective(ServerConfig& server);
-		void			_parseListen(ServerConfig& server);
 		void			_parseClientMaxBodySize(ServerConfig& server);
 		void			_parseErrorPage(ServerConfig& server);
+		void			_parseListen(ServerConfig& server);
 
+		/* location parsing */
 		LocationConfig	_parseLocation(void);
 		void			_parseLocationDirective(LocationConfig& location);
 		void			_parseAllowMethods(LocationConfig& location);
-		void			_parseReturn(LocationConfig& location);
 		void			_parseBoolSetting(bool& configOption);
-		void			_parsePathSetting(std::string& configOption);
 		void			_parseCgi(LocationConfig& location);
+		void			_parsePathSetting(std::string& configOption);
+		void			_parseReturn(LocationConfig& location);
 
 		const std::vector<Token>&	_tokens;
 		size_t						_currentPos;

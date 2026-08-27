@@ -2,5 +2,8 @@ TODO: remove later
 this is a list of files to add to the Makefile later after merging to avoid merge conflicts and without having to type every single one again
 
 				classes/Lexer.class.cpp	\
-				classes/Parser.class.cpp
+				classes/Parser.core.class.cpp \
+				classes/Parser.location.class.cpp \
+				classes/Parser.server.class.cpp \
+				classes/parserUtils.cpp
 
