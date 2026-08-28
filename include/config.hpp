@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:11:25 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/28 02:20:45 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/28 02:23:05 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,3 +68,5 @@ struct ServerConfig {
 struct Config {
 	std::vector<ServerConfig>	servers;
 };
+
+void	validateConfig(const Config& config);
