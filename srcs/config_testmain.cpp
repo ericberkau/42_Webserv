@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:07:00 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/27 22:18:33 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/28 02:30:58 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -241,15 +241,17 @@ int main(int argc, char** argv)
 		std::vector<Token> tokens = lexer.tokenize();
 
 		std::cout
-			<< "Token count: "
+			<< "\n== Token count: "
 			<< tokens.size()
-			<< '\n';
+			<< " ==\n";
 
 		Parser parser(tokens);
 
 		Config config = parser.parse();
-
 		std::cout << "\n===== CONFIG PARSED SUCCESSFULLY =====\n\n";
+
+		validateConfig(config);
+		std::cout << "===== CONFIG VALIDATED SUCCESSFULLY =====\n\n\n";
 
 		printConfig(config);
 	}
