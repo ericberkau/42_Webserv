@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:11:25 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/28 00:12:06 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/28 02:20:45 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <cstdint>
 
 enum class HttpMethod {
 	GET,
@@ -51,8 +52,8 @@ struct LocationConfig {
 };
 
 struct ListenDirective {
-	std::string		host;
-	std::uint16_t	port;
+	std::string	host;
+	uint16_t	port;
 };
 
 struct ServerConfig {
