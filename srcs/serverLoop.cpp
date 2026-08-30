@@ -1,24 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   server_loop.cpp                                    :+:      :+:    :+:   */
+/*   serverLoop.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 22:02:11 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/30 19:41:25 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/30 19:57:27 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "networking.hpp"
-// #include "classes/Client.class.hpp"
-// #include <arpa/inet.h>
-// #include <fcntl.h>
-// #include <poll.h>
-// #include <iostream>
+#include <fcntl.h>
+#include <iostream>
 
-// constexpr int FOREVER = -1;
-// constexpr int MAX_PEND_CONNECT_QUEUE = 32;
+// constexpr int FOREVER = -1; // FIXME: remove
+// constexpr int MAX_PEND_CONNECT_QUEUE = 32; // FIXME: remove
 
 static int setupListeningSocket(std::vector<pollfd>& pollfdArr) {
 	int serverFd = socket(AF_INET, SOCK_STREAM, 0);

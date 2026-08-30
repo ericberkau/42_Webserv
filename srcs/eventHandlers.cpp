@@ -1,21 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   event_handlers.cpp                                 :+:      :+:    :+:   */
+/*   eventHandlers.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 23:21:39 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/30 19:41:25 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/30 19:57:41 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "networking.hpp"
-// #include "classes/Client.class.hpp"
-// #include <arpa/inet.h>
-// #include <iostream>
-// #include <fcntl.h>
-// #include <poll.h>
+#include <iostream>
+#include <fcntl.h>
 
 // constexpr size_t MSG_SIZE = 8; // FIXME: provide proper size later
 
