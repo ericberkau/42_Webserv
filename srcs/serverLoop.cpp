@@ -6,42 +6,79 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 22:02:11 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/30 19:57:27 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/31 01:38:29 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "networking.hpp"
+#include "config.hpp"
 #include <fcntl.h>
 #include <iostream>
+#include <memory>
+#include <netdb.h>
+#include <set>
+#include <unistd.h>
 
 // constexpr int FOREVER = -1; // FIXME: remove
 // constexpr int MAX_PEND_CONNECT_QUEUE = 32; // FIXME: remove
 
-static int setupListeningSocket(std::vector<pollfd>& pollfdArr) {
+static bool isDuplicateAddress(
+	std::set<std::pair<uint32_t, uint16_t>>& usedAddresses,
+	uint32_t host,
+	uint16_t port
+) {
+	return !usedAddresses.insert(std::make_pair(host, port)).second;
+}
+
+static int setupListeningSocket(
+	const ListenDirective& listenCfg,
+	std::vector<pollfd>& pollfdArr,
+	std::set<std::pair<uint32_t, uint16_t>>& usedAddresses
+) {
+	auto resolvedAddr = std::unique_ptr<addrinfo, void(*)(addrinfo*)>(
+							resolveAddress(listenCfg.host, listenCfg.port),
+							freeaddrinfo
+						);
+	sockaddr_in* serverAddr = reinterpret_cast<sockaddr_in*>(resolvedAddr->ai_addr);
+
+	uint32_t ip = ntohl(serverAddr->sin_addr.s_addr);
+	uint16_t port = ntohs(serverAddr->sin_port);
+
+	if (isDuplicateAddress(usedAddresses, ip, port)) {
+		throw std::runtime_error(
+			"duplicate listen address '"
+			+ listenCfg.host + ":" + std::to_string(listenCfg.port)
+			+ "'"
+		);
+	}
+
 	int serverFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (serverFd < 0) {
 		perror("socket");
-		throw 1;
+		throw 1; // FIXME: clean open listening sockets before exiting
 	}
 
 	const int enableSetting = true;
-	setsockopt(serverFd, SOL_SOCKET, SO_REUSEADDR, &enableSetting, sizeof(enableSetting));
-	const int currentFlags = fcntl(serverFd, F_GETFL);
-	fcntl(serverFd, F_SETFL, currentFlags | O_NONBLOCK);
+	setsockopt(serverFd, SOL_SOCKET, SO_REUSEADDR, &enableSetting, sizeof(enableSetting)); // TODO: check return value
 
-	sockaddr_in serverAddr = {};
-	serverAddr.sin_family = AF_INET;
-	serverAddr.sin_port = htons(8080);
-	serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-	if (0 != bind(serverFd, reinterpret_cast<sockaddr*>(&serverAddr), sizeof(serverAddr))) {
+	const int currentFlags = fcntl(serverFd, F_GETFL);
+	fcntl(serverFd, F_SETFL, currentFlags | O_NONBLOCK); // TODO: check return value
+
+	if (0 != bind(serverFd, resolvedAddr->ai_addr, resolvedAddr->ai_addrlen)) {
+		close(serverFd);
 		perror("bind");
+		throw 1;
+	}
+	if (0 != listen(serverFd, MAX_PEND_CONNECT_QUEUE)) {
+		close(serverFd);
+		perror("listen");
 		throw 1;
 	}
 
 	pollfd serverPoll;
 	serverPoll.fd = serverFd;
 	serverPoll.events = POLLIN;
-	pollfdArr.push_back(serverPoll);
+	pollfdArr.push_back(serverPoll); // FIXME: might fail, consider this in cleanup
 
 	return serverFd;
 }
@@ -105,20 +142,30 @@ static void handleSingleSocket(
 	}
 }
 
-void serverLoop(void) {
+void serverLoop(const Config& config) {
 	std::vector<pollfd> pollfdArr;
-
-	const int serverFd = setupListeningSocket(pollfdArr);
-
 	std::unordered_map<int, FdContext> fdCtx;
+	std::set<std::pair<uint32_t, uint16_t>> usedAddresses;
+	int listenerFd = -1;
 
-	fdCtx.emplace(serverFd, FdContext(SocketType::LISTENER));
+	try {
+		for (const ServerConfig& serverCfg : config.servers) {
+			for (const ListenDirective& listenCfg : serverCfg.listen) {
+				listenerFd = setupListeningSocket(listenCfg, pollfdArr, usedAddresses);
 
-	if (0 != listen(serverFd, MAX_PEND_CONNECT_QUEUE)) {
-		perror("listen");
-		throw 1;
+				fdCtx.emplace(listenerFd, FdContext(SocketType::LISTENER));
+				listenerFd = -1;
+			}
+		}
+	} catch (const std::exception& e) {
+		for (auto& [fd, ctx] : fdCtx) {
+			close(fd);
+		}
+		if (listenerFd != -1)
+			close(listenerFd);
+
+		throw;
 	}
-	// FIXME: maybe wrap above code in subfunction later to register multiple listeners in a loop
 
 	while (true) {
 		std::cout << "listening" << std::endl;
