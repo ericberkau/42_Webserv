@@ -6,7 +6,7 @@
 #    By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/05/11 14:54:40 by eberkau           #+#    #+#              #
-#    Updated: 2026/05/11 15:59:41 by eberkau          ###   ########.fr        #
+#    Updated: 2026/08/28 02:07:41 by eberkau          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -35,8 +35,13 @@ BLUE		=	\033[0;34m
 DEFAULT		=	\033[0m
 
 # list source files here
-CXXFILES	=	main.cpp	\
-				classes/sourcefile.class.cpp	\
+CXXFILES	=	config_testmain.cpp	\
+				configValidation.cpp \
+				classes/Lexer.class.cpp	\
+				classes/Parser.core.class.cpp \
+				classes/Parser.location.class.cpp \
+				classes/Parser.server.class.cpp \
+				classes/parserUtils.cpp
 #				and_so_on.cpp
 
 
