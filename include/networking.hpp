@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 22:44:52 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/30 19:44:30 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/30 19:47:22 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,9 @@
 #include <fcntl.h>
 #include <poll.h>
 #include <iostream>
+#include <optional>
+#include <vector>
+#include <unordered_map>
 
 constexpr int		FOREVER = -1;
 constexpr int		MAX_PEND_CONNECT_QUEUE = 32;
