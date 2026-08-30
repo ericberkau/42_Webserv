@@ -6,13 +6,14 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:21:49 by eberkau           #+#    #+#             */
-/*   Updated: 2026/05/20 23:12:31 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/31 00:04:17 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 // FIXME: this is a testmain for experimenting and needs to be removed or the code included in the actual main function
 
 #include "classes/Client.class.hpp"
+#include "config.hpp"
 // #include <sys/socket.h>
 // #include <netinet/in.h>
 // #include <arpa/inet.h>
@@ -25,11 +26,12 @@
 
 // constexpr int FOREVER = -1;
 
-void serverLoop();
+void serverLoop(const Config& config);
 
 int main()
 {
-	serverLoop();
+	Config config = {}; // FIXME: empty config, merely for successful compilation
+	serverLoop(config);
 
 	// int serverFd = socket(AF_INET, SOCK_STREAM, 0);
 	// if (serverFd < 0) {
