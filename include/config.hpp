@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:11:25 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/28 02:23:05 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/30 23:44:21 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <netdb.h>
 #include <cstdint>
 
 enum class HttpMethod {
@@ -69,4 +70,5 @@ struct Config {
 	std::vector<ServerConfig>	servers;
 };
 
-void	validateConfig(const Config& config);
+addrinfo*	resolveAddress(const std::string& host, uint16_t port);
+void		validateConfig(const Config& config);
