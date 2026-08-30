@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 22:02:11 by eberkau           #+#    #+#             */
-/*   Updated: 2026/06/01 01:52:06 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/30 19:41:25 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,15 +91,15 @@ static void handleSingleSocket(
 	FdContext& currFd = fdCtx.at(pollfdArr[idx].fd);
 
 	switch (currFd.type) {
-		case socket_type::LISTENER:
+		case SocketType::LISTENER:
 			handleListenerEvents(pollfdArr, idx, fdCtx);
 			break;
 
-		case socket_type::CLIENT:
+		case SocketType::CLIENT:
 			handleClientEvents(pollfdArr, idx, fdCtx);
 			break;
 
-		case socket_type::CGI_PIPE:
+		case SocketType::CGI_PIPE:
 			// TODO
 			break;
 
@@ -115,7 +115,7 @@ void serverLoop(void) {
 
 	std::unordered_map<int, FdContext> fdCtx;
 
-	fdCtx.emplace(serverFd, FdContext(socket_type::LISTENER));
+	fdCtx.emplace(serverFd, FdContext(SocketType::LISTENER));
 
 	if (0 != listen(serverFd, MAX_PEND_CONNECT_QUEUE)) {
 		perror("listen");

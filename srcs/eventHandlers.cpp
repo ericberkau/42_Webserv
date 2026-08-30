@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 23:21:39 by eberkau           #+#    #+#             */
-/*   Updated: 2026/06/01 00:32:08 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/08/30 19:41:25 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ void handlePendConnects(
 		newClientPoll.events = POLLIN;
 		pollfdArr.push_back(newClientPoll);
 
-		fdCtx.try_emplace(newClientFd, FdContext{socket_type::CLIENT, Client(newClientFd, newClientAddr)});
+		fdCtx.try_emplace(newClientFd, FdContext{SocketType::CLIENT, Client(newClientFd, newClientAddr)});
 
 		std::cout << "Client registered: " << newClientFd << std::endl;
 	}
