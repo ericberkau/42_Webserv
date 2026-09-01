@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:07:00 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/28 02:30:58 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/02 01:31:26 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@
 /* extended parser testing */
 #include "classes/Lexer.class.hpp"
 #include "classes/Parser.class.hpp"
+#include "classes/Server.class.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -205,7 +206,7 @@ static void printConfig(const Config& config) {
 	{
 		printServer(config.servers[i], i);
 
-		std::cout << "\n\n";
+		std::cout << "\n=========================\n\n";
 	}
 }
 
@@ -254,6 +255,11 @@ int main(int argc, char** argv)
 		std::cout << "===== CONFIG VALIDATED SUCCESSFULLY =====\n\n\n";
 
 		printConfig(config);
+		std::cout << "******************************\n" << std::endl;
+
+		/* server testing */
+		Server server(config);
+		server.run();
 	}
 	catch (const std::exception& e)
 	{

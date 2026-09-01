@@ -6,7 +6,7 @@
 #    By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/05/11 14:54:40 by eberkau           #+#    #+#              #
-#    Updated: 2026/08/30 20:44:35 by eberkau          ###   ########.fr        #
+#    Updated: 2026/09/02 01:39:25 by eberkau          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -35,16 +35,17 @@ BLUE		=	\033[0;34m
 DEFAULT		=	\033[0m
 
 # list source files here
-CXXFILES	=	networking_testmain.cpp \
+CXXFILES	=	config_testmain.cpp \
 				configValidation.cpp \
-				eventHandlers.cpp \
-				serverLoop.cpp \
 				classes/Client.class.cpp \
 				classes/Lexer.class.cpp \
 				classes/Parser.core.class.cpp \
 				classes/Parser.location.class.cpp \
 				classes/Parser.server.class.cpp \
-				classes/parserUtils.cpp
+				classes/parserUtils.cpp \
+				classes/Server.class.cpp \
+# 				eventHandlers.cpp \
+# 				serverLoop.cpp \
 #				config_testmain.cpp \
 #				and_so_on.cpp
 
