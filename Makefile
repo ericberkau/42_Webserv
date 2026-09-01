@@ -6,7 +6,7 @@
 #    By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/05/11 14:54:40 by eberkau           #+#    #+#              #
-#    Updated: 2026/09/02 01:39:25 by eberkau          ###   ########.fr        #
+#    Updated: 2026/09/02 01:52:22 by eberkau          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -44,8 +44,6 @@ CXXFILES	=	config_testmain.cpp \
 				classes/Parser.server.class.cpp \
 				classes/parserUtils.cpp \
 				classes/Server.class.cpp \
-# 				eventHandlers.cpp \
-# 				serverLoop.cpp \
 #				config_testmain.cpp \
 #				and_so_on.cpp
 
