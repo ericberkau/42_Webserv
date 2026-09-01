@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 22:02:11 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/31 01:38:29 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/01 22:27:36 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,7 +153,7 @@ void serverLoop(const Config& config) {
 			for (const ListenDirective& listenCfg : serverCfg.listen) {
 				listenerFd = setupListeningSocket(listenCfg, pollfdArr, usedAddresses);
 
-				fdCtx.emplace(listenerFd, FdContext(SocketType::LISTENER));
+				fdCtx.emplace(listenerFd, FdContext(SocketType::LISTENER, &serverCfg));
 				listenerFd = -1;
 			}
 		}

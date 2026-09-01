@@ -6,13 +6,14 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 22:44:52 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/30 19:57:04 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/01 21:41:08 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include "classes/Client.class.hpp"
+#include "config.hpp"
 #include <optional>
 #include <poll.h>
 #include <unordered_map>
@@ -31,10 +32,23 @@ enum class SocketType {
 };
 
 struct FdContext {
-	explicit FdContext(SocketType t) : type(t), client(std::nullopt) {}
-	explicit FdContext(SocketType t, Client&& c) : type(t), client(std::move(c)) {}
+	explicit FdContext(
+		SocketType t,
+		const ServerConfig* s = NULL
+	)
+		: type(t), server(s), client(std::nullopt)
+	{}
+
+	explicit FdContext(
+		SocketType t,
+		const ServerConfig* s,
+		Client&& c
+	)
+		: type(t), server(s), client(std::move(c))
+	{}
 
 	SocketType				type;
+	const ServerConfig*		server;
 	std::optional<Client>	client;
 };
 
