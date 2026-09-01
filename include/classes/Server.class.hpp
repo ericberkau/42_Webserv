@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:10 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/02 00:42:03 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/02 01:21:04 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ class Server {
 	public:
 
 		explicit Server(const Config& config);
-		~Server(void) = default;
+		~Server(void);
 
 		void	run(void);
 

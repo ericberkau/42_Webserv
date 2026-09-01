@@ -6,13 +6,14 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/02 01:15:23 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/02 01:21:30 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/Server.class.hpp"
 #include <fcntl.h>
 #include <iostream>
+#include <memory>
 #include <unistd.h>
 
 Server::Server(const Config& config) : _config(config) {}
