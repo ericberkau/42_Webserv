@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/02 01:21:30 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/02 01:47:16 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include <iostream>
 #include <memory>
+#include <netdb.h>
 #include <unistd.h>
 
 Server::Server(const Config& config) : _config(config) {}

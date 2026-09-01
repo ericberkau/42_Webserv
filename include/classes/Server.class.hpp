@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:10 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/02 01:21:04 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/02 01:43:17 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,10 @@
 
 #include "config.hpp"
 #include "networking.hpp"
-#include <vector>
-#include <unordered_map>
-#include <set>
 #include <poll.h>
+#include <set>
+#include <unordered_map>
+#include <vector>
 
 class Server {
 
