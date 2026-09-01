@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:10 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/01 23:17:12 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/02 00:19:18 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,12 +31,24 @@ class Server {
 
 	private:
 
+		/* setup */
+		void	_setupListeners(void);
+		int		_setupListeningSocket(const ListenDirective& listenCfg);
+
 		/* event handling */
-		void	_handleSingleSocket(size_t idx);
+		void	_handlePendingConnections(int listeningSocket);
+		void	_handleClientEvents(size_t& idx);
+		void	_handleIncomingData(size_t& idx);
+		void	_handleListenerEvents(size_t idx);
+		void	_handleOutgoingData(size_t& idx);
+		void	_handleSingleSocket(size_t& idx);
+		void	_disconnectClient(size_t& idx);
+
+		bool	_isDuplicateAddress(uint32_t host, uint16_t port);
 
 		/* server state */
 		const Config&							_config;
-		std::vector<pollfd>						_pollFdArr;
+		std::vector<pollfd>						_pollfdArr;
 		std::unordered_map<int, FdContext>		_fdCtx;
 		std::set<std::pair<uint32_t, uint16_t>>	_usedAddresses;
 

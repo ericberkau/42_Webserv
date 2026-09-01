@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 22:02:11 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/01 22:27:36 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/01 23:57:05 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ static bool isDuplicateAddress(
 	uint16_t port
 ) {
 	return !usedAddresses.insert(std::make_pair(host, port)).second;
-}
+} // BUG: copied to class and therefore duplicate
 
 static int setupListeningSocket(
 	const ListenDirective& listenCfg,
@@ -81,7 +81,7 @@ static int setupListeningSocket(
 	pollfdArr.push_back(serverPoll); // FIXME: might fail, consider this in cleanup
 
 	return serverFd;
-}
+} // BUG: copied to class and therefore duplicate
 
 // static void updatePolloutMonitoring(std::vector<pollfd>& pollfdArr, std::unordered_map<int, Client>& clients) {
 // 	for (size_t i = 1; i < pollfdArr.size(); ++i) {
@@ -99,7 +99,7 @@ static void handleListenerEvents(
 ) {
 	if (pollfdArr[idx].revents & POLLIN)
 		handlePendConnects(pollfdArr[idx].fd, pollfdArr, fdCtx);
-}
+} // BUG: copied to class and therefore duplicate
 
 static void handleClientEvents(
 	std::vector<pollfd>& pollfdArr,
@@ -115,7 +115,7 @@ static void handleClientEvents(
 	 * with still pending outgoing data, originalIdx checks if a diconnect occured. */
 	if (pollfdArr[idx].revents & POLLOUT && idx == originalIdx)
 		handleOutgoingData(pollfdArr, idx, fdCtx);
-}
+} // BUG: copied to class and therefore duplicate
 
 static void handleSingleSocket(
 	std::vector<pollfd>& pollfdArr,
@@ -140,7 +140,7 @@ static void handleSingleSocket(
 		default:
 			break;
 	}
-}
+} // BUG: copied to class and therefore duplicate
 
 void serverLoop(const Config& config) {
 	std::vector<pollfd> pollfdArr;
@@ -165,7 +165,7 @@ void serverLoop(const Config& config) {
 			close(listenerFd);
 
 		throw;
-	}
+	} // BUG: copied to class and therefore duplicate
 
 	while (true) {
 		std::cout << "listening" << std::endl;
@@ -181,5 +181,5 @@ void serverLoop(const Config& config) {
 		}
 
 		// updatePolloutMonitoring(pollfdArr, clients); // FIXME: maybe do the updating later when data is queued/fully written to avoid looping
-	}
+	} // BUG: copied to class and therefore duplicate
 }

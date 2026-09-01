@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 23:21:39 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/01 22:31:48 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/02 00:22:27 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ void handlePendConnects(
 
 		std::cout << "Client registered: " << newClientFd << std::endl;
 	}
-}
+} // BUG: copied to class and therefore duplicate
 
 static void disconnectClient(
 	std::vector<pollfd>& pollfdArr,
@@ -76,7 +76,7 @@ static void disconnectClient(
 	pollfdArr[idx] = pollfdArr.back();
 	pollfdArr.pop_back();
 	--idx;
-}
+} // BUG: copied to class and therefore duplicate
 
 void handleIncomingData(
 	std::vector<pollfd>& pollfdArr,
@@ -107,7 +107,7 @@ void handleIncomingData(
 	currClient.appendToOutBuf(std::string("\nYou just sent -> " + currClient.getInBuf() + "\n")); // FIXME: remove later
 	pollfdArr[idx].events |= POLLOUT; // FIXME: remove later
 	currClient.clearInBuf(); // FIXME: remove later
-}
+} // BUG: copied to class and therefore duplicate
 
 void handleOutgoingData(
 	std::vector<pollfd>& pollfdArr,
@@ -145,4 +145,4 @@ void handleOutgoingData(
 
 		currClient.advanceOutProgress(sentBytes);
 	}
-}
+} // BUG: copied to class and therefore duplicate
