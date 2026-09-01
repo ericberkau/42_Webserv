@@ -73,7 +73,7 @@ bool RequestParser::isKnownHttpMethod(const std::string& method)
 	static const std::vector<std::string> knownMethods = {
 		"GET", "POST", "DELETE", "PUT", "HEAD", "OPTIONS", "PATCH", "TRACE", "CONNECT"
 	};
-	return std::find(knownMethods.begin(), knownMethods.end(), method) != knownMethods.end();
+	return (std::find(knownMethods.begin(), knownMethods.end(), method) != knownMethods.end());
 }
 
 void RequestParser::parseRequestLine(const std::string& line, HttpRequestContainer& request)
@@ -95,15 +95,14 @@ void RequestParser::parseRequestLine(const std::string& line, HttpRequestContain
 	if (!isSupportedMethod(method)) 
 	{
 		// Check if it's a valid standard HTTP method we just don't support
-		if (isKnownHttpMethod(method)) {
+		if (isKnownHttpMethod(method))
 			throw HttpParseException(405, "Method Not Allowed");
-		}
 
 		// If it's completely malformed (contains lowercase letters or invalid chars)
-		for (char c : method) {
-			if (!std::isupper(static_cast<unsigned char>(c))) {
+		for (char c : method)
+		{
+			if (!std::isupper(static_cast<unsigned char>(c)))
 				throw HttpParseException(400, "Bad Request: invalid method token");
-			}
 		}
 
 		// It's all-caps but completely random (e.g., "MYCUSTOMMETHOD")
@@ -121,11 +120,11 @@ void RequestParser::parseRequestLine(const std::string& line, HttpRequestContain
 	}
 
 	// Validate form (Origin-form, Absolute-form)
-	if (uri[0] != '/') {
+	if (uri[0] != '/')
+	{
 		// If it doesn't start with '/', check if it is a valid absolute URI (starts with http:// or https://)
-		if (uri.rfind("http://", 0) != 0 && uri.rfind("https://", 0) != 0) {
+		if (uri.rfind("http://", 0) != 0 && uri.rfind("https://", 0) != 0)
 			throw HttpParseException(400, "Bad Request: unsupported URI format");
-		}
 	}
 
 	if (version != "HTTP/1.1" && version != "HTTP/1.0")
@@ -189,7 +188,8 @@ static size_t parseContentLength(const std::string& s)
 		throw HttpParseException(400, "Bad Request: Empty Content-Length");
 
 	size_t result = 0;
-	for (size_t i = 0; i < s.size(); ++i) {
+	for (size_t i = 0; i < s.size(); ++i)
+	{
 		if (!std::isdigit(static_cast<unsigned char>(s[i])))
 			throw HttpParseException(400, "Bad Request: Invalid character in Content-Length");
 		
@@ -352,7 +352,7 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 				size_t contentLength = parseContentLength(contentLengthStr);
 
 				// Enforce Max Body Limit up front (413 Payload Too Large) before consuming bytes
-				if (contentLength > 50000000) // ⚠️ Map to configuration rules later
+				if (contentLength > 50000000) //Map to configuration rules later
 					throw HttpParseException(413, "Payload Too Large");
 
 				// Check if the current cache holds the requested frame bytes fully

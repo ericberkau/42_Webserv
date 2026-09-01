@@ -31,12 +31,15 @@ const LocationConfig* RequestHandler::matchLocation(const std::string& uri) cons
 	const LocationConfig* bestMatch = NULL;
 	size_t longestMatchLength = 0;
 
-	for (size_t i = 0; i < _config.locations.size(); ++i) {
+	for (size_t i = 0; i < _config.locations.size(); ++i)
+	{
 		const LocationConfig& loc = _config.locations[i];
 		
 		// prefix match evaluation
-		if (uri.rfind(loc.path, 0) == 0) {
-			if (loc.path.size() > longestMatchLength) {
+		if (uri.rfind(loc.path, 0) == 0)
+		{
+			if (loc.path.size() > longestMatchLength)
+			{
 				longestMatchLength = loc.path.size();
 				bestMatch = &loc;
 			}
@@ -54,7 +57,8 @@ void RequestHandler::verifyMethodAllowed(const std::string& method, const Locati
 	// if allowedMethods is empty, assume all methods are permitted by default
 	if (location->allowedMethods.empty()) return;
 
-	if (location->allowedMethods.find(method) == location->allowedMethods.end()) {
+	if (location->allowedMethods.find(method) == location->allowedMethods.end())
+	{
 		// throw a handler exception that the Response Builder will catch to turn into a 405 response!
 		throw std::runtime_error("405"); 
 	}
@@ -83,7 +87,8 @@ std::string RequestHandler::translateToPhysicalPath(const std::string& uri, cons
 
 			// check if index.html actually exists on disk.
 			struct stat indexStat;
-			if (stat(fullIndexPath.c_str(), &indexStat) == 0) {
+			if (stat(fullIndexPath.c_str(), &indexStat) == 0)
+			{
 				return fullIndexPath; // If it exists, use it!
 			}
 			// if index.html DOES NOT exist, leave the path pointing to the directory 
@@ -167,7 +172,8 @@ std::string RequestHandler::handlePost(const std::string& physicalPath, const Ht
 {
 	// Attempt to create/open a file in binary write mode (overwrites if it exists)
 	std::ofstream file(physicalPath.c_str(), std::ios::binary);
-	if (!file.is_open()) {
+	if (!file.is_open())
+	{
 		throw std::runtime_error("500"); // internal Server Error (e.g., directory doesn't exist)
 	}
 
@@ -198,19 +204,16 @@ std::string RequestHandler::handleDelete(const std::string& physicalPath)
 {
 	// check if the file exists before attempting to delete it
 	struct stat pathStat;
-	if (stat(physicalPath.c_str(), &pathStat) != 0) {
+	if (stat(physicalPath.c_str(), &pathStat) != 0)
 		throw std::runtime_error("404");
-	}
 
 	// enforce that we cannot delete a whole directory folder directly via DELETE
-	if (S_ISDIR(pathStat.st_mode)) {
+	if (S_ISDIR(pathStat.st_mode))
 		throw std::runtime_error("400"); // Bad Request
-	}
 
 	// delete the file using standard system call
-	if (std::remove(physicalPath.c_str()) != 0) {
+	if (std::remove(physicalPath.c_str()) != 0)
 		throw std::runtime_error("500"); // Internal Server Error (e.g., permission denied)
-	}
 
 	// prepare a confirmation payload
 	std::string bodyMessage = "<h1>File Deleted Successfully</h1>";
@@ -275,7 +278,8 @@ std::string RequestHandler::processRequest(const HttpRequestContainer& request)
 {
 	ResponseBuilder response; // instantiate a clean ResponseBuilder container
 
-	try {
+	try
+	{
 		// 1. Find configuration block matches
 		const LocationConfig* matchedLoc = matchLocation(request.getUri());
 
@@ -286,19 +290,17 @@ std::string RequestHandler::processRequest(const HttpRequestContainer& request)
 		std::string physicalPath = translateToPhysicalPath(request.getUri(), matchedLoc);
 
 		// 4. Branch execution to the matching handler based on HTTP Method type
-		if (request.getMethod() == "GET") {
+		if (request.getMethod() == "GET")
 			return handleGet(physicalPath, matchedLoc);
-		} 
-		else if (request.getMethod() == "POST") {
+		else if (request.getMethod() == "POST")
 			return handlePost(physicalPath, request);
-		} 
-		else if (request.getMethod() == "DELETE") {
+		else if (request.getMethod() == "DELETE")
 			return handleDelete(physicalPath);
-		}
 		
 		throw std::runtime_error("501"); // Not Implemented fallback guard
 	}
-	catch (const std::runtime_error& errorMsg) {
+	catch (const std::runtime_error& errorMsg)
+	{
 		// handles structural runtime codes thrown by the execution handlers (e.g. "404", "405")
 		int statusCode = stringToInt(errorMsg.what());
 		if (statusCode == 0) statusCode = 500; // Fallback to Internal Error if conversion fails
@@ -306,12 +308,14 @@ std::string RequestHandler::processRequest(const HttpRequestContainer& request)
 		response.generateDefaultErrorPage(statusCode);
 		return response.buildString(); // Returns a beautifully compiled HTTP error packet
 	}
-	catch (const HttpParseException& parseError) {
+	catch (const HttpParseException& parseError)
+	{
 		// captures bad request inputs coming out of your initial Parser stages
 		response.generateDefaultErrorPage(parseError.getStatusCode());
 		return response.buildString();
 	}
-	catch (...) {
+	catch (...) // huh????
+	{
 		// global safety net catch-all for any completely unexpected system failure
 		response.generateDefaultErrorPage(500);
 		return response.buildString();

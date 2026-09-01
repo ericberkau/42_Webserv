@@ -5,8 +5,10 @@ ResponseBuilder::ResponseBuilder() : _httpVersion("HTTP/1.1"), _statusCode(200),
 ResponseBuilder::~ResponseBuilder() {}
 
 // Dictionary lookup for standard HTTP text statuses required by the protocol
-std::string ResponseBuilder::getStandardStatusMessage(int code) const {
-	switch (code) {
+std::string ResponseBuilder::getStandardStatusMessage(int code) const
+{
+	switch (code)
+	{
 		case 200: return "OK";
 		case 201: return "Created";
 		case 204: return "No Content";
@@ -24,41 +26,49 @@ std::string ResponseBuilder::getStandardStatusMessage(int code) const {
 	}
 }
 
-void ResponseBuilder::setStatus(int code) {
+void ResponseBuilder::setStatus(int code)
+{
 	_statusCode = code;
 	_statusMessage = getStandardStatusMessage(code);
 }
 
-void ResponseBuilder::setStatus(int code, const std::string& customMessage) {
+void ResponseBuilder::setStatus(int code, const std::string& customMessage)
+{
 	_statusCode = code;
 	_statusMessage = customMessage;
 }
 
-void ResponseBuilder::addHeader(const std::string& key, const std::string& value) {
+void ResponseBuilder::addHeader(const std::string& key, const std::string& value)
+{
 	_headers[key] = value;
 }
 
-void ResponseBuilder::setBody(const std::string& body) {
+void ResponseBuilder::setBody(const std::string& body)
+{
 	_body = body;
 	setContentLength(_body.size()); // Automatically sync the header size!
 }
 
-void ResponseBuilder::setHttpVersion(const std::string& version) {
+void ResponseBuilder::setHttpVersion(const std::string& version)
+{
 	_httpVersion = version;
 }
 
-void ResponseBuilder::setContentType(const std::string& contentType) {
+void ResponseBuilder::setContentType(const std::string& contentType)
+{
 	addHeader("Content-Type", contentType);
 }
 
-void ResponseBuilder::setContentLength(size_t length) {
+void ResponseBuilder::setContentLength(size_t length)
+{
 	std::stringstream ss;
 	ss << length;
 	addHeader("Content-Length", ss.str());
 }
 
 // Generates a standard default fallback HTML view if no custom error file is found
-void ResponseBuilder::generateDefaultErrorPage(int code) {
+void ResponseBuilder::generateDefaultErrorPage(int code)
+{
 	setStatus(code);
 		
 	std::stringstream bodyStream;
@@ -71,7 +81,8 @@ void ResponseBuilder::generateDefaultErrorPage(int code) {
 }
 
 // Sticher: Merges everything into the exact byte packet the network socket needs
-std::string ResponseBuilder::buildString() const {
+std::string ResponseBuilder::buildString() const
+{
 	std::stringstream packet;
 
 	// 1. Status Line (Ex: HTTP/1.1 200 OK\r\n)
@@ -79,7 +90,8 @@ std::string ResponseBuilder::buildString() const {
 
 	// 2. Headers Block (Ex: Content-Length: 42\r\n)
 	std::map<std::string, std::string>::const_iterator it;
-	for (it = _headers.begin(); it != _headers.end(); ++it) {
+	for (it = _headers.begin(); it != _headers.end(); ++it)
+	{
 		packet << it->first << ": " << it->second << "\r\n";
 	}
 
@@ -92,7 +104,8 @@ std::string ResponseBuilder::buildString() const {
 	return packet.str();
 }
 
-void ResponseBuilder::clear() {
+void ResponseBuilder::clear()
+{
 	_httpVersion = "HTTP/1.1";
 	_statusCode = 200;
 	_statusMessage = "OK";
@@ -100,18 +113,21 @@ void ResponseBuilder::clear() {
 	_body.clear();
 }
 
-void ResponseBuilder::setContentTypeFromExtension(const std::string& physicalPath) {
+void ResponseBuilder::setContentTypeFromExtension(const std::string& physicalPath)
+{
 	size_t dotPos = physicalPath.find_last_of('.');
 		
 	// if there is no dot or extension, defaulting safely to raw octet stream/binary
-	if (dotPos == std::string::npos || dotPos == physicalPath.size() - 1) {
+	if (dotPos == std::string::npos || dotPos == physicalPath.size() - 1)
+	{
 		setContentType("application/octet-stream");
 		return;
 	}
 
 	std::string ext = physicalPath.substr(dotPos + 1);
 	// Convert to lowercase just in case (Ex: .PNG -> .png)
-	for (size_t i = 0; i < ext.size(); ++i) {
+	for (size_t i = 0; i < ext.size(); ++i)
+	{
 		ext[i] = std::tolower(static_cast<unsigned char>(ext[i]));
 	}
 

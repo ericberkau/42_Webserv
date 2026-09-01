@@ -48,7 +48,7 @@ int main()
     // ---------------------------------------------------------
     {
         HttpRequestContainer req;
-        req.setMethod("POST"); // ❌ Trying to POST to a GET-only route!
+        req.setMethod("POST"); //Trying to POST to a GET-only route!
         req.setUri("/secure");
         req.setVersion("HTTP/1.1");
         req.addHeader("host", "localhost");
@@ -63,7 +63,7 @@ int main()
     {
         HttpRequestContainer req;
         req.setMethod("GET");
-        req.setUri("/ghost-file.txt"); // ❌ File does not exist on disk
+        req.setUri("/ghost-file.txt"); //File does not exist on disk
         req.setVersion("HTTP/1.1");
         req.addHeader("host", "localhost");
         

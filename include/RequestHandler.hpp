@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 12:54:09 by djanardh          #+#    #+#             */
-/*   Updated: 2026/08/12 16:40:55 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/01 15:00:56 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,8 @@
 #include <sys/types.h>
 #include <dirent.h>
 
-class RequestHandler {
+class RequestHandler
+{
 private:
 	const ServerConfig& _config;
 

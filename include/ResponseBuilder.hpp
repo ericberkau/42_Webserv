@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/11 16:05:34 by djanardh          #+#    #+#             */
-/*   Updated: 2026/08/12 16:36:33 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/01 15:01:04 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,8 @@
 #include <string>
 #include <map>
 
-class ResponseBuilder {
+class ResponseBuilder
+{
 private:
 	std::string _httpVersion;
 	int	_statusCode;

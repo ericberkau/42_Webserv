@@ -6,7 +6,8 @@
 #include <sys/stat.h>
 
 // The helper function that simulates network packets coming in
-void simulateNetworkEvent(const std::string& testName, const ServerConfig& config, const std::string& rawInput) {
+void simulateNetworkEvent(const std::string& testName, const ServerConfig& config, const std::string& rawInput)
+{
 	std::cout << "==================================================\n";
 	std::cout << "TEST: " << testName << "\n";
 	std::cout << "==================================================\n";
@@ -16,25 +17,31 @@ void simulateNetworkEvent(const std::string& testName, const ServerConfig& confi
 	RequestHandler handler(config);
 	std::string finalNetworkOutput;
 
-	try {
+	try
+	{
 		// Step 1: Feed data chunks into your parser state machine
 		parser.feed(rawInput, request);
 
 		// Step 2: If parsing finishes successfully, pass it to the handler
-		if (parser.getState() == RequestParser::PARSE_COMPLETE) {
+		if (parser.getState() == RequestParser::PARSE_COMPLETE)
+		{
 			finalNetworkOutput = handler.processRequest(request);
-		} else {
+		}
+		else
+		{
 			ResponseBuilder rb;
 			rb.generateDefaultErrorPage(400); 
 			finalNetworkOutput = rb.buildString();
 		}
 	}
-	catch (const HttpParseException& e) {
+	catch (const HttpParseException& e)
+	{
 		ResponseBuilder rb;
 		rb.generateDefaultErrorPage(e.getStatusCode());
 		finalNetworkOutput = rb.buildString();
 	}
-	catch (...) {
+	catch (...) // huh??????
+	{
 		ResponseBuilder rb;
 		rb.generateDefaultErrorPage(500);
 		finalNetworkOutput = rb.buildString();
@@ -44,7 +51,8 @@ void simulateNetworkEvent(const std::string& testName, const ServerConfig& confi
 	std::cout << finalNetworkOutput << "\n";
 }
 
-int main() {
+int main()
+{
 	// 1. Setup a basic server configuration layout
 	ServerConfig config;
 	config.root = "."; // Points to the current directory
@@ -63,7 +71,7 @@ int main() {
 	listableRoute.path = "/files";
 	listableRoute.root = "."; // Points to your current project folder
 	listableRoute.allowedMethods.insert("GET");
-	listableRoute.autoindex = true; // 💡 TURN AUTOINDEX ON!
+	listableRoute.autoindex = true; //TURN AUTOINDEX ON!
 	config.locations.push_back(listableRoute);
 
 

@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/01 17:58:03 by djanardh          #+#    #+#             */
-/*   Updated: 2026/08/12 16:58:43 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/01 15:00:37 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,8 @@
 #include <set>
 
 // Represents a "location" block inside a server configuration block
-struct LocationConfig {
+struct LocationConfig
+{
 	std::string path;				 // Ex: "/images" or "/cgi-bin"
 	std::string root;				 // Ex: "/var/www/html/images"
 	std::set<std::string> allowedMethods; // Ex: { "GET", "POST" }
@@ -30,7 +31,8 @@ struct LocationConfig {
 };
 
 // Represents a "server" block
-struct ServerConfig {
+struct ServerConfig
+{
 	std::string host;
 	int port;
 	std::string serverName;

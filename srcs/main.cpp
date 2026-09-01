@@ -34,22 +34,27 @@
 static void runTest(const std::string& testName, const std::string& rawRequest)
 {
 	std::cout << "Running: " << testName << "\n";
-	try {
+	try
+	{
 		RequestParser parser; // Create a living instance
 		HttpRequestContainer request;
 
 		// Feed the data into the instance state machine
 		parser.feed(rawRequest, request);
 
-		if (parser.getState() == RequestParser::PARSE_COMPLETE) {
-			std::cout << "✅ Parsing success!\n";
+		if (parser.getState() == RequestParser::PARSE_COMPLETE)
+		{
+			std::cout << "Parsing success!\n";
 			request.print();
-		} else {
+		} 
+		else
+		{
 			std::cout << "Request is incomplete (waiting for more chunks).\n";
 		}
 	}
-	catch (const HttpParseException& e) {
-		std::cout << "❌ Caught expected/unexpected error: " << e.what() << "\n";
+	catch (const HttpParseException& e)
+	{
+		std::cout << "Caught expected/unexpected error: " << e.what() << "\n";
 	}
 }
 
@@ -169,16 +174,16 @@ int main()
 		parser.feed(packet1, request);
 		
 		if (parser.getState() != RequestParser::PARSE_BODY)
-			std::cout << "❌ Error: State should be PARSE_BODY while waiting for rest of data\n";
+			std::cout << "Error: State should be PARSE_BODY while waiting for rest of data\n";
 
 		// Packet 2: The remaining data bytes finally arrive
 		std::string packet2 = "world";
 		parser.feed(packet2, request);
 
 		if (parser.getState() == RequestParser::PARSE_COMPLETE && request.getBody() == "helloworld")
-			std::cout << "✅ Success: Fragmented Content-Length parsed correctly!\n";
+			std::cout << "Success: Fragmented Content-Length parsed correctly!\n";
 		else
-			std::cout << "❌ Error: Fragmented Content-Length failed. Body was: " << request.getBody() << "\n";
+			std::cout << "Error: Fragmented Content-Length failed. Body was: " << request.getBody() << "\n";
 	}
 
 	// 2. Chunked Transfer Encoding: Arriving sequentially 
@@ -201,9 +206,9 @@ int main()
 		parser.feed(chunkedRequest, request);
 
 		if (parser.getState() == RequestParser::PARSE_COMPLETE && request.getBody() == "Hello World")
-			std::cout << "✅ Success: Chunked body decoded perfectly!\n";
+			std::cout << "Success: Chunked body decoded perfectly!\n";
 		else
-			std::cout << "❌ Error: Chunked stream failed. Body was: " << request.getBody() << "\n";
+			std::cout << "Error: Chunked stream failed. Body was: " << request.getBody() << "\n";
 	}
 
 	// 3. Chunked Transfer Encoding: Split directly in the middle of a hex size line
@@ -219,43 +224,47 @@ int main()
 		parser.feed("\r\ntest\r\n0\r\n\r\n", request);
 
 		if (parser.getState() == RequestParser::PARSE_COMPLETE && request.getBody() == "test")
-			std::cout << "✅ Success: Fragmented chunked sizes handled gracefully!\n";
+			std::cout << "Success: Fragmented chunked sizes handled gracefully!\n";
 		else
-			std::cout << "❌ Error: Fragmented chunked parser failed.\n";
+			std::cout << "Error: Fragmented chunked parser failed.\n";
 	}
 
 	// 4. Missing Length on POST Request (411 Check)
 	{
 		std::cout << "Running: POST Missing Length Headers Test (411 Check)\n";
-		try {
+		try
+		{
 			RequestParser parser;
 			HttpRequestContainer request;
 			parser.feed("POST /submit HTTP/1.1\r\nHost: localhost\r\n\r\n", request);
-			std::cout << "❌ Error: Server accepted a POST request with no body size declarations!\n";
+			std::cout << "Error: Server accepted a POST request with no body size declarations!\n";
 		}
-		catch (const HttpParseException& e) {
+		catch (const HttpParseException& e)
+		{
 			if (e.getStatusCode() == 411)
-				std::cout << "✅ Success: Correctly rejected with 411 Length Required\n";
+				std::cout << "Success: Correctly rejected with 411 Length Required\n";
 			else
-				std::cout << "❌ Error: Threw wrong code " << e.getStatusCode() << "\n";
+				std::cout << "Error: Threw wrong code " << e.getStatusCode() << "\n";
 		}
 	}
 
 	// 5. Max Body Limit Breach (413 Check)
 	{
 		std::cout << "Running: Payload Too Large Test (413 Check)\n";
-		try {
+		try
+		{
 			RequestParser parser;
 			HttpRequestContainer request;
 			// Tell the parser 60 Million bytes are coming (Our limit is 50 Million)
 			parser.feed("POST /big-upload HTTP/1.1\r\nHost: localhost\r\nContent-Length: 60000000\r\n\r\n", request);
-			std::cout << "❌ Error: Allowed a size metadata overflow!\n";
+			std::cout << "Error: Allowed a size metadata overflow!\n";
 		}
-		catch (const HttpParseException& e) {
+		catch (const HttpParseException& e)
+		{
 			if (e.getStatusCode() == 413)
-				std::cout << "✅ Success: Correctly blocked oversized payload with 413\n";
+				std::cout << "Success: Correctly blocked oversized payload with 413\n";
 			else
-				std::cout << "❌ Error: Threw wrong code " << e.getStatusCode() << "\n";
+				std::cout << "Error: Threw wrong code " << e.getStatusCode() << "\n";
 		}
 	}
 
