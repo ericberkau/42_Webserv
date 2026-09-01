@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/02 00:29:36 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/02 01:15:23 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,11 @@
 
 Server::Server(const Config& config) : _config(config) {}
 
+Server::~Server(void) {
+	for (auto& [fd, ctx] : _fdCtx)
+		close(fd);
+}
+
 void Server::run(void) {
 	_setupListeners();
 
@@ -24,12 +29,19 @@ void Server::run(void) {
 		std::cout << "listening" << std::endl;
 
 		int ready = poll(_pollfdArr.data(), _pollfdArr.size(), FOREVER);
+		if (ready == -1) {
+			if (errno == EINTR)
+				continue;
+
+			perror("poll");
+			throw std::runtime_error("poll() failed");
+		}
 
 		for (size_t i = 0; i < _pollfdArr.size() && ready > 0; ++i) {
 			if (!_pollfdArr[i].revents)
 				continue;
 
-			_handleSingleSocket(i);
+			_handleSocketEvent(i);
 			--ready;
 		}
 
@@ -38,25 +50,22 @@ void Server::run(void) {
 }
 
 void Server::_setupListeners(void) {
-	int listenerFd = -1;
+	for (const ServerConfig& serverCfg : _config.servers) {
+		for (const ListenDirective& listenCfg : serverCfg.listen) {
+			int listenerFd = _setupListeningSocket(listenCfg);
 
-	try {
-		for (const ServerConfig& serverCfg : _config.servers) {
-			for (const ListenDirective& listenCfg : serverCfg.listen) {
-				listenerFd = _setupListeningSocket(listenCfg);
-
-				_fdCtx.emplace(listenerFd, FdContext(SocketType::LISTENER, &serverCfg));
-				listenerFd = -1;
+			bool inserted = false;
+			try {
+				const auto result = _fdCtx.emplace(listenerFd, FdContext(SocketType::LISTENER, &serverCfg));
+				inserted = result.second;
+			} catch (...) {
+				close(listenerFd);
+				throw;
 			}
-		}
-	} catch (const std::exception& e) {
-		for (auto& [fd, ctx] : _fdCtx) {
-			close(fd);
-		}
-		if (listenerFd != -1)
-			close(listenerFd);
 
-		throw;
+			if (!inserted)
+				throw std::logic_error("attempted to register duplicate listener file descriptor");
+		}
 	}
 }
 
@@ -113,7 +122,7 @@ bool Server::_isDuplicateAddress(uint32_t host, uint16_t port) {
 	return !_usedAddresses.insert(std::make_pair(host, port)).second;
 }
 
-void Server::_handleSingleSocket(size_t& idx) {
+void Server::_handleSocketEvent(size_t& idx) {
 	FdContext& currFd = _fdCtx.at(_pollfdArr[idx].fd);
 
 	switch (currFd.type) {
@@ -152,7 +161,7 @@ void Server::_handlePendingConnections(int listeningSocket) {
 			throw 1;
 		}
 
-		const int currentFlags = fcntl(newClientFd, F_GETFL);
+		const int currentFlags = fcntl(newClientFd, F_GETFL); // TODO: check return value for fail
 		fcntl(newClientFd, F_SETFL, currentFlags | O_NONBLOCK);
 
 		std::cout << "Client accepted" << std::endl;
@@ -164,19 +173,27 @@ void Server::_handlePendingConnections(int listeningSocket) {
 
 		const ServerConfig*	relatedServer = _fdCtx.at(listeningSocket).server;
 
-		const auto result = _fdCtx.emplace(
-								newClientFd,
-								FdContext(
-									SocketType::CLIENT,
-									relatedServer,
-									Client(
-										newClientFd,
-										newClientAddr
+		bool inserted = false;
+		try {
+			const auto result = _fdCtx.emplace(
+									newClientFd,
+									FdContext(
+										SocketType::CLIENT,
+										relatedServer,
+										Client(
+											newClientFd,
+											newClientAddr
+										)
 									)
-								)
-							);
+								);
 
-		if (!result.second)
+			inserted = result.second;
+		} catch (...) {
+			close(newClientFd);
+			throw;
+		}
+
+		if (!inserted)
 			throw std::logic_error("attempted to register duplicate client file descriptor");
 
 		std::cout << "Client registered: " << newClientFd << std::endl;
@@ -261,7 +278,9 @@ void Server::_handleOutgoingData(size_t& idx) {
 void Server::_disconnectClient(size_t& idx) {
 	std::cout << "Client " << _pollfdArr[idx].fd << " disconnected" << std::endl;
 
-	_fdCtx.erase(_pollfdArr[idx].fd);
+	const int fd = _pollfdArr[idx].fd;
+	_fdCtx.erase(fd);
+	close(fd);
 
 	_pollfdArr[idx] = _pollfdArr.back();
 	_pollfdArr.pop_back();
