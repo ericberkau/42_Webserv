@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:06 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/30 19:56:32 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/02 01:57:12 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,16 +39,16 @@ class Client {
 
 	private:
 
-		Client(void) = delete;
-		Client(const Client&) = delete;
-		Client& operator=(const Client&) = delete;
-
 		int			_fd;
 		std::string	_inputBuffer; // TODO: limit size later
 		size_t		_inputReadProgress;
 		std::string	_outputBuffer;
 		size_t		_outputWriteProgress;
 		sockaddr_in	_addr;
+
+		/* diallow copying */
+		Client(const Client&) = delete;
+		Client& operator=(const Client&) = delete;
 
 		// int			_requestParserState;
 		// int			_timeoutInfo

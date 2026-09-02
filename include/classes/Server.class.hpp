@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:10 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/02 01:43:17 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/02 01:59:23 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,17 +34,16 @@ class Server {
 		/* setup */
 		void	_setupListeners(void);
 		int		_setupListeningSocket(const ListenDirective& listenCfg);
+		bool	_isDuplicateAddress(uint32_t host, uint16_t port);
 
 		/* event handling */
-		void	_handlePendingConnections(int listeningSocket);
+		void	_disconnectClient(size_t& idx);
 		void	_handleClientEvents(size_t& idx);
 		void	_handleIncomingData(size_t& idx);
 		void	_handleListenerEvents(size_t idx);
 		void	_handleOutgoingData(size_t& idx);
+		void	_handlePendingConnections(int listeningSocket);
 		void	_handleSocketEvent(size_t& idx);
-		void	_disconnectClient(size_t& idx);
-
-		bool	_isDuplicateAddress(uint32_t host, uint16_t port);
 
 		/* server state */
 		const Config&							_config;
