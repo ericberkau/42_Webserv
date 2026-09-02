@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/02 01:47:16 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/02 02:21:18 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -236,11 +236,34 @@ void Server::_handleIncomingData(size_t& idx) {
 		currClient.appendToInBuf(msg, receivedBytes);
 	}
 
-	std::cout << "Message arrived from " << _pollfdArr[idx].fd << " -> " << currClient.getInBuf() << std::endl; // FIXME: remove later
-	currClient.appendToOutBuf(std::string("\nYou just sent -> " + currClient.getInBuf() + "\n")); // FIXME: remove later
-	_pollfdArr[idx].events |= POLLOUT; // FIXME: remove later
-	currClient.clearInBuf(); // FIXME: remove later
+	_processClientInput(currClient);
 
+	std::cout << "Message arrived from " << _pollfdArr[idx].fd << " -> " << currClient.getInBuf() << std::endl; // BUG: remove later
+	currClient.appendToOutBuf(std::string("\nYou just sent -> " + currClient.getInBuf() + "\n")); // BUG: remove later
+	_pollfdArr[idx].events |= POLLOUT; // BUG: remove later
+	currClient.clearInBuf(); // BUG: remove later
+
+}
+
+void Server::_processClientInput(Client& client) {
+	/**
+	 * //TODO
+	 * Feed client input buffer into HTTP parser.
+	 * Extract complete requests.
+	 * Call _handleRequest() for each request.
+	 */
+	_handleRequest(client);
+}
+
+void Server::_handleRequest(Client& client/*, HttpRequest*/) {
+	/**
+	 * //TODO
+	 * Match request against ServerConfig.
+	 * Find location block.
+	 * Generate response.
+	 * Queue response into client output buffer.
+	 */
+	(void)client;
 }
 
 void Server::_handleOutgoingData(size_t& idx) {
