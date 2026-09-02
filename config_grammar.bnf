@@ -1,0 +1,35 @@
+CONFIG	::=	SERVER* EOF
+
+SERVER	::=	"server" "{" SERVER_DIRECTIVE* "}"
+
+SERVER_DIRECTIVE	::=	LISTEN
+					|	CLIENT_MAX_BODY_SIZE
+					|	ERROR_PAGE
+					|	LOCATION
+
+LOCATION	::=	"location" PATH "{" LOCATION_DIRECTIVE* "}"
+
+LOCATION_DIRECTIVE	::=	ROOT
+					|	INDEX
+					|	ALLOW_METHODS
+					|	AUTOINDEX
+					|	RETURN
+					|	CGI
+					|	UPLOAD_ENABLE
+					|	UPLOAD_PATH
+
+LISTEN					::=	"listen" WORD ";"
+CLIENT_MAX_BODY_SIZE	::=	"client_max_body_size" WORD ";"
+ERROR_PAGE				::=	"error_page" WORD WORD ";"
+
+
+ROOT					::=	"root" WORD ";"
+INDEX					::=	"index" WORD ";"
+UPLOAD_PATH				::=	"upload_path" WORD ";"
+
+UPLOAD_ENABLE			::=	"upload_enable" ("on" | "off") ";"
+AUTOINDEX				::=	"autoindex" ("on" | "off") ";"
+
+ALLOW_METHODS			::=	"allow_methods" WORD+ ";"
+RETURN					::=	"return" WORD WORD ";"
+CGI						::=	"cgi" WORD WORD ";"
