@@ -6,11 +6,12 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/02 02:21:18 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/04 19:20:30 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/Server.class.hpp"
+#include "signals.hpp"
 #include <fcntl.h>
 #include <iostream>
 #include <memory>
@@ -27,7 +28,7 @@ Server::~Server(void) {
 void Server::run(void) {
 	_setupListeners();
 
-	while (true) {
+	while (!g_shutdownRequested) {
 		std::cout << "listening" << std::endl;
 
 		int ready = poll(_pollfdArr.data(), _pollfdArr.size(), FOREVER);
@@ -49,6 +50,8 @@ void Server::run(void) {
 
 		// updatePolloutMonitoring(pollfdArr, clients); // FIXME: maybe do the updating later when data is queued/fully written to avoid looping
 	}
+
+	std::cout << "\nServer shutting down ..." << std::endl;
 }
 
 void Server::_setupListeners(void) {
@@ -151,7 +154,7 @@ void Server::_handleListenerEvents(size_t idx) {
 }
 
 void Server::_handlePendingConnections(int listeningSocket) {
-	while (true) {
+	while (!g_shutdownRequested) {
 		sockaddr_in newClientAddr = {};
 		socklen_t newClientLen = sizeof(newClientAddr);
 		
@@ -220,7 +223,7 @@ void Server::_handleIncomingData(size_t& idx) {
 	Client& currClient = _fdCtx.at(_pollfdArr[idx].fd).client.value();
 	ssize_t receivedBytes = -1;
 
-	while (true) {
+	while (!g_shutdownRequested) {
 		receivedBytes = recv(currClient.getFd(), msg, MSG_SIZE, 0);
 		if (receivedBytes == -1) {
 			if (errno == EAGAIN || errno == EWOULDBLOCK)
@@ -270,7 +273,7 @@ void Server::_handleOutgoingData(size_t& idx) {
 	Client& currClient = _fdCtx.at(_pollfdArr[idx].fd).client.value();
 	ssize_t sentBytes = -1;
 
-	while (true) {
+	while (!g_shutdownRequested) {
 		if (!currClient.hasPendingOutput()) {
 			currClient.clearOutBuf();
 			_pollfdArr[idx].events &= ~POLLOUT;
