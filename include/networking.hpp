@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 22:44:52 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/01 21:41:08 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/04 19:36:43 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,11 +51,3 @@ struct FdContext {
 	const ServerConfig*		server;
 	std::optional<Client>	client;
 };
-
-
-/* functions */
-
-void	handlePendConnects(int serverFd, std::vector<pollfd>& pollfdArr, std::unordered_map<int, FdContext>& fdCtx);
-void	handleIncomingData(std::vector<pollfd>& pollfdArr, size_t& idx, std::unordered_map<int, FdContext>& fdCtx);
-void	handleOutgoingData(std::vector<pollfd>& pollfdArr, size_t& idx, std::unordered_map<int, FdContext>& fdCtx);
-
