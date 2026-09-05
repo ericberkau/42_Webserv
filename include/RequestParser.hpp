@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 15:15:37 by djanardh          #+#    #+#             */
-/*   Updated: 2026/08/07 19:34:45 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/05 17:26:56 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ class HttpParseException : public std::exception
 class RequestParser
 {		
 	public:
-			enum ParsingState 
+		enum ParsingState 
 		{ 
 			PARSE_REQUEST_LINE,
 			PARSE_HEADERS, 

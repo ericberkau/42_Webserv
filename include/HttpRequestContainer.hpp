@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   HttpRequest.hpp                                    :+:      :+:    :+:   */
+/*   HttpRequestContainer.hpp                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 15:15:43 by djanardh          #+#    #+#             */
-/*   Updated: 2026/06/22 15:45:38 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/05 17:28:08 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ class HttpRequestContainer
 		const std::string& getBody() const;
 
 		// Returns "" if header not found. Header lookup is case-insensitive
-		// acc. to RFC, so we normalize keys to lowercase when storing them.
+		// acc. to RFC, so we normalize keys to lowercase when storing them
 		std::string getHeader(const std::string& key) const;
 
 		// For debugging to print everything that is parsed

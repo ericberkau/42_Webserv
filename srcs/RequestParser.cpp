@@ -284,11 +284,9 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 			std::string method = request.getMethod();
 
 			// HTTP Specification Requirement: 411 Length Required
-			// If it's a POST request and BOTH size headers are missing, reject it.
+			// If it's a POST request and BOTH size headers are missing, reject it
 			if (method == "POST" && transferEncoding.empty() && contentLengthStr.empty())
-			{
 				throw HttpParseException(411, "Length Required");
-			}
 
 			// CASE 1: If 'Transfer-Encoding: chunked' is there in the header
 			if (transferEncoding.find("chunked") != std::string::npos)
