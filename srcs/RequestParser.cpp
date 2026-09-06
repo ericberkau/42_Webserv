@@ -68,25 +68,25 @@ bool RequestParser::isSupportedMethod(const std::string& method)
 	return method == "GET" || method == "POST" || method == "DELETE";
 }
 
-bool RequestParser::isKnownHttpMethod(const std::string& method) 
-{
-	static const std::vector<std::string> knownMethods = {
-		"GET", "POST", "DELETE", "PUT", "HEAD", "OPTIONS", "PATCH", "TRACE", "CONNECT"
-	};
-	return (std::find(knownMethods.begin(), knownMethods.end(), method) != knownMethods.end());
-}
-
-// if u get an error, try this
 // bool RequestParser::isKnownHttpMethod(const std::string& method) 
 // {
-//	// Use a static raw array instead of an initializer-list vector
-//		static const std::string localArray[] = {
-//		"GET", "POST", "DELETE", "PUT", "HEAD", "OPTIONS", "PATCH", "TRACE", "CONNECT"
-//	};
-//		static const std::vector<std::string> knownMethods(localArray, localArray + sizeof(localArray) / sizeof(localArray[0]));
-
-//		return std::find(knownMethods.begin(), knownMethods.end(), method) != knownMethods.end();
+// 	static const std::vector<std::string> knownMethods = {
+// 		"GET", "POST", "DELETE", "PUT", "HEAD", "OPTIONS", "PATCH", "TRACE", "CONNECT"
+// 	};
+// 	return (std::find(knownMethods.begin(), knownMethods.end(), method) != knownMethods.end());
 // }
+
+// if u get an error, try this
+bool RequestParser::isKnownHttpMethod(const std::string& method) 
+{
+	// Use a static raw array instead of an initializer-list vector
+		static const std::string localArray[] = {
+		"GET", "POST", "DELETE", "PUT", "HEAD", "OPTIONS", "PATCH", "TRACE", "CONNECT"
+	};
+		static const std::vector<std::string> knownMethods(localArray, localArray + sizeof(localArray) / sizeof(localArray[0]));
+
+		return std::find(knownMethods.begin(), knownMethods.end(), method) != knownMethods.end();
+}
 
 void RequestParser::parseRequestLine(const std::string& line, HttpRequestContainer& request)
 {

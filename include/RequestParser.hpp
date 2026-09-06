@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 15:15:37 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/06 13:20:19 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/06 18:03:17 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <string>
 #include <stdexcept>
 #include <vector>
+#include <algorithm>
 
 class HttpParseException : public std::exception
 {
@@ -57,11 +58,6 @@ class RequestParser
 	public:
 		RequestParser();
 		~RequestParser();
-
-		// So far only parsing one complete request string in one shot.
-		// (No partial/incremental handling yet - that comes after
-		// body parsing is added and then this should be hooked up to real recv() data later)
-		// HttpRequestContainer parse(const std::string& raw);
 		
 		// Feeds raw data coming out of recv() piece by piece
 		void feed(const std::string& chunk, HttpRequestContainer& request, const ServerConfig& config);
