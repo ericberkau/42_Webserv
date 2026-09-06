@@ -20,7 +20,7 @@
 #include <cstdio> // for std::remove
 #include <cstdlib>
 
-RequestHandler::RequestHandler(const ServerConfig& config) : _config(config) {}
+RequestHandler::RequestHandler(const ServerConfig* config) : _config(config) {}
 RequestHandler::~RequestHandler() {}
 
 // Matching the Location Block (Prefix Matching)
@@ -32,9 +32,9 @@ const LocationConfig* RequestHandler::matchLocation(const std::string& uri) cons
 	const LocationConfig* bestMatch = NULL;
 	size_t longestMatchLength = 0;
 
-	for (size_t i = 0; i < _config.locations.size(); ++i)
+	for (size_t i = 0; i < _config->locations.size(); ++i)
 	{
-		const LocationConfig& loc = _config.locations[i];
+		const LocationConfig& loc = _config->locations[i];
 		
 		// prefix match evaluation
 		if (uri.rfind(loc.path, 0) == 0)
@@ -51,7 +51,7 @@ const LocationConfig* RequestHandler::matchLocation(const std::string& uri) cons
 
 // checking the 405 Method Not Allowed Rule. If a location block specifies that only GET is allowed, 
 // any incoming POST or DELETE request must halt immediately
-void RequestHandler::verifyMethodAllowed(const std::string& method, const LocationConfig* location) const
+void RequestHandler::verifyMethodAllowed(const HttpMethod& method, const LocationConfig* location) const
 {
 	if (!location) return; // if no location block matches, default global rules apply
 
@@ -69,7 +69,7 @@ void RequestHandler::verifyMethodAllowed(const std::string& method, const Locati
 // folder directory with the client's requested trailing URI string path)
 std::string RequestHandler::translateToPhysicalPath(const std::string& uri, const LocationConfig* location) const
 {
-	std::string baseRoot = location ? location->root : _config.root;
+	std::string baseRoot = location ? location->root : _config->locations[0].root; //FIXME for multiple locations
 	std::string path = baseRoot + uri;
 
 	struct stat pathStat;
@@ -77,7 +77,7 @@ std::string RequestHandler::translateToPhysicalPath(const std::string& uri, cons
 	{
 		if (S_ISDIR(pathStat.st_mode))
 		{
-			std::string indexFile = location ? location->index : _config.index;
+			std::string indexFile = location ? location->index : _config->locations[0].index; //FIXME for multiple locations
 			if (indexFile.empty()) indexFile = "index.html";
 
 			std::string fullIndexPath = path;
@@ -114,7 +114,7 @@ std::string RequestHandler::handleGet(const std::string& physicalPath, const Loc
 	if (S_ISDIR(pathStat.st_mode))
 	{
 		// If config turned autoindex off, deny access!
-		bool isAutoindexEnabled = location ? location->autoindex : false;
+		bool isAutoindexEnabled = location ? location->autoIndex : false;
 		if (!isAutoindexEnabled)
 			throw std::runtime_error("403"); // 403 Forbidden
 
@@ -291,11 +291,11 @@ std::string RequestHandler::processRequest(const HttpRequestContainer& request)
 		std::string physicalPath = translateToPhysicalPath(request.getUri(), matchedLoc);
 
 		// 4. Branch execution to the matching handler based on HTTP Method type
-		if (request.getMethod() == "GET")
+		if (request.getMethod() == HttpMethod::GET)
 			return handleGet(physicalPath, matchedLoc);
-		else if (request.getMethod() == "POST")
+		else if (request.getMethod() == HttpMethod::POST)
 			return handlePost(physicalPath, request);
-		else if (request.getMethod() == "DELETE")
+		else if (request.getMethod() == HttpMethod::DELETE)
 			return handleDelete(physicalPath);
 		
 		throw std::runtime_error("501"); // Not Implemented fallback guard
@@ -306,19 +306,19 @@ std::string RequestHandler::processRequest(const HttpRequestContainer& request)
 		int statusCode = stringToInt(errorMsg.what());
 		if (statusCode == 0) statusCode = 500; // Fallback to Internal Error if conversion fails
 
-		response.generateCustomErrorPage(statusCode, _config);
+		response.generateCustomErrorPage(statusCode, *_config);
 		return response.buildString(); // Returns a beautifully compiled HTTP error packet
 	}
 	catch (const HttpParseException& parseError)
 	{
 		// captures bad request inputs coming out of your initial Parser stages
-		response.generateCustomErrorPage(parseError.getStatusCode(), _config);
+		response.generateCustomErrorPage(parseError.getStatusCode(), *_config);
 		return response.buildString();
 	}
 	catch (...)
 	{
 		// global safety net catch-all for any completely unexpected system failure
-		response.generateCustomErrorPage(500, _config);
+		response.generateCustomErrorPage(500, *_config);
 		return response.buildString();
 	}
 }

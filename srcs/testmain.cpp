@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:07:00 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/04 19:24:35 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/06 19:32:19 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,9 @@ static std::string methodToString(HttpMethod method)
 
 		case HttpMethod::DELETE:
 			return "DELETE";
+
+		case HttpMethod::INVALID:
+			return "INVALID";
 	}
 
 	return "UNKNOWN";
@@ -114,12 +117,10 @@ static void printLocation(const LocationConfig& loc) {
 	std::cout
 		<< "  methods: ";
 
-	for (std::size_t m = 0;
-		m < loc.allowedMethods.size();
-		++m)
+	for (const HttpMethod& m : loc.allowedMethods)
 	{
 		std::cout
-			<< methodToString(loc.allowedMethods[m])
+			<< methodToString(m)
 			<< ' ';
 	}
 

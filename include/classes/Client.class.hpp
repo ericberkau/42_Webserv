@@ -6,12 +6,14 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:06 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/02 01:57:12 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/06 19:34:49 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+#include "classes/RequestParser.hpp"
+#include "classes/HttpRequestContainer.hpp"
 #include <arpa/inet.h>
 #include <string>
 
@@ -35,6 +37,9 @@ class Client {
 		void	clearInBuf();
 		void	clearOutBuf();
 		bool	hasPendingOutput() const;
+
+		RequestParser			requestParser;
+		HttpRequestContainer	httpRequest;
 
 
 	private:

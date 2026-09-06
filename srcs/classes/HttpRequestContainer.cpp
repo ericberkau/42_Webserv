@@ -17,7 +17,7 @@
 HttpRequestContainer::HttpRequestContainer() {}
 HttpRequestContainer::~HttpRequestContainer() {}
 
-void HttpRequestContainer::setMethod(const std::string& method) { _method = method; }
+void HttpRequestContainer::setMethod(const HttpMethod& method) { _method = method; }
 void HttpRequestContainer::setUri(const std::string& uri) { _uri = uri; }
 void HttpRequestContainer::setVersion(const std::string& version) { _version = version; }
 void HttpRequestContainer::setBody(const std::string& body) { _body = body; }
@@ -44,7 +44,7 @@ void HttpRequestContainer::addHeader(const std::string& key, const std::string& 
 		_headers[lowerKey] = value;
 }
 
-const std::string& HttpRequestContainer::getMethod() const { return _method; }
+const HttpMethod& HttpRequestContainer::getMethod() const { return _method; }
 const std::string& HttpRequestContainer::getUri() const { return _uri; }
 const std::string& HttpRequestContainer::getVersion() const { return _version; }
 const std::string& HttpRequestContainer::getBody() const { return _body; }
@@ -60,7 +60,7 @@ std::string HttpRequestContainer::getHeader(const std::string& key) const
 
 void HttpRequestContainer::print() const
 {
-	std::cout << "Method:  " << _method << std::endl;
+	// std::cout << "Method:  " << _method << std::endl;
 	std::cout << "URI:	 " << _uri << std::endl;
 	std::cout << "Version: " << _version << std::endl;
 	std::cout << "Headers:" << std::endl;

@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/27 22:39:18 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/27 23:54:51 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/06 19:19:35 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,7 +114,7 @@ void Parser::_parseAllowMethods(LocationConfig& location) {
 	while (!_check(TokenType::SEMICOLON)) {
 		_expect(TokenType::WORD, "expected allowed HTTP method");
 
-		location.allowedMethods.push_back(parseHttpMethod(_current()));
+		location.allowedMethods.insert(parseHttpMethod(_current()));
 		_advance();
 	}
 	_advance();

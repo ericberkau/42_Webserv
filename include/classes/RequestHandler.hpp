@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 12:54:09 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/06 18:18:42 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/06 19:23:06 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include "HttpRequestContainer.hpp"
 #include "ConfigStructures.hpp"
+#include "../config.hpp"
 #include <string>
 #include <sys/types.h>
 #include <dirent.h>
@@ -22,19 +23,19 @@
 class RequestHandler
 {
 	private:
-		const ServerConfig& _config;
+		const ServerConfig* _config;
 
 		// Internal steps for routing
 		const LocationConfig* matchLocation(const std::string& uri) const;
 		std::string translateToPhysicalPath(const std::string& uri, const LocationConfig* location) const;
-		void verifyMethodAllowed(const std::string& method, const LocationConfig* location) const;
+		void verifyMethodAllowed(const HttpMethod& method, const LocationConfig* location) const;
 
 		std::string handleGet(const std::string& physicalPath, const LocationConfig* location);
 		std::string handlePost(const std::string& physicalPath, const HttpRequestContainer& request);
 		std::string handleDelete(const std::string& physicalPath);
 
 	public:
-		RequestHandler(const ServerConfig& config);
+		RequestHandler(const ServerConfig* config);
 		~RequestHandler();
 
 		// execution entry point

@@ -6,11 +6,12 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/04 19:20:30 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/06 19:05:11 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/Server.class.hpp"
+#include "classes/RequestHandler.hpp"
 #include "signals.hpp"
 #include <fcntl.h>
 #include <iostream>
@@ -250,23 +251,33 @@ void Server::_handleIncomingData(size_t& idx) {
 
 void Server::_processClientInput(Client& client) {
 	/**
-	 * //TODO
+	 * //TODO: check if enough
 	 * Feed client input buffer into HTTP parser.
 	 * Extract complete requests.
 	 * Call _handleRequest() for each request.
 	 */
+	client.requestParser.feed(
+		client.getInBuf(),
+		client.httpRequest,
+		_fdCtx.at(client.getFd()).server
+	);
+
 	_handleRequest(client);
 }
 
 void Server::_handleRequest(Client& client/*, HttpRequest*/) {
 	/**
-	 * //TODO
+	 * //TODO: check if enough
 	 * Match request against ServerConfig.
 	 * Find location block.
 	 * Generate response.
 	 * Queue response into client output buffer.
 	 */
-	(void)client;
+	RequestHandler reqHandler(_fdCtx.at(client.getFd()).server);
+
+	const std::string response = reqHandler.processRequest(client.httpRequest);
+
+	client.appendToOutBuf(response);
 }
 
 void Server::_handleOutgoingData(size_t& idx) {

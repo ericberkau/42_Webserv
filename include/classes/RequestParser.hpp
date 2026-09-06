@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 15:15:37 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/06 18:03:17 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/06 19:07:43 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include "HttpRequestContainer.hpp"
 #include "ConfigStructures.hpp"
+#include "../config.hpp"
 #include <string>
 #include <stdexcept>
 #include <vector>
@@ -60,7 +61,7 @@ class RequestParser
 		~RequestParser();
 		
 		// Feeds raw data coming out of recv() piece by piece
-		void feed(const std::string& chunk, HttpRequestContainer& request, const ServerConfig& config);
+		void feed(const std::string& chunk, HttpRequestContainer& request, const ServerConfig* config);
 
 		// Getters for the server loop to know when a request is ready
 		ParsingState getState() const;

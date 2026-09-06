@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/11 16:05:34 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/06 18:20:14 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/06 19:33:31 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include <string>
 #include <map>
 #include <fstream>
-#include "ConfigStructures.hpp"
+#include "config.hpp"
 
 class ResponseBuilder
 {

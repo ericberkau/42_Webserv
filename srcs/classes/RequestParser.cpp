@@ -88,6 +88,17 @@ bool RequestParser::isKnownHttpMethod(const std::string& method)
 		return std::find(knownMethods.begin(), knownMethods.end(), method) != knownMethods.end();
 }
 
+static
+HttpMethod convertStrToMethod(const std::string& str) {
+	if (str == "GET")
+		return HttpMethod::GET;
+	else if (str == "POST")
+		return HttpMethod::POST;
+	else if (str == "DELETE")
+		return HttpMethod::DELETE;
+	return HttpMethod::INVALID;
+}
+
 void RequestParser::parseRequestLine(const std::string& line, HttpRequestContainer& request)
 {
 	// Request line looks like: "GET /index.html HTTP/1.1"
@@ -142,7 +153,7 @@ void RequestParser::parseRequestLine(const std::string& line, HttpRequestContain
 	if (version != "HTTP/1.1" && version != "HTTP/1.0")
 		throw HttpParseException(400, "Bad Request: unsupported HTTP version");
 
-	request.setMethod(method);
+	request.setMethod(convertStrToMethod(method));
 	request.setUri(uri);
 	request.setVersion(version);
 }
@@ -240,7 +251,7 @@ static size_t parseHexSize(const std::string& s)
 	return result;
 }
 
-void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request, const ServerConfig& config)
+void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request, const ServerConfig* config)
 {
 	_buffer += chunk; // Save the newly arrived data bytes to persistent cache
 
@@ -281,11 +292,11 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 		{
 			std::string transferEncoding = request.getHeader("transfer-encoding");
 			std::string contentLengthStr = request.getHeader("content-length");
-			std::string method = request.getMethod();
+			HttpMethod method = request.getMethod();
 
 			// HTTP Specification Requirement: 411 Length Required
 			// If it's a POST request and BOTH size headers are missing, reject it
-			if (method == "POST" && transferEncoding.empty() && contentLengthStr.empty())
+			if (method == HttpMethod::POST && transferEncoding.empty() && contentLengthStr.empty())
 				throw HttpParseException(411, "Length Required");
 
 			// CASE 1: If 'Transfer-Encoding: chunked' is there in the header
@@ -345,7 +356,7 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 						
 						// Enforce Max Body Limit (Webserv client_max_body_size requirement)
 						// DON'T FORGET TO replace 50000000 with the variable from the config structs file!
-						if (request.getBody().size() > config.clientMaxBodySize) 
+						if (request.getBody().size() > config->clientMaxBodySize)
 							throw HttpParseException(413, "Payload Too Large");
 
 						// Wipe out processed data segment from system read cache
@@ -362,7 +373,7 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 				size_t contentLength = parseContentLength(contentLengthStr);
 
 				// Enforce Max Body Limit up front (413 Payload Too Large) before consuming bytes
-				if (contentLength > config.clientMaxBodySize) //Map to configuration rules later
+				if (contentLength > config->clientMaxBodySize) //Map to configuration rules later
 					throw HttpParseException(413, "Payload Too Large");
 
 				// Check if the current cache holds the requested frame bytes fully
