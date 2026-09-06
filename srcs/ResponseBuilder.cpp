@@ -86,6 +86,8 @@ void ResponseBuilder::generateCustomErrorPage(int code, const ServerConfig& conf
 	if (it != config.errorPages.end())
 	{
 		std::string filePath = it->second;
+		// trying to physically open that custom HTML file from the computer's hard drive
+		// It opens it in binary mode (std::ios::binary) to make sure it reads the exact byte layout without altering newlines
 		std::ifstream file(filePath.c_str(), std::ios::in | std::ios::binary);
 		
 		if (file.is_open())

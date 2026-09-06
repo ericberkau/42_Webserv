@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/11 16:05:34 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/06 13:29:58 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/06 14:10:31 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,14 +35,14 @@ public:
 	ResponseBuilder();
 	~ResponseBuilder();
 
-	// Core Setters
+	// Setters
 	void setStatus(int code); // Automatically looks up the text message
 	void setStatus(int code, const std::string& customMessage);
 	void addHeader(const std::string& key, const std::string& value);
 	void setBody(const std::string& body);
 	void setHttpVersion(const std::string& version);
 
-	// Helper shortcuts for common headers
+	// Helpers  for common headers
 	void setContentType(const std::string& contentType);
 	void setContentLength(size_t length);
 
@@ -50,7 +50,7 @@ public:
 	void generateDefaultErrorPage(int code);
 	void generateCustomErrorPage(int code, const ServerConfig& config);
 
-	// The grand finale: stitches everything into the raw string packet
+	// stitches everything into the raw string packet
 	std::string buildString() const;
 
 	// Clears the builder state so it can be reused on keep-alive loops
