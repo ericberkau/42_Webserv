@@ -10,7 +10,7 @@
 /*																			*/
 /* ************************************************************************** */
 
-#include "RequestParser.hpp"
+#include "classes/RequestParser.hpp"
 #include <sstream>
 
 HttpParseException::HttpParseException(int statusCode, const std::string& reason)

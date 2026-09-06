@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.hpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 12:54:09 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/06 14:58:36 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/06 18:18:42 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,24 +21,24 @@
 
 class RequestHandler
 {
-private:
-	const ServerConfig& _config;
+	private:
+		const ServerConfig& _config;
 
-	// Internal steps for routing
-	const LocationConfig* matchLocation(const std::string& uri) const;
-	std::string translateToPhysicalPath(const std::string& uri, const LocationConfig* location) const;
-	void verifyMethodAllowed(const std::string& method, const LocationConfig* location) const;
+		// Internal steps for routing
+		const LocationConfig* matchLocation(const std::string& uri) const;
+		std::string translateToPhysicalPath(const std::string& uri, const LocationConfig* location) const;
+		void verifyMethodAllowed(const std::string& method, const LocationConfig* location) const;
 
-	std::string handleGet(const std::string& physicalPath, const LocationConfig* location);
-	std::string handlePost(const std::string& physicalPath, const HttpRequestContainer& request);
-	std::string handleDelete(const std::string& physicalPath);
+		std::string handleGet(const std::string& physicalPath, const LocationConfig* location);
+		std::string handlePost(const std::string& physicalPath, const HttpRequestContainer& request);
+		std::string handleDelete(const std::string& physicalPath);
 
-public:
-	RequestHandler(const ServerConfig& config);
-	~RequestHandler();
+	public:
+		RequestHandler(const ServerConfig& config);
+		~RequestHandler();
 
-	// execution entry point
-	std::string processRequest(const HttpRequestContainer& request);
+		// execution entry point
+		std::string processRequest(const HttpRequestContainer& request);
 };
 
 #endif

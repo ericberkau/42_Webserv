@@ -10,9 +10,9 @@
 /*																			*/
 /* ************************************************************************** */
 
-#include "RequestHandler.hpp"
-#include "ResponseBuilder.hpp"
-#include "RequestParser.hpp"
+#include "classes/RequestHandler.hpp"
+#include "classes/ResponseBuilder.hpp"
+#include "classes/RequestParser.hpp"
 #include <sys/stat.h> // for checking if files exist
 #include <fstream>
 #include <sstream>

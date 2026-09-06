@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 22:44:52 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/04 19:36:43 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/06 18:21:31 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,10 @@ enum class SocketType {
 };
 
 struct FdContext {
+	SocketType				type;
+	const ServerConfig*		server;
+	std::optional<Client>	client;
+
 	explicit FdContext(
 		SocketType t,
 		const ServerConfig* s = NULL
@@ -47,7 +51,4 @@ struct FdContext {
 		: type(t), server(s), client(std::move(c))
 	{}
 
-	SocketType				type;
-	const ServerConfig*		server;
-	std::optional<Client>	client;
 };

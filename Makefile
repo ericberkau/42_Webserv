@@ -6,7 +6,7 @@
 #    By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/05/11 14:54:40 by eberkau           #+#    #+#              #
-#    Updated: 2026/09/06 18:16:19 by eberkau          ###   ########.fr        #
+#    Updated: 2026/09/06 18:23:22 by eberkau          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -45,10 +45,10 @@ CXXFILES	=	testmain.cpp \
 				classes/Parser.server.class.cpp \
 				classes/parserUtils.cpp \
 				classes/Server.class.cpp \
-				HttpRequestContainer.cpp \
-				RequestParser.cpp \
-				RequestHandler.cpp \
-				ResponseBuilder.cpp \
+				classes/HttpRequestContainer.cpp \
+				classes/RequestParser.cpp \
+				classes/RequestHandler.cpp \
+				classes/ResponseBuilder.cpp \
 #				and_so_on.cpp
 
 

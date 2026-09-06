@@ -1,4 +1,4 @@
-#include "ResponseBuilder.hpp"
+#include "classes/ResponseBuilder.hpp"
 
 ResponseBuilder::ResponseBuilder() : _httpVersion("HTTP/1.1"), _statusCode(200), _statusMessage("OK") {}
 ResponseBuilder::~ResponseBuilder() {}
