@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 15:15:43 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/05 17:28:08 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/05 18:28:11 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include <string>
 #include <map>
 
-// This class is only a container for the result of parsing.
+// This class is only a container for the result of parsing
 class HttpRequestContainer
 {
 	private:

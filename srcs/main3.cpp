@@ -37,10 +37,10 @@ void simulateNetworkEvent(const std::string& testName, const ServerConfig& confi
 	catch (const HttpParseException& e)
 	{
 		ResponseBuilder rb;
-		rb.generateDefaultErrorPage(e.getStatusCode());
+		rb.generateDefaultErrorPage(e.getStatusCode(), config);
 		finalNetworkOutput = rb.buildString();
 	}
-	catch (...) // huh??????
+	catch (...)
 	{
 		ResponseBuilder rb;
 		rb.generateDefaultErrorPage(500);

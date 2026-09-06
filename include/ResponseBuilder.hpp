@@ -6,15 +6,18 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/11 16:05:34 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/01 15:01:04 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/06 13:29:58 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef RESPONSEBUILDER_HPP
 #define RESPONSEBUILDER_HPP
 
+#include <sstream>
 #include <string>
 #include <map>
+#include <fstream>
+#include "ConfigStructures.hpp"
 
 class ResponseBuilder
 {
@@ -45,6 +48,7 @@ public:
 
 	// Generates a proper HTML page for error codes (404, 405, etc.)
 	void generateDefaultErrorPage(int code);
+	void generateCustomErrorPage(int code, const ServerConfig& config);
 
 	// The grand finale: stitches everything into the raw string packet
 	std::string buildString() const;

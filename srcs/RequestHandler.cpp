@@ -314,7 +314,7 @@ std::string RequestHandler::processRequest(const HttpRequestContainer& request)
 		response.generateDefaultErrorPage(parseError.getStatusCode());
 		return response.buildString();
 	}
-	catch (...) // huh????
+	catch (...)
 	{
 		// global safety net catch-all for any completely unexpected system failure
 		response.generateDefaultErrorPage(500);

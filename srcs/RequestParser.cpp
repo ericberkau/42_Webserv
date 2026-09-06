@@ -240,7 +240,7 @@ static size_t parseHexSize(const std::string& s)
 	return result;
 }
 
-void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request)
+void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request, const ServerConfig& config)
 {
 	_buffer += chunk; // Save the newly arrived data bytes to persistent cache
 
@@ -345,7 +345,7 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 						
 						// Enforce Max Body Limit (Webserv client_max_body_size requirement)
 						// DON'T FORGET TO replace 50000000 with the variable from the config structs file!
-						if (request.getBody().size() > 50000000) 
+						if (request.getBody().size() > config.clientMaxBodySize) 
 							throw HttpParseException(413, "Payload Too Large");
 
 						// Wipe out processed data segment from system read cache
@@ -362,7 +362,7 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 				size_t contentLength = parseContentLength(contentLengthStr);
 
 				// Enforce Max Body Limit up front (413 Payload Too Large) before consuming bytes
-				if (contentLength > 50000000) //Map to configuration rules later
+				if (contentLength > config.clientMaxBodySize) //Map to configuration rules later
 					throw HttpParseException(413, "Payload Too Large");
 
 				// Check if the current cache holds the requested frame bytes fully

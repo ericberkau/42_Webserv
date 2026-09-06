@@ -23,7 +23,7 @@ void HttpRequestContainer::setVersion(const std::string& version) { _version = v
 void HttpRequestContainer::setBody(const std::string& body) { _body = body; }
 
 // Lowercase the header key before storing
-// HTTP headers are case-insensitive by spec (Host, host, HOST are the same header).
+// HTTP headers are case-insensitive by spec (Host, host, HOST are the same header)
 static std::string ft_toLower(const std::string& s)
 {
 	std::string result = s;
@@ -36,7 +36,8 @@ void HttpRequestContainer::addHeader(const std::string& key, const std::string& 
 {
 	std::string lowerKey = ft_toLower(key);
 		
-	// If the header already exists append with a comma, EXCEPT for Set-Cookie headers which must remain separate - do we have to handle this too??? 
+	// If the header already exists append the new value with a comma
+	// EXCEPT for Set-Cookie headers which must remain separate - do we have to handle this too??? 
 	if (_headers.find(lowerKey) != _headers.end())
 		_headers[lowerKey] += ", " + value;
 	else
@@ -50,7 +51,7 @@ const std::string& HttpRequestContainer::getBody() const { return _body; }
 
 std::string HttpRequestContainer::getHeader(const std::string& key) const
 {
-	std::string lowerKey = ft_toLower(key); // to handle whatever the programmer types when they look up a header later
+	// ft_toLower(key): to handle whatever is typed when a header is looked up
 	std::map<std::string, std::string>::const_iterator it = _headers.find(ft_toLower(key));
 	if (it == _headers.end())
 		return "";

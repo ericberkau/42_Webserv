@@ -1,5 +1,4 @@
 #include "ResponseBuilder.hpp"
-#include <sstream>
 
 ResponseBuilder::ResponseBuilder() : _httpVersion("HTTP/1.1"), _statusCode(200), _statusMessage("OK") {}
 ResponseBuilder::~ResponseBuilder() {}
@@ -79,6 +78,32 @@ void ResponseBuilder::generateDefaultErrorPage(int code)
 	setContentType("text/html");
 	setBody(bodyStream.str());
 }
+
+void ResponseBuilder::generateCustomErrorPage(int code, const ServerConfig& config)
+{
+	std::map<int, std::string>::const_iterator it = config.errorPages.find(code);
+	
+	if (it != config.errorPages.end())
+	{
+		std::string filePath = it->second;
+		std::ifstream file(filePath.c_str(), std::ios::in | std::ios::binary);
+		
+		if (file.is_open())
+		{
+			std::stringstream ss;
+			ss << file.rdbuf();
+			file.close();
+			
+			setStatus(code);
+			setContentTypeFromExtension(filePath);
+			setBody(ss.str());
+			return;
+		}
+	}
+	// default if custom file fails
+	generateDefaultErrorPage(code);
+}
+
 
 // Sticher: Merges everything into the exact byte packet the network socket needs
 std::string ResponseBuilder::buildString() const

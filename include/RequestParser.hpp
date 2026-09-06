@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/22 15:15:37 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/05 17:26:56 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/06 13:20:19 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #define REQUEST_PARSER_HPP
 
 #include "HttpRequestContainer.hpp"
+#include "ConfigStructures.hpp"
 #include <string>
 #include <stdexcept>
 #include <vector>
@@ -63,7 +64,7 @@ class RequestParser
 		// HttpRequestContainer parse(const std::string& raw);
 		
 		// Feeds raw data coming out of recv() piece by piece
-		void feed(const std::string& chunk, HttpRequestContainer& request);
+		void feed(const std::string& chunk, HttpRequestContainer& request, const ServerConfig& config);
 
 		// Getters for the server loop to know when a request is ready
 		ParsingState getState() const;
