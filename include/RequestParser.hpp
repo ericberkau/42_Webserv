@@ -1,0 +1,70 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   RequestParser.hpp                                  :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/06/22 15:15:37 by djanardh          #+#    #+#             */
+/*   Updated: 2026/09/06 18:03:17 by djanardh         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#ifndef REQUEST_PARSER_HPP
+#define REQUEST_PARSER_HPP
+
+#include "HttpRequestContainer.hpp"
+#include "ConfigStructures.hpp"
+#include <string>
+#include <stdexcept>
+#include <vector>
+#include <algorithm>
+
+class HttpParseException : public std::exception
+{
+	private:
+		int _statusCode;
+		std::string _reason;
+
+	public:
+		HttpParseException(int statusCode, const std::string& reason);
+		virtual ~HttpParseException() throw();
+		virtual const char* what() const throw();
+		int getStatusCode() const;
+};
+
+class RequestParser
+{		
+	public:
+		enum ParsingState 
+		{ 
+			PARSE_REQUEST_LINE,
+			PARSE_HEADERS, 
+			PARSE_BODY, 
+			PARSE_COMPLETE 
+		};
+		
+	private:
+		ParsingState _state;
+		std::string _buffer;
+		void parseRequestLine(const std::string& line, HttpRequestContainer& request); // Splits "METHOD URI VERSION" and validates each piece
+		bool isValidHeaderKeyChar(unsigned char c);
+		void parseHeaderLine(const std::string& line, HttpRequestContainer& request); // Splits "Key: Value" and adds it to the request
+		bool isSupportedMethod(const std::string& method);
+		bool isKnownHttpMethod(const std::string& method);
+		size_t _expectedBodyBytes; // Stores Content-Length or current chunk size
+		bool _chunkSizeParsed; // Tracks if we are waiting for a chunk size line or chunk data bytes
+		
+	public:
+		RequestParser();
+		~RequestParser();
+		
+		// Feeds raw data coming out of recv() piece by piece
+		void feed(const std::string& chunk, HttpRequestContainer& request, const ServerConfig& config);
+
+		// Getters for the server loop to know when a request is ready
+		ParsingState getState() const;
+		void reset();
+};
+
+#endif
