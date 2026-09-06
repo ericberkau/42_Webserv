@@ -23,8 +23,9 @@
 RequestHandler::RequestHandler(const ServerConfig& config) : _config(config) {}
 RequestHandler::~RequestHandler() {}
 
-// Matching the Location Block (Prefix Matching). If a user requests /images/avatar.png, and we 
-// have location configurations for / and /images, the router must choose the longest, most specific match (/images)
+// Matching the Location Block (Prefix Matching)
+// If a user requests /images/avatar.png, and we have location configurations for / and /images,
+// the router must choose the longest, most specific match (/images)
 
 const LocationConfig* RequestHandler::matchLocation(const std::string& uri) const
 {
@@ -305,19 +306,19 @@ std::string RequestHandler::processRequest(const HttpRequestContainer& request)
 		int statusCode = stringToInt(errorMsg.what());
 		if (statusCode == 0) statusCode = 500; // Fallback to Internal Error if conversion fails
 
-		response.generateDefaultErrorPage(statusCode);
+		response.generateCustomErrorPage(statusCode, _config);
 		return response.buildString(); // Returns a beautifully compiled HTTP error packet
 	}
 	catch (const HttpParseException& parseError)
 	{
 		// captures bad request inputs coming out of your initial Parser stages
-		response.generateDefaultErrorPage(parseError.getStatusCode());
+		response.generateCustomErrorPage(parseError.getStatusCode(), _config);
 		return response.buildString();
 	}
 	catch (...)
 	{
 		// global safety net catch-all for any completely unexpected system failure
-		response.generateDefaultErrorPage(500);
+		response.generateCustomErrorPage(500, _config);
 		return response.buildString();
 	}
 }

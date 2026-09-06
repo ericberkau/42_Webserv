@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/02 12:54:09 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/01 15:00:56 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/06 14:58:36 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,6 @@ private:
 	std::string translateToPhysicalPath(const std::string& uri, const LocationConfig* location) const;
 	void verifyMethodAllowed(const std::string& method, const LocationConfig* location) const;
 
-	// Execution strategies per method
 	std::string handleGet(const std::string& physicalPath, const LocationConfig* location);
 	std::string handlePost(const std::string& physicalPath, const HttpRequestContainer& request);
 	std::string handleDelete(const std::string& physicalPath);
@@ -38,7 +37,7 @@ public:
 	RequestHandler(const ServerConfig& config);
 	~RequestHandler();
 
-	// The primary execution entry point
+	// execution entry point
 	std::string processRequest(const HttpRequestContainer& request);
 };
 
