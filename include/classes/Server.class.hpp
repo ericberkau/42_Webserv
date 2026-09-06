@@ -6,12 +6,13 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:10 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/02 02:15:48 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/06 23:14:00 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+#include "classes/Client.class.hpp"
 #include "config.hpp"
 #include "networking.hpp"
 #include <poll.h>
@@ -43,7 +44,7 @@ class Server {
 		void	_handleListenerEvents(size_t idx);
 		void	_handleOutgoingData(size_t& idx);
 		void	_handlePendingConnections(int listeningSocket);
-		void	_handleRequest(Client& client/*TODO, HttpRequest*/);
+		void	_handleRequest(Client& client);
 		void	_handleSocketEvent(size_t& idx);
 		void	_processClientInput(Client& client);
 
