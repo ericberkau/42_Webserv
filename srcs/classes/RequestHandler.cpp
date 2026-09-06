@@ -46,7 +46,7 @@ const LocationConfig* RequestHandler::matchLocation(const std::string& uri) cons
 			}
 		}
 	}
-	return bestMatch; // returns NULL if no location blocks match, falling back to server default root
+	return bestMatch; // returns NULL if no location blocks match, falling back to server default root //FIXME: currently always returns NULL when using basic.config
 }
 
 // checking the 405 Method Not Allowed Rule. If a location block specifies that only GET is allowed, 
@@ -69,7 +69,7 @@ void RequestHandler::verifyMethodAllowed(const HttpMethod& method, const Locatio
 // folder directory with the client's requested trailing URI string path)
 std::string RequestHandler::translateToPhysicalPath(const std::string& uri, const LocationConfig* location) const
 {
-	std::string baseRoot = location ? location->root : _config->locations[0].root; //FIXME for multiple locations
+	std::string baseRoot = location ? location->root : _config->locations[0].root; //BUG for multiple locations (also deref for nonexisting location)
 	std::string path = baseRoot + uri;
 
 	struct stat pathStat;
@@ -78,7 +78,7 @@ std::string RequestHandler::translateToPhysicalPath(const std::string& uri, cons
 		if (S_ISDIR(pathStat.st_mode))
 		{
 			std::string indexFile = location ? location->index : _config->locations[0].index; //FIXME for multiple locations
-			if (indexFile.empty()) indexFile = "index.html";
+			if (indexFile.empty()) indexFile = "index.html"; //FIXME: remove hardcoding, "does not exist"/"not found" instead? default behavior for index not specified in config
 
 			std::string fullIndexPath = path;
 			if (fullIndexPath.back() == '/') 
