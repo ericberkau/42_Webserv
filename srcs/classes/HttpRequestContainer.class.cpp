@@ -1,13 +1,13 @@
 /* ************************************************************************** */
-/*																			*/
-/*														:::	  ::::::::   */
-/*   HttpRequestContainer.class.cpp						   :+:	  :+:	:+:   */
-/*													+:+ +:+		 +:+	 */
-/*   By: djanardh <djanardh@student.42heilbronn.	+#+  +:+	   +#+		*/
-/*												+#+#+#+#+#+   +#+		   */
-/*   Created: 2026/06/22 15:14:59 by djanardh		  #+#	#+#			 */
-/*   Updated: 2026/06/23 20:22:13 by djanardh		 ###   ########.fr	   */
-/*																			*/
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   HttpRequestContainer.class.cpp                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/09/07 11:03:59 by djanardh          #+#    #+#             */
+/*   Updated: 2026/09/07 11:04:01 by djanardh         ###   ########.fr       */
+/*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/HttpRequestContainer.class.hpp"

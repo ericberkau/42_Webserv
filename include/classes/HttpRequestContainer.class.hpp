@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:54:11 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/07 10:54:16 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/07 11:06:26 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,14 +20,8 @@
 // This class is only a container for the result of parsing
 class HttpRequestContainer
 {
-	private:
-		HttpMethod _method;
-		std::string _uri;
-		std::string _version;
-		std::map<std::string, std::string> _headers; // keys stored lowercase
-		std::string _body;
-		
 	public:
+	
 		HttpRequestContainer();
 		~HttpRequestContainer();
 
@@ -50,6 +44,15 @@ class HttpRequestContainer
 
 		// For debugging to print everything that is parsed
 		void print() const;
+		
+	private:
+	
+		HttpMethod _method;
+		std::string _uri;
+		std::string _version;
+		std::map<std::string, std::string> _headers; // keys stored lowercase
+		std::string _body;
+		
 };
 
 #endif

@@ -1,13 +1,13 @@
 /* ************************************************************************** */
-/*																			*/
-/*														:::	  ::::::::   */
-/*   RequestParser.class.cpp								  :+:	  :+:	:+:   */
-/*													+:+ +:+		 +:+	 */
-/*   By: djanardh <djanardh@student.42heilbronn.	+#+  +:+	   +#+		*/
-/*												+#+#+#+#+#+   +#+		   */
-/*   Created: 2026/06/22 15:14:18 by djanardh		  #+#	#+#			 */
-/*   Updated: 2026/06/22 19:27:38 by djanardh		 ###   ########.fr	   */
-/*																			*/
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   RequestParser.class.cpp                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/09/07 11:04:16 by djanardh          #+#    #+#             */
+/*   Updated: 2026/09/07 11:14:41 by djanardh         ###   ########.fr       */
+/*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/RequestParser.class.hpp"
@@ -59,7 +59,7 @@ static bool splitOnce(const std::string& s, char delim, std::string& left, std::
 
 // RequestParser
 
-bool RequestParser::isSupportedMethod(const std::string& method)
+bool RequestParser::_isSupportedMethod(const std::string& method)
 {
 	// Subject requires at least GET, POST, DELETE
 	// We still need to RECOGNIZE other valid HTTP methods (so we can
@@ -68,28 +68,16 @@ bool RequestParser::isSupportedMethod(const std::string& method)
 	return method == "GET" || method == "POST" || method == "DELETE";
 }
 
-// bool RequestParser::isKnownHttpMethod(const std::string& method) 
-// {
-// 	static const std::vector<std::string> knownMethods = {
-// 		"GET", "POST", "DELETE", "PUT", "HEAD", "OPTIONS", "PATCH", "TRACE", "CONNECT"
-// 	};
-// 	return (std::find(knownMethods.begin(), knownMethods.end(), method) != knownMethods.end());
-// }
-
-// if u get an error, try this
-bool RequestParser::isKnownHttpMethod(const std::string& method) 
+bool RequestParser::_isKnownHttpMethod(const std::string& method) 
 {
-	// Use a static raw array instead of an initializer-list vector
-		static const std::string localArray[] = {
+	static const std::vector<std::string> knownMethods = {
 		"GET", "POST", "DELETE", "PUT", "HEAD", "OPTIONS", "PATCH", "TRACE", "CONNECT"
 	};
-		static const std::vector<std::string> knownMethods(localArray, localArray + sizeof(localArray) / sizeof(localArray[0]));
-
-		return std::find(knownMethods.begin(), knownMethods.end(), method) != knownMethods.end();
+	return (std::find(knownMethods.begin(), knownMethods.end(), method) != knownMethods.end());
 }
 
-static
-HttpMethod convertStrToMethod(const std::string& str) {
+static HttpMethod convertStrToMethod(const std::string& str)
+{
 	if (str == "GET")
 		return HttpMethod::GET;
 	else if (str == "POST")
@@ -99,7 +87,7 @@ HttpMethod convertStrToMethod(const std::string& str) {
 	return HttpMethod::INVALID;
 }
 
-void RequestParser::parseRequestLine(const std::string& line, HttpRequestContainer& request)
+void RequestParser::_parseRequestLine(const std::string& line, HttpRequestContainer& request)
 {
 	// Request line looks like: "GET /index.html HTTP/1.1"
 	// Exactly two spaces separate exactly three tokens. Anything else
@@ -115,10 +103,10 @@ void RequestParser::parseRequestLine(const std::string& line, HttpRequestContain
 	if (iss >> extra)
 		throw HttpParseException(400, "Bad Request: malformed request line");
 
-	if (!isSupportedMethod(method)) 
+	if (!_isSupportedMethod(method)) 
 	{
 		// Check if it's a valid standard HTTP method we just don't support
-		if (isKnownHttpMethod(method))
+		if (_isKnownHttpMethod(method))
 			throw HttpParseException(405, "Method Not Allowed");
 
 		// If it's completely malformed (contains lowercase letters or invalid chars)
@@ -158,7 +146,7 @@ void RequestParser::parseRequestLine(const std::string& line, HttpRequestContain
 	request.setVersion(version);
 }
 
-bool RequestParser::isValidHeaderKeyChar(unsigned char c)
+bool RequestParser::_isValidHeaderKeyChar(unsigned char c)
 {
 	if (c <= 32 || c >= 127) return false; // No control characters or spaces
 	// Forbidden separators in HTTP header fields
@@ -166,7 +154,7 @@ bool RequestParser::isValidHeaderKeyChar(unsigned char c)
 	return separators.find(c) == std::string::npos;
 }
 
-void RequestParser::parseHeaderLine(const std::string& line, HttpRequestContainer& request)
+void RequestParser::_parseHeaderLine(const std::string& line, HttpRequestContainer& request)
 {
 	std::string key, value;
 	if (!splitOnce(line, ':', key, value))
@@ -181,7 +169,7 @@ void RequestParser::parseHeaderLine(const std::string& line, HttpRequestContaine
 	// Check header name for illegal characters
 	for (char c : key)
 	{
-		if (!isValidHeaderKeyChar(static_cast<unsigned char>(c)))
+		if (!_isValidHeaderKeyChar(static_cast<unsigned char>(c)))
 			throw HttpParseException(400, "Bad Request: illegal character in header name");
 	}
 
@@ -270,7 +258,7 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 
 			if (_state == PARSE_REQUEST_LINE)
 			{
-				parseRequestLine(line, request);
+				_parseRequestLine(line, request);
 				_state = PARSE_HEADERS;
 			}
 			else if (_state == PARSE_HEADERS)
@@ -284,7 +272,7 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 					_state = PARSE_BODY; // Do not break; immediately fall through to try parsing the body out of remaining buffer
 				}
 				else
-					parseHeaderLine(line, request);
+					_parseHeaderLine(line, request);
 			}
 		}
 		
@@ -424,11 +412,11 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 // 			line.erase(line.size() - 1); // chops it off
 // 		if (firstLine)
 // 		{
-// 			parseRequestLine(line, request);
+// 			_parseRequestLine(line, request);
 // 			firstLine = false;
 // 		}
 // 		else
-// 			parseHeaderLine(line, request);
+// 			_parseHeaderLine(line, request);
 // 	}
 
 // 	// NO Content-Length / chunked handling yet!!

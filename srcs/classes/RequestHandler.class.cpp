@@ -1,13 +1,13 @@
 /* ************************************************************************** */
-/*																			*/
-/*														:::	  ::::::::   */
-/*   RequestHandler.class.cpp								 :+:	  :+:	:+:   */
-/*													+:+ +:+		 +:+	 */
-/*   By: djanardh <djanardh@student.42heilbronn.	+#+  +:+	   +#+		*/
-/*												+#+#+#+#+#+   +#+		   */
-/*   Created: 2026/08/07 19:28:12 by djanardh		  #+#	#+#			 */
-/*   Updated: 2026/08/11 16:17:07 by djanardh		 ###   ########.fr	   */
-/*																			*/
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   RequestHandler.class.cpp                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
+/*   Updated: 2026/09/07 11:15:02 by djanardh         ###   ########.fr       */
+/*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/RequestHandler.class.hpp"
@@ -27,7 +27,7 @@ RequestHandler::~RequestHandler() {}
 // If a user requests /images/avatar.png, and we have location configurations for / and /images,
 // the router must choose the longest, most specific match (/images)
 
-const LocationConfig* RequestHandler::matchLocation(const std::string& uri) const
+const LocationConfig* RequestHandler::_matchLocation(const std::string& uri) const
 {
 	const LocationConfig* bestMatch = NULL;
 	size_t longestMatchLength = 0;
@@ -67,7 +67,7 @@ void RequestHandler::verifyMethodAllowed(const HttpMethod& method, const Locatio
 
 // translating the URI to a Real File Path on Your System (to serve a file, we combine the configuration's designated root 
 // folder directory with the client's requested trailing URI string path)
-std::string RequestHandler::translateToPhysicalPath(const std::string& uri, const LocationConfig* location) const
+std::string RequestHandler::_translateToPhysicalPath(const std::string& uri, const LocationConfig* location) const
 {
 	std::string baseRoot = location ? location->root : _config->locations[0].root; //BUG for multiple locations (also deref for nonexisting location)
 	std::string path = baseRoot + uri;
@@ -78,7 +78,8 @@ std::string RequestHandler::translateToPhysicalPath(const std::string& uri, cons
 		if (S_ISDIR(pathStat.st_mode))
 		{
 			std::string indexFile = location ? location->index : _config->locations[0].index; //FIXME for multiple locations
-			if (indexFile.empty()) indexFile = "index.html"; //FIXME: remove hardcoding, "does not exist"/"not found" instead? default behavior for index not specified in config
+			if (indexFile.empty()) 
+				indexFile = "index.html"; //FIXME: remove hardcoding, "does not exist"/"not found" instead? default behavior for index not specified in config
 
 			std::string fullIndexPath = path;
 			if (fullIndexPath.back() == '/') 
@@ -93,7 +94,7 @@ std::string RequestHandler::translateToPhysicalPath(const std::string& uri, cons
 				return fullIndexPath; // If it exists, use it!
 			}
 			// if index.html DOES NOT exist, leave the path pointing to the directory 
-			// so handleGet can trigger autoindex logic later!
+			// so _handleGet can trigger autoindex logic later!
 		}
 	}
 	return path;
@@ -102,7 +103,7 @@ std::string RequestHandler::translateToPhysicalPath(const std::string& uri, cons
 
 // attempts to open a file on our hard drive. If it exists, it reads the content and builds a 200 OK response
 // If it doesn't exist, it throws a 404 Not Found error
-std::string RequestHandler::handleGet(const std::string& physicalPath, const LocationConfig* location)
+std::string RequestHandler::_handleGet(const std::string& physicalPath, const LocationConfig* location)
 {
 	ResponseBuilder response;
 
@@ -169,7 +170,7 @@ std::string RequestHandler::handleGet(const std::string& physicalPath, const Loc
 
 // this function takes the raw body data sent by the client and saves it as a new file on your hard drive
 // if successful, it returns a 201 Created response.
-std::string RequestHandler::handlePost(const std::string& physicalPath, const HttpRequestContainer& request)
+std::string RequestHandler::_handlePost(const std::string& physicalPath, const HttpRequestContainer& request)
 {
 	// Attempt to create/open a file in binary write mode (overwrites if it exists)
 	std::ofstream file(physicalPath.c_str(), std::ios::binary);
@@ -201,7 +202,7 @@ std::string RequestHandler::handlePost(const std::string& physicalPath, const Ht
 
 // checks if a file exists, and if it does, deletes it using the standard C++ std::remove utility
 // if successful, it returns a 200 OK or 204 No Content response.
-std::string RequestHandler::handleDelete(const std::string& physicalPath)
+std::string RequestHandler::_handleDelete(const std::string& physicalPath)
 {
 	// check if the file exists before attempting to delete it
 	struct stat pathStat;
@@ -237,23 +238,23 @@ std::string RequestHandler::handleDelete(const std::string& physicalPath)
 // {
 // 	try {
 // 		// 1. Find configuration block matches
-// 		const LocationConfig* matchedLoc = matchLocation(request.getUri());
+// 		const LocationConfig* matchedLoc = _matchLocation(request.getUri());
 
 // 		// 2. Validate routing method permissions (Throws 405 if blocked)
-// 		verifyMethodAllowed(request.getMethod(), matchedLoc);
+// 		_verifyMethodAllowed(request.getMethod(), matchedLoc);
 
 // 		// 3. Convert URI string to a real system file address path
-// 		std::string physicalPath = translateToPhysicalPath(request.getUri(), matchedLoc);
+// 		std::string physicalPath = _translateToPhysicalPath(request.getUri(), matchedLoc);
 
 // 		// 4. Branch execution to chosen handler based on HTTP Method type
 // 		if (request.getMethod() == "GET") {
-// 			return handleGet(physicalPath, matchedLoc);
+// 			return _handleGet(physicalPath, matchedLoc);
 // 		} 
 // 		else if (request.getMethod() == "POST") {
-// 			return handlePost(physicalPath, request);
+// 			return _handlePost(physicalPath, request);
 // 		} 
 // 		else if (request.getMethod() == "DELETE") {
-// 			return handleDelete(physicalPath);
+// 			return _handleDelete(physicalPath);
 // 		}
 		
 // 		throw std::runtime_error("501"); // Not Implemented fallback guard
@@ -282,21 +283,21 @@ std::string RequestHandler::processRequest(const HttpRequestContainer& request)
 	try
 	{
 		// 1. Find configuration block matches
-		const LocationConfig* matchedLoc = matchLocation(request.getUri());
+		const LocationConfig* matchedLoc = _matchLocation(request.getUri());
 
 		// 2. Validate routing method permissions (Throws a runtime_error with status string if blocked)
-		verifyMethodAllowed(request.getMethod(), matchedLoc);
+		_verifyMethodAllowed(request.getMethod(), matchedLoc);
 
 		// 3. Convert abstract URI string to a real system file address path
-		std::string physicalPath = translateToPhysicalPath(request.getUri(), matchedLoc);
+		std::string physicalPath = _translateToPhysicalPath(request.getUri(), matchedLoc);
 
 		// 4. Branch execution to the matching handler based on HTTP Method type
 		if (request.getMethod() == HttpMethod::GET)
-			return handleGet(physicalPath, matchedLoc);
+			return _handleGet(physicalPath, matchedLoc);
 		else if (request.getMethod() == HttpMethod::POST)
-			return handlePost(physicalPath, request);
+			return _handlePost(physicalPath, request);
 		else if (request.getMethod() == HttpMethod::DELETE)
-			return handleDelete(physicalPath);
+			return _handleDelete(physicalPath);
 		
 		throw std::runtime_error("501"); // Not Implemented fallback guard
 	}

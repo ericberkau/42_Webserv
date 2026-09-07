@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:56:06 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/07 10:56:29 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/07 11:15:28 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,20 +22,24 @@
 
 class HttpParseException : public std::exception
 {
-	private:
-		int _statusCode;
-		std::string _reason;
-
 	public:
+	
 		HttpParseException(int statusCode, const std::string& reason);
 		virtual ~HttpParseException() throw();
 		virtual const char* what() const throw();
 		int getStatusCode() const;
+		
+	private:
+	
+		int _statusCode;
+		std::string _reason;
+
 };
 
 class RequestParser
 {		
 	public:
+	
 		enum ParsingState 
 		{ 
 			PARSE_REQUEST_LINE,
@@ -44,18 +48,6 @@ class RequestParser
 			PARSE_COMPLETE 
 		};
 		
-	private:
-		ParsingState _state;
-		std::string _buffer;
-		void parseRequestLine(const std::string& line, HttpRequestContainer& request); // Splits "METHOD URI VERSION" and validates each piece
-		bool isValidHeaderKeyChar(unsigned char c);
-		void parseHeaderLine(const std::string& line, HttpRequestContainer& request); // Splits "Key: Value" and adds it to the request
-		bool isSupportedMethod(const std::string& method);
-		bool isKnownHttpMethod(const std::string& method);
-		size_t _expectedBodyBytes; // Stores Content-Length or current chunk size
-		bool _chunkSizeParsed; // Tracks if we are waiting for a chunk size line or chunk data bytes
-		
-	public:
 		RequestParser();
 		~RequestParser();
 		
@@ -65,6 +57,20 @@ class RequestParser
 		// Getters for the server loop to know when a request is ready
 		ParsingState getState() const;
 		void reset();
+		
+	private:
+	
+		ParsingState _state;
+		std::string _buffer;
+		size_t _expectedBodyBytes; // Stores Content-Length or current chunk size
+		bool _chunkSizeParsed; // Tracks if we are waiting for a chunk size line or chunk data bytes
+		
+		void _parseRequestLine(const std::string& line, HttpRequestContainer& request); // Splits "METHOD URI VERSION" and validates each piece
+		bool _isValidHeaderKeyChar(unsigned char c);
+		void _parseHeaderLine(const std::string& line, HttpRequestContainer& request); // Splits "Key: Value" and adds it to the request
+		bool _isSupportedMethod(const std::string& method);
+		bool _isKnownHttpMethod(const std::string& method);
+		
 };
 
 #endif

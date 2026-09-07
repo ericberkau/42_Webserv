@@ -1,10 +1,22 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ResponseBuilder.class.cpp                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/09/07 11:04:26 by djanardh          #+#    #+#             */
+/*   Updated: 2026/09/07 11:16:41 by djanardh         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "classes/ResponseBuilder.class.hpp"
 
 ResponseBuilder::ResponseBuilder() : _httpVersion("HTTP/1.1"), _statusCode(200), _statusMessage("OK") {}
 ResponseBuilder::~ResponseBuilder() {}
 
 // Dictionary lookup for standard HTTP text statuses required by the protocol
-std::string ResponseBuilder::getStandardStatusMessage(int code) const
+std::string ResponseBuilder::_getStandardStatusMessage(int code) const
 {
 	switch (code)
 	{
@@ -28,7 +40,7 @@ std::string ResponseBuilder::getStandardStatusMessage(int code) const
 void ResponseBuilder::setStatus(int code)
 {
 	_statusCode = code;
-	_statusMessage = getStandardStatusMessage(code);
+	_statusMessage = _getStandardStatusMessage(code);
 }
 
 void ResponseBuilder::setStatus(int code, const std::string& customMessage)

@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:58:56 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/07 10:58:59 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/07 11:16:28 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,17 +21,8 @@
 
 class ResponseBuilder
 {
-	private:
-		std::string _httpVersion;
-		int	_statusCode;
-		std::string _statusMessage;
-		std::map<std::string, std::string> _headers;
-		std::string _body;
-
-		// Internal helper to get standard HTTP status messages automatically
-		std::string getStandardStatusMessage(int code) const;
-
 	public:
+	
 		ResponseBuilder();
 		~ResponseBuilder();
 
@@ -57,6 +48,17 @@ class ResponseBuilder
 		void clear();
 
 		void setContentTypeFromExtension(const std::string& physicalPath);
+		
+	private:
+	
+		std::string _httpVersion;
+		int	_statusCode;
+		std::string _statusMessage;
+		std::map<std::string, std::string> _headers;
+		std::string _body;
+
+		// Internal helper to get standard HTTP status messages automatically
+		std::string _getStandardStatusMessage(int code) const;
 };
 
 #endif
