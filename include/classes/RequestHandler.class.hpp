@@ -1,20 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   RequestHandler.hpp                                 :+:      :+:    :+:   */
+/*   RequestHandler.class.hpp                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/08/02 12:54:09 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/06 19:23:06 by eberkau          ###   ########.fr       */
+/*   Created: 2026/09/07 10:55:03 by djanardh          #+#    #+#             */
+/*   Updated: 2026/09/07 10:56:55 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef REQUESTHANDLER_HPP
 #define REQUESTHANDLER_HPP
 
-#include "HttpRequestContainer.hpp"
-#include "ConfigStructures.hpp"
+#include "HttpRequestContainer.class.hpp"
 #include "../config.hpp"
 #include <string>
 #include <sys/types.h>

@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*																			*/
 /*														:::	  ::::::::   */
-/*   RequestHandler.cpp								 :+:	  :+:	:+:   */
+/*   RequestHandler.class.cpp								 :+:	  :+:	:+:   */
 /*													+:+ +:+		 +:+	 */
 /*   By: djanardh <djanardh@student.42heilbronn.	+#+  +:+	   +#+		*/
 /*												+#+#+#+#+#+   +#+		   */
@@ -10,9 +10,9 @@
 /*																			*/
 /* ************************************************************************** */
 
-#include "classes/RequestHandler.hpp"
-#include "classes/ResponseBuilder.hpp"
-#include "classes/RequestParser.hpp"
+#include "classes/RequestHandler.class.hpp"
+#include "classes/ResponseBuilder.class.hpp"
+#include "classes/RequestParser.class.hpp"
 #include <sys/stat.h> // for checking if files exist
 #include <fstream>
 #include <sstream>

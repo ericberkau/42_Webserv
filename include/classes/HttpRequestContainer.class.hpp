@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   HttpRequestContainer.hpp                           :+:      :+:    :+:   */
+/*   HttpRequestContainer.class.hpp                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/22 15:15:43 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/06 19:25:01 by eberkau          ###   ########.fr       */
+/*   Created: 2026/09/07 10:54:11 by djanardh          #+#    #+#             */
+/*   Updated: 2026/09/07 10:54:16 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

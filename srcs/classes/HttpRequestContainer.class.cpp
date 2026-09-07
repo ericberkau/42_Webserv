@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*																			*/
 /*														:::	  ::::::::   */
-/*   HttpRequestContainer.cpp						   :+:	  :+:	:+:   */
+/*   HttpRequestContainer.class.cpp						   :+:	  :+:	:+:   */
 /*													+:+ +:+		 +:+	 */
 /*   By: djanardh <djanardh@student.42heilbronn.	+#+  +:+	   +#+		*/
 /*												+#+#+#+#+#+   +#+		   */
@@ -10,7 +10,7 @@
 /*																			*/
 /* ************************************************************************** */
 
-#include "classes/HttpRequestContainer.hpp"
+#include "classes/HttpRequestContainer.class.hpp"
 #include <iostream>
 #include <cctype> // for tolower
 

@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*																			*/
 /*														:::	  ::::::::   */
-/*   RequestParser.cpp								  :+:	  :+:	:+:   */
+/*   RequestParser.class.cpp								  :+:	  :+:	:+:   */
 /*													+:+ +:+		 +:+	 */
 /*   By: djanardh <djanardh@student.42heilbronn.	+#+  +:+	   +#+		*/
 /*												+#+#+#+#+#+   +#+		   */
@@ -10,7 +10,7 @@
 /*																			*/
 /* ************************************************************************** */
 
-#include "classes/RequestParser.hpp"
+#include "classes/RequestParser.class.hpp"
 #include <sstream>
 
 HttpParseException::HttpParseException(int statusCode, const std::string& reason)

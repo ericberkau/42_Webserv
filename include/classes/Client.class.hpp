@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Client.class.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:06 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/06 19:34:49 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/07 10:56:00 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "classes/RequestParser.hpp"
-#include "classes/HttpRequestContainer.hpp"
+#include "classes/RequestParser.class.hpp"
+#include "classes/HttpRequestContainer.class.hpp"
 #include <arpa/inet.h>
 #include <string>
 

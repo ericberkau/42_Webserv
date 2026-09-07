@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   Server.class.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/06 19:05:11 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/07 10:54:58 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/Server.class.hpp"
-#include "classes/RequestHandler.hpp"
+#include "classes/RequestHandler.class.hpp"
 #include "signals.hpp"
 #include <fcntl.h>
 #include <iostream>

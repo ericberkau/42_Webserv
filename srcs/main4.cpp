@@ -1,7 +1,7 @@
-#include "RequestParser.hpp"
-#include "RequestHandler.hpp"
-#include "ResponseBuilder.hpp"
-#include "ConfigStructures.hpp"
+#include "RequestParser.class.hpp"
+#include "RequestHandler.class.hpp"
+#include "ResponseBuilder.class.hpp"
+#include "config.hpp"
 #include <iostream>
 #include <sys/stat.h>
 

@@ -1,20 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   RequestParser.hpp                                  :+:      :+:    :+:   */
+/*   RequestParser.class.hpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/22 15:15:37 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/06 19:07:43 by eberkau          ###   ########.fr       */
+/*   Created: 2026/09/07 10:56:06 by djanardh          #+#    #+#             */
+/*   Updated: 2026/09/07 10:56:29 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef REQUEST_PARSER_HPP
 #define REQUEST_PARSER_HPP
 
-#include "HttpRequestContainer.hpp"
-#include "ConfigStructures.hpp"
+#include "HttpRequestContainer.class.hpp"
 #include "../config.hpp"
 #include <string>
 #include <stdexcept>
