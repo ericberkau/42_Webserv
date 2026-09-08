@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/08 19:14:23 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/08 19:21:46 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -284,19 +284,11 @@ void Server::_handleIncomingData(size_t& idx) {
 
 	_processClientInput(currClient);
 
-	// check if a response packet was successfully queued
-	if (currClient.hasPendingOutput()) {
-		_pollfdArr[idx].events |= POLLOUT; // Tell poll() we are ready to write to the socket
-	}
+	if (currClient.hasPendingOutput())
+		_pollfdArr[idx].events |= POLLOUT;
 }
 
 void Server::_processClientInput(Client& client) {
-	/**
-	 * //TODO: check if enough
-	 * Feed client input buffer into HTTP parser.
-	 * Extract complete requests.
-	 * Call _handleRequest() for each request.
-	 */
 	client.requestParser.feed(
 		client.getInBuf(),
 		client.httpRequest,
@@ -308,14 +300,7 @@ void Server::_processClientInput(Client& client) {
 		_handleRequest(client);
 }
 
-void Server::_handleRequest(Client& client/*, HttpRequest*/) {
-	/**
-	 * //TODO: check if enough
-	 * Match request against ServerConfig.
-	 * Find location block.
-	 * Generate response.
-	 * Queue response into client output buffer.
-	 */
+void Server::_handleRequest(Client& client) {
 	RequestHandler reqHandler(_fdCtx.at(client.getFd()).server);
 
 	const std::string response = reqHandler.processRequest(client.httpRequest);
@@ -335,10 +320,12 @@ void Server::_handleOutgoingData(size_t& idx) {
 			break;
 		}
 
-		sentBytes = send(currClient.getFd(),
+		sentBytes = send(
+						currClient.getFd(),
 						currClient.getOutBuf().data() + currClient.getOutProgress(),
 						currClient.getOutBuf().size() - currClient.getOutProgress(),
-						MSG_NOSIGNAL);
+						MSG_NOSIGNAL
+					);
 
 		if (sentBytes == -1) {
 			if (errno == EAGAIN || errno == EWOULDBLOCK)
