@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/08 02:35:54 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/08 03:28:16 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ const LocationConfig* RequestHandler::_matchLocation(const std::string& uri) con
 			}
 		}
 	}
-	return bestMatch; // returns NULL if no location blocks match, falling back to server default root //FIXME: currently always returns NULL when using basic.config
+	return bestMatch; // returns NULL if no location blocks match, falling back to server default root 
 }
 
 // checking the 405 Method Not Allowed Rule. If a location block specifies that only GET is allowed, 
