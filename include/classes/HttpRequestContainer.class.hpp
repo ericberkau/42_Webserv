@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:54:11 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/07 11:06:26 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/08 16:17:29 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,12 +31,14 @@ class HttpRequestContainer
 		void setVersion(const std::string& version);
 		void addHeader(const std::string& key, const std::string& value);
 		void setBody(const std::string& body);
+		void setQueryString(const std::string& query);
 
 		// Getters
 		const HttpMethod& getMethod() const;
 		const std::string& getUri() const;
 		const std::string& getVersion() const;
 		const std::string& getBody() const;
+		const std::string& getQueryString() const;
 
 		// Returns "" if header not found. Header lookup is case-insensitive
 		// acc. to RFC, so we normalize keys to lowercase when storing them
@@ -52,6 +54,7 @@ class HttpRequestContainer
 		std::string _version;
 		std::map<std::string, std::string> _headers; // keys stored lowercase
 		std::string _body;
+		std::string _queryString;
 		
 };
 

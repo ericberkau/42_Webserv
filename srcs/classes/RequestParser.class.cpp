@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:16 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/08 03:24:50 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/08 16:21:21 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,8 +145,18 @@ void RequestParser::_parseRequestLine(const std::string& line, HttpRequestContai
 	if (version != "HTTP/1.1" && version != "HTTP/1.0")
 		throw HttpParseException(400, "Bad Request: unsupported HTTP version");
 
+	std::string path = uri;
+	std::string queryString;
+	size_t qPos = uri.find('?');
+	if (qPos != std::string::npos)
+	{
+		path = uri.substr(0, qPos);
+		queryString = uri.substr(qPos + 1);
+	}
+
 	request.setMethod(convertStrToMethod(method));
-	request.setUri(uri);
+	request.setUri(path);
+	request.setQueryString(queryString);
 	request.setVersion(version);
 }
 
@@ -317,6 +327,8 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 						
 						sizeLine = trim(sizeLine);
 						_expectedBodyBytes = parseHexSize(sizeLine);
+						if (_expectedBodyBytes > config->clientMaxBodySize - request.getBody().size())
+							throw HttpParseException(413, "Payload Too Large");
 						_chunkSizeParsed = true;
 					}
 

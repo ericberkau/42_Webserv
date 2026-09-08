@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/08 03:12:00 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/08 15:48:39 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -274,22 +274,11 @@ void Server::_handleIncomingData(size_t& idx) {
 
 	_processClientInput(currClient);
 
-	// check the state before cleaning up containers
-	if (currClient.requestParser.getState() != RequestParser::PARSE_COMPLETE)
-	{
-		std::cout << "Message arrived from " << _pollfdArr[idx].fd << " -> " << currClient.getInBuf() << std::endl;
-		currClient.appendToOutBuf(std::string("\nYou just sent -> " + currClient.getInBuf() + "\n"));
-		_pollfdArr[idx].events |= POLLOUT;
-	}
-	else 
-	{
-		// request hit completion, start transmission, clear buffers, and reset states
-		_pollfdArr[idx].events |= POLLOUT;
-		currClient.clearInBuf();
-		currClient.requestParser.reset(); 
+	// check if a response packet was successfully queued
+	if (currClient.hasPendingOutput()) {
+		_pollfdArr[idx].events |= POLLOUT; // Tell poll() we are ready to write to the socket
 	}
 }
-
 
 void Server::_processClientInput(Client& client) {
 	/**
@@ -304,7 +293,8 @@ void Server::_processClientInput(Client& client) {
 		_fdCtx.at(client.getFd()).server
 	);
 
-	_handleRequest(client);
+	if (client.requestParser.getState() == RequestParser::PARSE_COMPLETE)
+		_handleRequest(client);
 }
 
 void Server::_handleRequest(Client& client/*, HttpRequest*/) {

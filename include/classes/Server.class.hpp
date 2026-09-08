@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.class.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:10 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/06 23:14:00 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/08 12:56:00 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
