@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:07:00 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/06 19:32:19 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/08 15:09:41 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,6 +175,11 @@ static void printServer(const ServerConfig& server, size_t serverIndex) {
 	std::cout
 		<< "client_max_body_size: "
 		<< server.clientMaxBodySize
+		<< '\n';
+
+	std::cout
+		<< "global root: "
+		<< server.root
 		<< '\n';
 
 	std::cout << "\nerror pages:\n";
