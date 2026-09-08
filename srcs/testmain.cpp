@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:07:00 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/08 15:09:41 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/08 20:57:55 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -234,15 +234,21 @@ int main(int argc, char** argv)
 {
 	try
 	{
-		if (argc != 2)
+		std::string source;
+		
+		if (argc > 2)
 		{
 			std::cerr << "Usage: "
 			          << argv[0]
-			          << " <config_file>\n";
+			          << " [config_file]\n";
 			return 1;
 		}
+		else if (argc == 2)
+			source = argv[1];
+		else
+			source = "configs/basic.conf";
 
-		const std::string input = readFile(argv[1]);
+		const std::string input = readFile(source);
 
 		Lexer lexer(input);
 
