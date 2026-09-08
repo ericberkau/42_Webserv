@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.class.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/08 15:48:39 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/08 19:14:23 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -230,6 +230,10 @@ void Server::_handleClientEvents(size_t& idx) {
 // 		if (receivedBytes == -1) {
 // 			if (errno == EAGAIN || errno == EWOULDBLOCK)
 // 				break;
+// 			else if (errno == EPIPE || errno == ECONNRESET) {
+// 				_disconnectClient(idx);
+// 				return;
+// 			}
 // 			perror("recv()");
 // 			throw 1;
 // 		}
@@ -261,6 +265,10 @@ void Server::_handleIncomingData(size_t& idx) {
 		if (receivedBytes == -1) {
 			if (errno == EAGAIN || errno == EWOULDBLOCK)
 				break;
+			else if (errno == EPIPE || errno == ECONNRESET) {
+				_disconnectClient(idx);
+				return;
+			}
 			perror("recv()");
 			throw 1;
 		}
@@ -271,6 +279,8 @@ void Server::_handleIncomingData(size_t& idx) {
 
 		currClient.appendToInBuf(msg, receivedBytes);
 	}
+
+	std::cout << "Message arrived from " << _pollfdArr[idx].fd << " -> " << currClient.getInBuf() << std::endl; // BUG: remove later
 
 	_processClientInput(currClient);
 
@@ -292,6 +302,7 @@ void Server::_processClientInput(Client& client) {
 		client.httpRequest,
 		_fdCtx.at(client.getFd()).server
 	);
+	client.clearInBuf();
 
 	if (client.requestParser.getState() == RequestParser::PARSE_COMPLETE)
 		_handleRequest(client);
@@ -310,6 +321,7 @@ void Server::_handleRequest(Client& client/*, HttpRequest*/) {
 	const std::string response = reqHandler.processRequest(client.httpRequest);
 
 	client.appendToOutBuf(response);
+	client.requestParser.reset();
 }
 
 void Server::_handleOutgoingData(size_t& idx) {
