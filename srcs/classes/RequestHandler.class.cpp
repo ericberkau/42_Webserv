@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/08 03:28:16 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/08 20:01:06 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,7 @@ void RequestHandler::_verifyMethodAllowed(const HttpMethod& method, const Locati
 std::string RequestHandler::_translateToPhysicalPath(const std::string& uri, const LocationConfig* location) const
 {
 	// if no location block exists, using system's current directory "." as a safe root
-	std::string baseRoot = location ? location->root : ".";
+	std::string baseRoot = location ? (location->root.empty() ? "html" : location->root) : "html";
 	std::string path = baseRoot + uri;
 
 	struct stat pathStat;
@@ -342,6 +342,8 @@ std::string RequestHandler::processRequest(const HttpRequestContainer& request)
 
 		// 3. Convert abstract URI string to a real system file address path
 		std::string physicalPath = _translateToPhysicalPath(request.getUri(), matchedLoc);
+
+		
 
 		// 4. Branch execution to the matching handler based on HTTP Method type
 		if (request.getMethod() == HttpMethod::GET)
