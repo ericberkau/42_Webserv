@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:16 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/08 02:40:28 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/08 03:24:50 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -253,6 +253,9 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 	{
 		if (_state == PARSE_REQUEST_LINE || _state == PARSE_HEADERS)
 		{
+			if ((_state == PARSE_REQUEST_LINE || _state == PARSE_HEADERS) && _buffer.size() > 8192)
+				throw HttpParseException(431, "Request Header Fields Too Large");
+
 			// Look for the standard network line break (\r\n)
 			size_t lineEnd = _buffer.find("\r\n");
 			if (lineEnd == std::string::npos)
