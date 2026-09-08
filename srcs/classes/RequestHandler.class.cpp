@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/07 11:15:02 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/08 02:35:54 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,52 +51,90 @@ const LocationConfig* RequestHandler::_matchLocation(const std::string& uri) con
 
 // checking the 405 Method Not Allowed Rule. If a location block specifies that only GET is allowed, 
 // any incoming POST or DELETE request must halt immediately
-void RequestHandler::verifyMethodAllowed(const HttpMethod& method, const LocationConfig* location) const
+void RequestHandler::_verifyMethodAllowed(const HttpMethod& method, const LocationConfig* location) const
 {
-	if (!location) return; // if no location block matches, default global rules apply
+	if (!location)
+		return; // if no location block matches, default global rules apply
 
 	// if allowedMethods is empty, assume all methods are permitted by default
-	if (location->allowedMethods.empty()) return;
+	if (location->allowedMethods.empty())
+		return;
 
 	if (location->allowedMethods.find(method) == location->allowedMethods.end())
-	{
-		// throw a handler exception that the Response Builder will catch to turn into a 405 response!
 		throw std::runtime_error("405"); 
-	}
 }
 
 // translating the URI to a Real File Path on Your System (to serve a file, we combine the configuration's designated root 
 // folder directory with the client's requested trailing URI string path)
+// old func.
+// std::string RequestHandler::_translateToPhysicalPath(const std::string& uri, const LocationConfig* location) const
+// {
+// 	std::string baseRoot = location ? location->root : _config->locations[0].root; //BUG for multiple locations (also deref for nonexisting location)
+// 	std::string path = baseRoot + uri;
+
+// 	struct stat pathStat;
+// 	if (stat(path.c_str(), &pathStat) == 0)
+// 	{
+// 		if (S_ISDIR(pathStat.st_mode))
+// 		{
+// 			std::string indexFile = location ? location->index : _config->locations[0].index; //FIXME for multiple locations
+// 			if (indexFile.empty()) 
+// 				indexFile = "index.html"; //FIXME: remove hardcoding, "does not exist"/"not found" instead? default behavior for index not specified in config
+
+// 			std::string fullIndexPath = path;
+// 			if (fullIndexPath.back() == '/') 
+// 				fullIndexPath += indexFile;
+// 			else							 
+// 				fullIndexPath += "/" + indexFile;
+
+// 			// check if index.html actually exists on disk.
+// 			struct stat indexStat;
+// 			if (stat(fullIndexPath.c_str(), &indexStat) == 0)
+// 			{
+// 				return fullIndexPath; // If it exists, use it!
+// 			}
+// 			// if index.html DOES NOT exist, leave the path pointing to the directory 
+// 			// so _handleGet can trigger autoindex logic later!
+// 		}
+// 	}
+// 	return path;
+// }
+
+
 std::string RequestHandler::_translateToPhysicalPath(const std::string& uri, const LocationConfig* location) const
 {
-	std::string baseRoot = location ? location->root : _config->locations[0].root; //BUG for multiple locations (also deref for nonexisting location)
+	// if no location block exists, using system's current directory "." as a safe root
+	std::string baseRoot = location ? location->root : ".";
 	std::string path = baseRoot + uri;
 
 	struct stat pathStat;
 	if (stat(path.c_str(), &pathStat) == 0)
 	{
+		// Check if the path targets a directory folder on disk
 		if (S_ISDIR(pathStat.st_mode))
 		{
-			std::string indexFile = location ? location->index : _config->locations[0].index; //FIXME for multiple locations
-			if (indexFile.empty()) 
-				indexFile = "index.html"; //FIXME: remove hardcoding, "does not exist"/"not found" instead? default behavior for index not specified in config
+			// extract the index configuration if it exists
+			std::string indexFile = location ? location->index : "";
 
-			std::string fullIndexPath = path;
-			if (fullIndexPath.back() == '/') 
-				fullIndexPath += indexFile;
-			else							 
-				fullIndexPath += "/" + indexFile;
-
-			// check if index.html actually exists on disk.
-			struct stat indexStat;
-			if (stat(fullIndexPath.c_str(), &indexStat) == 0)
+			// do file lookup if the config explicitly specified an index file
+			if (!indexFile.empty())
 			{
-				return fullIndexPath; // If it exists, use it!
+				std::string fullIndexPath = path;
+				if (fullIndexPath.back() == '/') 
+					fullIndexPath += indexFile;
+				else							 
+					fullIndexPath += "/" + indexFile;
+
+				// Check if the configured index file actually exists on the hard drive
+				struct stat indexStat;
+				if (stat(fullIndexPath.c_str(), &indexStat) == 0)
+					return fullIndexPath; // Match found, route directly to this file
 			}
-			// if index.html DOES NOT exist, leave the path pointing to the directory 
-			// so _handleGet can trigger autoindex logic later!
 		}
 	}
+	// If no index file was specified or if the configured file doesn't exist on disk
+	// leave the path pointing to the folder directory. 
+	// handleGet block will evaluate 'autoIndex' from here
 	return path;
 }
 
@@ -114,12 +152,25 @@ std::string RequestHandler::_handleGet(const std::string& physicalPath, const Lo
 	// CASE 1: The path is a directory (meaning index.html was missing)
 	if (S_ISDIR(pathStat.st_mode))
 	{
-		// If config turned autoindex off, deny access!
+		// If the path is a directory but doesn't end with a '/', send a 301 Redirect
+		if (!physicalPath.empty() && physicalPath.back() != '/')
+		{
+			std::string targetUri = location ? location->path : "/";
+			if (targetUri.empty() || targetUri.back() != '/')
+				targetUri += "/";
+
+			response.setStatus(301);
+			response.addHeader("Location", targetUri);
+			response.setBody(""); 
+			return response.buildString();
+		}
+		
+		// if location is NULL, autoIndex defaults to false
 		bool isAutoindexEnabled = location ? location->autoIndex : false;
 		if (!isAutoindexEnabled)
-			throw std::runtime_error("403"); // 403 Forbidden
+			throw std::runtime_error("403"); // // If autoindex is turned off and we have no valid index file path, deny access
 
-		// Open the directory folder stream
+		// Opening directory folder stream
 		DIR* dir = opendir(physicalPath.c_str());
 		if (!dir)
 			throw std::runtime_error("500"); // Internal Server Error
@@ -135,7 +186,8 @@ std::string RequestHandler::_handleGet(const std::string& physicalPath, const Lo
 			std::string name = entry->d_name;
 			
 			// Skip hidden current directory "." references to look clean
-			if (name == ".") continue;
+			if (name == ".")
+				continue;
 
 			// Generate an HTML hyperlink anchor block for each asset
 			html << "<a href=\"" << name << "\">" << name << "</a>\n";
@@ -150,7 +202,7 @@ std::string RequestHandler::_handleGet(const std::string& physicalPath, const Lo
 		return response.buildString();
 	}
 
-	// CASE 2: The path is a normal standalone asset file
+	// CASE 2: path is a normal standalone file
 	std::ifstream file(physicalPath.c_str(), std::ios::binary);
 	if (!file.is_open())
 		throw std::runtime_error("404");
@@ -267,7 +319,7 @@ std::string RequestHandler::_handleDelete(const std::string& physicalPath)
 // 	}
 // }
 
-// Helper utility to safely convert strings to numbers for status code conversion
+// for status code conversion
 static int stringToInt(const std::string& s)
 {
 	std::stringstream ss(s);
@@ -278,14 +330,14 @@ static int stringToInt(const std::string& s)
 
 std::string RequestHandler::processRequest(const HttpRequestContainer& request)
 {
-	ResponseBuilder response; // instantiate a clean ResponseBuilder container
+	ResponseBuilder response;
 
 	try
 	{
 		// 1. Find configuration block matches
 		const LocationConfig* matchedLoc = _matchLocation(request.getUri());
 
-		// 2. Validate routing method permissions (Throws a runtime_error with status string if blocked)
+		// 2. Validate routing method permissions
 		_verifyMethodAllowed(request.getMethod(), matchedLoc);
 
 		// 3. Convert abstract URI string to a real system file address path
@@ -299,26 +351,27 @@ std::string RequestHandler::processRequest(const HttpRequestContainer& request)
 		else if (request.getMethod() == HttpMethod::DELETE)
 			return _handleDelete(physicalPath);
 		
-		throw std::runtime_error("501"); // Not Implemented fallback guard
+		throw std::runtime_error("501"); // Not Implemented fallback guard if INVALID
 	}
 	catch (const std::runtime_error& errorMsg)
 	{
 		// handles structural runtime codes thrown by the execution handlers (e.g. "404", "405")
 		int statusCode = stringToInt(errorMsg.what());
-		if (statusCode == 0) statusCode = 500; // Fallback to Internal Error if conversion fails
+		if (statusCode == 0)
+			statusCode = 500; // Fallback to Internal Error if conversion fails
 
 		response.generateCustomErrorPage(statusCode, *_config);
-		return response.buildString(); // Returns a beautifully compiled HTTP error packet
+		return response.buildString();
 	}
 	catch (const HttpParseException& parseError)
 	{
-		// captures bad request inputs coming out of your initial Parser stages
+		// captures bad request inputs coming out of initial Parser stages
 		response.generateCustomErrorPage(parseError.getStatusCode(), *_config);
 		return response.buildString();
 	}
 	catch (...)
 	{
-		// global safety net catch-all for any completely unexpected system failure
+		// global safety net catch-all for any unexpected system failure
 		response.generateCustomErrorPage(500, *_config);
 		return response.buildString();
 	}

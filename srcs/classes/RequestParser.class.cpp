@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:16 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/07 11:14:41 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/08 02:40:28 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,6 +130,10 @@ void RequestParser::_parseRequestLine(const std::string& line, HttpRequestContai
 			throw HttpParseException(400, "Bad Request: illegal characters in URI");
 	}
 
+	// Check for relative directory traversal backtracks ("..")
+	if (uri.find("..") != std::string::npos)
+		throw HttpParseException(400, "Bad Request: Directory traversal attempt detected");
+
 	// Validate form (Origin-form, Absolute-form)
 	if (uri[0] != '/')
 	{
@@ -148,7 +152,8 @@ void RequestParser::_parseRequestLine(const std::string& line, HttpRequestContai
 
 bool RequestParser::_isValidHeaderKeyChar(unsigned char c)
 {
-	if (c <= 32 || c >= 127) return false; // No control characters or spaces
+	if (c <= 32 || c >= 127)
+		return false; // No control characters or spaces
 	// Forbidden separators in HTTP header fields
 	std::string separators = "()<>@,;:\\\"/[]?={}";
 	return separators.find(c) == std::string::npos;

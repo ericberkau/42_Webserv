@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:26 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/07 11:16:41 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/07 18:35:38 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,33 @@ void ResponseBuilder::generateDefaultErrorPage(int code)
 	setBody(bodyStream.str());
 }
 
+// void ResponseBuilder::generateCustomErrorPage(int code, const ServerConfig& config)
+// {
+// 	std::map<int, std::string>::const_iterator it = config.errorPages.find(code);
+	
+// 	if (it != config.errorPages.end())
+// 	{
+// 		std::string filePath = it->second;
+// 		// trying to physically open that custom HTML file from the computer's hard drive
+// 		// It opens it in binary mode (std::ios::binary) to make sure it reads the exact byte layout without altering newlines
+// 		std::ifstream file(filePath.c_str(), std::ios::in | std::ios::binary);
+		
+// 		if (file.is_open())
+// 		{
+// 			std::stringstream ss;
+// 			ss << file.rdbuf();
+// 			file.close();
+			
+// 			setStatus(code);
+// 			setContentTypeFromExtension(filePath);
+// 			setBody(ss.str());
+// 			return;
+// 		}
+// 	}
+// 	// default if custom file fails
+// 	generateDefaultErrorPage(code);
+// }
+
 void ResponseBuilder::generateCustomErrorPage(int code, const ServerConfig& config)
 {
 	std::map<int, std::string>::const_iterator it = config.errorPages.find(code);
@@ -98,25 +125,32 @@ void ResponseBuilder::generateCustomErrorPage(int code, const ServerConfig& conf
 	if (it != config.errorPages.end())
 	{
 		std::string filePath = it->second;
-		// trying to physically open that custom HTML file from the computer's hard drive
-		// It opens it in binary mode (std::ios::binary) to make sure it reads the exact byte layout without altering newlines
-		std::ifstream file(filePath.c_str(), std::ios::in | std::ios::binary);
-		
-		if (file.is_open())
+
+		// RULEBOOK FIX: Verify that the custom error path exists AND is a regular file
+		struct stat pathStat;
+		if (stat(filePath.c_str(), &pathStat) == 0 && S_ISREG(pathStat.st_mode))
 		{
-			std::stringstream ss;
-			ss << file.rdbuf();
-			file.close();
+			std::ifstream file(filePath.c_str(), std::ios::in | std::ios::binary);
 			
-			setStatus(code);
-			setContentTypeFromExtension(filePath);
-			setBody(ss.str());
-			return;
+			if (file.is_open())
+			{
+				std::stringstream ss;
+				ss << file.rdbuf();
+				file.close();
+				
+				setStatus(code);
+				setContentTypeFromExtension(filePath);
+				setBody(ss.str());
+				return; // Successfully processed the valid custom error file
+			}
 		}
 	}
-	// default if custom file fails
+	
+	// Fallback requirement: If the file path is a directory, missing, or corrupt, 
+	// generate your hardcoded string fallback page immediately.
 	generateDefaultErrorPage(code);
 }
+
 
 
 // Sticher: Merges everything into the exact byte packet the network socket needs

@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:58:56 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/07 11:16:28 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/07 18:18:05 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <map>
 #include <fstream>
 #include "config.hpp"
+#include <sys/stat.h> 
 
 class ResponseBuilder
 {

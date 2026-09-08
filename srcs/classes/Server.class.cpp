@@ -6,12 +6,13 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/07 10:54:58 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/08 03:12:00 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/Server.class.hpp"
 #include "classes/RequestHandler.class.hpp"
+#include "classes/ResponseBuilder.class.hpp"
 #include "signals.hpp"
 #include <fcntl.h>
 #include <iostream>
@@ -219,6 +220,37 @@ void Server::_handleClientEvents(size_t& idx) {
 		_handleOutgoingData(idx);
 }
 
+// void Server::_handleIncomingData(size_t& idx) {
+// 	char msg[MSG_SIZE];
+// 	Client& currClient = _fdCtx.at(_pollfdArr[idx].fd).client.value();
+// 	ssize_t receivedBytes = -1;
+
+// 	while (!g_shutdownRequested) {
+// 		receivedBytes = recv(currClient.getFd(), msg, MSG_SIZE, 0);
+// 		if (receivedBytes == -1) {
+// 			if (errno == EAGAIN || errno == EWOULDBLOCK)
+// 				break;
+// 			perror("recv()");
+// 			throw 1;
+// 		}
+// 		else if (receivedBytes == 0) {
+// 			_disconnectClient(idx);
+// 			return;
+// 		}
+
+// 		currClient.appendToInBuf(msg, receivedBytes);
+// 	}
+
+// 	_processClientInput(currClient);
+
+// 	std::cout << "Message arrived from " << _pollfdArr[idx].fd << " -> " << currClient.getInBuf() << std::endl; // BUG: remove later
+// 	currClient.appendToOutBuf(std::string("\nYou just sent -> " + currClient.getInBuf() + "\n")); // BUG: remove later
+// 	_pollfdArr[idx].events |= POLLOUT; // BUG: remove later
+// 	currClient.clearInBuf(); // BUG: remove later
+
+// }
+
+
 void Server::_handleIncomingData(size_t& idx) {
 	char msg[MSG_SIZE];
 	Client& currClient = _fdCtx.at(_pollfdArr[idx].fd).client.value();
@@ -242,12 +274,22 @@ void Server::_handleIncomingData(size_t& idx) {
 
 	_processClientInput(currClient);
 
-	std::cout << "Message arrived from " << _pollfdArr[idx].fd << " -> " << currClient.getInBuf() << std::endl; // BUG: remove later
-	currClient.appendToOutBuf(std::string("\nYou just sent -> " + currClient.getInBuf() + "\n")); // BUG: remove later
-	_pollfdArr[idx].events |= POLLOUT; // BUG: remove later
-	currClient.clearInBuf(); // BUG: remove later
-
+	// check the state before cleaning up containers
+	if (currClient.requestParser.getState() != RequestParser::PARSE_COMPLETE)
+	{
+		std::cout << "Message arrived from " << _pollfdArr[idx].fd << " -> " << currClient.getInBuf() << std::endl;
+		currClient.appendToOutBuf(std::string("\nYou just sent -> " + currClient.getInBuf() + "\n"));
+		_pollfdArr[idx].events |= POLLOUT;
+	}
+	else 
+	{
+		// request hit completion, start transmission, clear buffers, and reset states
+		_pollfdArr[idx].events |= POLLOUT;
+		currClient.clearInBuf();
+		currClient.requestParser.reset(); 
+	}
 }
+
 
 void Server::_processClientInput(Client& client) {
 	/**
