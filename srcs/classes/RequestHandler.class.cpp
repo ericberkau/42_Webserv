@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/08 20:01:06 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/09 17:59:32 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,7 +168,7 @@ std::string RequestHandler::_handleGet(const std::string& physicalPath, const Lo
 		// if location is NULL, autoIndex defaults to false
 		bool isAutoindexEnabled = location ? location->autoIndex : false;
 		if (!isAutoindexEnabled)
-			throw std::runtime_error("403"); // // If autoindex is turned off and we have no valid index file path, deny access
+			throw std::runtime_error("403"); // If autoindex is turned off and we have no valid index file path, deny access
 
 		// Opening directory folder stream
 		DIR* dir = opendir(physicalPath.c_str());
@@ -227,9 +227,7 @@ std::string RequestHandler::_handlePost(const std::string& physicalPath, const H
 	// Attempt to create/open a file in binary write mode (overwrites if it exists)
 	std::ofstream file(physicalPath.c_str(), std::ios::binary);
 	if (!file.is_open())
-	{
-		throw std::runtime_error("500"); // internal Server Error (e.g., directory doesn't exist)
-	}
+		throw std::runtime_error("500"); // internal Server Error (ex., directory doesn't exist)
 
 	// write the request body directly into the file
 	file.write(request.getBody().data(), request.getBody().size());
