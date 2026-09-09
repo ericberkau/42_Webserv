@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.class.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:10 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/08 12:56:00 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/09 20:25:50 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,9 +44,7 @@ class Server {
 		void	_handleListenerEvents(size_t idx);
 		void	_handleOutgoingData(size_t& idx);
 		void	_handlePendingConnections(int listeningSocket);
-		void	_handleRequest(Client& client);
 		void	_handleSocketEvent(size_t& idx);
-		void	_processClientInput(Client& client);
 
 		/* server state */
 		const Config&							_config;

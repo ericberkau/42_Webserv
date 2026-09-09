@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:06 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/09 19:13:03 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/09 20:19:47 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,22 +24,24 @@ class Client {
 		Client(int fd, const sockaddr_in& addr, const ServerConfig* server);
 		Client(Client&& other) noexcept;
 		Client& operator=(Client&& other) noexcept;
-		~Client();
+		~Client(void);
 
-		int					getFd() const;
-		const std::string&	getInBuf() const;
-		const std::string&	getOutBuf() const;
-		size_t				getOutProgress() const;
-		
+		int							getFd(void) const;
+		const std::string&			getInBuf(void) const;
+		const std::string&			getOutBuf(void) const;
+		size_t						getOutProgress(void) const;
+		RequestParser::ParsingState	getRequestState(void) const;
+		const HttpRequestContainer&	getRequest(void) const;
+		const ServerConfig*			getServer(void) const;
+
 		void	advanceOutProgress(ssize_t bytes);
 		void	appendToInBuf(const char* input, size_t size);
 		void	appendToOutBuf(const std::string& input);
-		void	clearInBuf();
-		void	clearOutBuf();
-		bool	hasPendingOutput() const;
-
-		RequestParser			requestParser;
-		HttpRequestContainer	httpRequest;
+		void	clearInBuf(void);
+		void	clearOutBuf(void);
+		bool	hasPendingOutput(void) const;
+		void	processInputBuffer(void);
+		void	resetRequestState(void);
 
 
 	private:
@@ -52,11 +54,11 @@ class Client {
 		sockaddr_in			_addr;
 		const ServerConfig*	_server;
 
+		RequestParser			_requestParser;
+		HttpRequestContainer	_httpRequest;
+
 		/* diallow copying */
 		Client(const Client&) = delete;
 		Client& operator=(const Client&) = delete;
-
-		// int			_requestParserState;
-		// int			_timeoutInfo
 
 };

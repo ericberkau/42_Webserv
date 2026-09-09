@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/09 19:11:20 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/09 20:23:20 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -273,6 +273,23 @@ void Server::_handleClientEvents(size_t& idx) {
 
 // }
 
+static
+void handleRequest(Client& client) {
+	RequestHandler reqHandler(client.getServer());
+
+	const std::string response = reqHandler.processRequest(client.getRequest());
+
+	client.appendToOutBuf(response);
+	client.resetRequestState();
+}
+
+static
+void processClientInput(Client& client) {
+	client.processInputBuffer();
+
+	if (client.getRequestState() == RequestParser::PARSE_COMPLETE)
+		handleRequest(client);
+}
 
 void Server::_handleIncomingData(size_t& idx) {
 	char msg[MSG_SIZE];
@@ -292,31 +309,10 @@ void Server::_handleIncomingData(size_t& idx) {
 
 	std::cout << "Message arrived from " << _pollfdArr[idx].fd << " -> " << currClient.getInBuf() << std::endl; // BUG: remove later
 
-	_processClientInput(currClient);
+	processClientInput(currClient);
 
 	if (currClient.hasPendingOutput())
 		_pollfdArr[idx].events |= POLLOUT;
-}
-
-void Server::_processClientInput(Client& client) {
-	client.requestParser.feed(
-		client.getInBuf(),
-		client.httpRequest,
-		_fdCtx.at(client.getFd()).server
-	);
-	client.clearInBuf();
-
-	if (client.requestParser.getState() == RequestParser::PARSE_COMPLETE)
-		_handleRequest(client);
-}
-
-void Server::_handleRequest(Client& client) {
-	RequestHandler reqHandler(_fdCtx.at(client.getFd()).server);
-
-	const std::string response = reqHandler.processRequest(client.httpRequest);
-
-	client.appendToOutBuf(response);
-	client.requestParser.reset();
 }
 
 void Server::_handleOutgoingData(size_t& idx) {

@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/09 19:10:19 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/09 20:20:17 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,8 +77,20 @@ const std::string& Client::getOutBuf(void) const {
 	return this->_outputBuffer; // FIXME: + current writeProgr maybe?
 }
 
-size_t Client::getOutProgress() const {
+size_t Client::getOutProgress(void) const {
 	return this->_outputWriteProgress;
+}
+
+RequestParser::ParsingState Client::getRequestState(void) const {
+	return this->_requestParser.getState();
+}
+
+const HttpRequestContainer& Client::getRequest(void) const {
+	return this->_httpRequest;
+}
+
+const ServerConfig* Client::getServer(void) const {
+	return this->_server;
 }
 
 void Client::advanceOutProgress(ssize_t bytes) {
@@ -106,4 +118,14 @@ void Client::clearOutBuf(void) {
 
 bool Client::hasPendingOutput(void) const {
 	return !this->_outputBuffer.empty() && this->_outputWriteProgress < this->_outputBuffer.size();
+}
+
+void Client::processInputBuffer(void) {
+	_requestParser.feed(_inputBuffer, _httpRequest, _server);
+	clearInBuf();
+}
+
+void Client::resetRequestState(void) {
+	_requestParser.reset();
+	// TODO: maybe reset HttpRequestContainer "_httpRequest" as well?
 }
