@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/09 17:22:12 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/09 17:27:22 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,7 @@ int Server::_setupListeningSocket(const ListenDirective& listenCfg) {
 	int serverFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (serverFd < 0) {
 		perror("socket");
-		throw 1;
+		throw std::runtime_error("socket() failed");
 	}
 
 	const int enableSetting = true;
@@ -109,12 +109,12 @@ int Server::_setupListeningSocket(const ListenDirective& listenCfg) {
 	if (0 != bind(serverFd, resolvedAddr->ai_addr, resolvedAddr->ai_addrlen)) {
 		close(serverFd);
 		perror("bind");
-		throw 1;
+		throw std::runtime_error("bind() failed");
 	}
 	if (0 != listen(serverFd, MAX_PEND_CONNECT_QUEUE)) {
 		close(serverFd);
 		perror("listen");
-		throw 1;
+		throw std::runtime_error("listen() failed");
 	}
 
 	pollfd serverPoll;
@@ -164,8 +164,8 @@ void Server::_handlePendingConnections(int listeningSocket) {
 		if (newClientFd == -1) {
 			if (errno == EAGAIN || errno == EWOULDBLOCK)
 				break;
-			perror("accept()");
-			throw 1;
+			perror("accept");
+			throw std::runtime_error("accept() failed");
 		}
 
 		const int currentFlags = fcntl(newClientFd, F_GETFL); // TODO: check return value for fail
@@ -234,8 +234,8 @@ void Server::_handleClientEvents(size_t& idx) {
 // 				_disconnectClient(idx);
 // 				return;
 // 			}
-// 			perror("recv()");
-// 			throw 1;
+// 			perror("recv");
+// 			throw std::runtime_error("recv() failed");
 // 		}
 // 		else if (receivedBytes == 0) {
 // 			_disconnectClient(idx);
@@ -267,8 +267,8 @@ void Server::_handleIncomingData(size_t& idx) {
 	ssize_t receivedBytes = recv(currClient.getFd(), msg, MSG_SIZE, 0);
 
 	if (receivedBytes == -1) {
-		perror("recv()");
-		throw 1;
+		perror("recv");
+		throw std::runtime_error("recv() failed");
 	} else if (receivedBytes == 0) {
 		_disconnectClient(idx);
 		return;
@@ -321,8 +321,8 @@ void Server::_handleOutgoingData(size_t& idx) {
 				);
 
 	if (sentBytes == -1) {
-		perror("send()");
-		throw 1;
+		perror("send");
+		throw std::runtime_error("send() failed");
 	}
 	else if (sentBytes == 0) {
 		std::cerr << "Logic warning: Sent empty output to client " << currClient.getFd() << std::endl;
