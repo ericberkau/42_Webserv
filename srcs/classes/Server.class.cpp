@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/08 19:21:46 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/09 17:22:12 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -258,27 +258,23 @@ void Server::_handleClientEvents(size_t& idx) {
 void Server::_handleIncomingData(size_t& idx) {
 	char msg[MSG_SIZE];
 	Client& currClient = _fdCtx.at(_pollfdArr[idx].fd).client.value();
-	ssize_t receivedBytes = -1;
 
-	while (!g_shutdownRequested) {
-		receivedBytes = recv(currClient.getFd(), msg, MSG_SIZE, 0);
-		if (receivedBytes == -1) {
-			if (errno == EAGAIN || errno == EWOULDBLOCK)
-				break;
-			else if (errno == EPIPE || errno == ECONNRESET) {
-				_disconnectClient(idx);
-				return;
-			}
-			perror("recv()");
-			throw 1;
-		}
-		else if (receivedBytes == 0) {
-			_disconnectClient(idx);
-			return;
-		}
-
-		currClient.appendToInBuf(msg, receivedBytes);
+	if (_pollfdArr[idx].revents & (POLLERR | POLLHUP | POLLNVAL)) {
+		_disconnectClient(idx);
+		return;
 	}
+
+	ssize_t receivedBytes = recv(currClient.getFd(), msg, MSG_SIZE, 0);
+
+	if (receivedBytes == -1) {
+		perror("recv()");
+		throw 1;
+	} else if (receivedBytes == 0) {
+		_disconnectClient(idx);
+		return;
+	}
+
+	currClient.appendToInBuf(msg, receivedBytes);
 
 	std::cout << "Message arrived from " << _pollfdArr[idx].fd << " -> " << currClient.getInBuf() << std::endl; // BUG: remove later
 
@@ -311,37 +307,32 @@ void Server::_handleRequest(Client& client) {
 
 void Server::_handleOutgoingData(size_t& idx) {
 	Client& currClient = _fdCtx.at(_pollfdArr[idx].fd).client.value();
-	ssize_t sentBytes = -1;
 
-	while (!g_shutdownRequested) {
-		if (!currClient.hasPendingOutput()) {
-			currClient.clearOutBuf();
-			_pollfdArr[idx].events &= ~POLLOUT;
-			break;
-		}
+	if (_pollfdArr[idx].revents & (POLLERR | POLLHUP | POLLNVAL)) {
+		_disconnectClient(idx);
+		return;
+	}
 
-		sentBytes = send(
-						currClient.getFd(),
-						currClient.getOutBuf().data() + currClient.getOutProgress(),
-						currClient.getOutBuf().size() - currClient.getOutProgress(),
-						MSG_NOSIGNAL
-					);
+	ssize_t sentBytes = send(
+					currClient.getFd(),
+					currClient.getOutBuf().data() + currClient.getOutProgress(),
+					currClient.getOutBuf().size() - currClient.getOutProgress(),
+					MSG_NOSIGNAL
+				);
 
-		if (sentBytes == -1) {
-			if (errno == EAGAIN || errno == EWOULDBLOCK)
-				break;
-			else if (errno == EPIPE || errno == ECONNRESET) {
-				_disconnectClient(idx);
-				return;
-			}
-			perror("send()");
-			throw 1;
-		}
-		else if (sentBytes == 0) {
-			std::cerr << "Sent empty output to client " << currClient.getFd() << std::endl;
-		}
+	if (sentBytes == -1) {
+		perror("send()");
+		throw 1;
+	}
+	else if (sentBytes == 0) {
+		std::cerr << "Logic warning: Sent empty output to client " << currClient.getFd() << std::endl;
+	}
 
-		currClient.advanceOutProgress(sentBytes);
+	currClient.advanceOutProgress(sentBytes);
+
+	if (!currClient.hasPendingOutput()) {
+		currClient.clearOutBuf();
+		_pollfdArr[idx].events &= ~POLLOUT;
 	}
 }
 
