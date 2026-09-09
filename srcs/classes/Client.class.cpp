@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/06/01 00:29:02 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/09 19:10:19 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,13 @@
 #include <iostream>
 #include <unistd.h>
 
-Client::Client(int fd, sockaddr_in addr) : _fd(fd), _inputReadProgress(0), _outputWriteProgress(0), _addr(addr)
+Client::Client(int fd, const sockaddr_in& addr, const ServerConfig* server)
+	: _fd(fd), _inputReadProgress(0), _outputWriteProgress(0), _addr(addr), _server(server)
 {
 	std::clog << "[Client] constructor called" << std::endl; // FIXME: for debugging, remove later
+
+	if (!server)
+		throw std::logic_error("Client constructed with nullptr to ServerConfig");
 }
 
 Client::Client(Client&& other) noexcept
@@ -24,7 +28,8 @@ Client::Client(Client&& other) noexcept
 		_inputBuffer(std::move(other._inputBuffer)),
 		_outputBuffer(std::move(other._outputBuffer)),
 		_outputWriteProgress(other._outputWriteProgress),
-		_addr(other._addr)
+		_addr(other._addr),
+		_server(other._server)
 {
 	std::clog << "[Client] move constructor called" << std::endl; // FIXME: for debugging, remove later
 
@@ -43,6 +48,7 @@ Client& Client::operator=(Client&& other) noexcept {
 		_outputBuffer = std::move(other._outputBuffer);
 		_outputWriteProgress = other._outputWriteProgress;
 		_addr = other._addr;
+		_server = other._server;
 		
 		other._fd = -1;
 	}

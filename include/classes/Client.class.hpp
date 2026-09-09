@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.class.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:06 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/07 10:56:00 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/09 19:13:03 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ class Client {
 
 	public:
 
-		Client(int fd, sockaddr_in addr);
+		Client(int fd, const sockaddr_in& addr, const ServerConfig* server);
 		Client(Client&& other) noexcept;
 		Client& operator=(Client&& other) noexcept;
 		~Client();
@@ -44,12 +44,13 @@ class Client {
 
 	private:
 
-		int			_fd;
-		std::string	_inputBuffer; // TODO: limit size later
-		size_t		_inputReadProgress;
-		std::string	_outputBuffer;
-		size_t		_outputWriteProgress;
-		sockaddr_in	_addr;
+		int					_fd;
+		std::string			_inputBuffer; // TODO: limit size later
+		size_t				_inputReadProgress; // FIXME: not needed at all?
+		std::string			_outputBuffer;
+		size_t				_outputWriteProgress;
+		sockaddr_in			_addr;
+		const ServerConfig*	_server;
 
 		/* diallow copying */
 		Client(const Client&) = delete;

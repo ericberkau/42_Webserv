@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/09 17:27:22 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/09 19:11:20 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,6 +132,24 @@ bool Server::_isDuplicateAddress(uint32_t host, uint16_t port) {
 void Server::_handleSocketEvent(size_t& idx) {
 	FdContext& currFd = _fdCtx.at(_pollfdArr[idx].fd);
 
+	if (_pollfdArr[idx].revents & (POLLERR | POLLHUP | POLLNVAL)) {
+		switch (currFd.type) {
+			case SocketType::LISTENER:
+				throw std::runtime_error("listening socket failed");
+
+			case SocketType::CLIENT:
+				_disconnectClient(idx);
+				return;
+
+			case SocketType::CGI_PIPE:
+				// TODO
+				return;
+
+			default:
+				throw std::logic_error("unknown socket type failed");
+		}
+	}
+
 	switch (currFd.type) {
 		case SocketType::LISTENER:
 			_handleListenerEvents(idx);
@@ -146,7 +164,7 @@ void Server::_handleSocketEvent(size_t& idx) {
 			break;
 
 		default:
-			break;
+			throw std::logic_error("event for unknown socket type");
 	}
 }
 
@@ -189,7 +207,8 @@ void Server::_handlePendingConnections(int listeningSocket) {
 										relatedServer,
 										Client(
 											newClientFd,
-											newClientAddr
+											newClientAddr,
+											relatedServer
 										)
 									)
 								);
@@ -259,11 +278,6 @@ void Server::_handleIncomingData(size_t& idx) {
 	char msg[MSG_SIZE];
 	Client& currClient = _fdCtx.at(_pollfdArr[idx].fd).client.value();
 
-	if (_pollfdArr[idx].revents & (POLLERR | POLLHUP | POLLNVAL)) {
-		_disconnectClient(idx);
-		return;
-	}
-
 	ssize_t receivedBytes = recv(currClient.getFd(), msg, MSG_SIZE, 0);
 
 	if (receivedBytes == -1) {
@@ -307,11 +321,6 @@ void Server::_handleRequest(Client& client) {
 
 void Server::_handleOutgoingData(size_t& idx) {
 	Client& currClient = _fdCtx.at(_pollfdArr[idx].fd).client.value();
-
-	if (_pollfdArr[idx].revents & (POLLERR | POLLHUP | POLLNVAL)) {
-		_disconnectClient(idx);
-		return;
-	}
 
 	ssize_t sentBytes = send(
 					currClient.getFd(),
