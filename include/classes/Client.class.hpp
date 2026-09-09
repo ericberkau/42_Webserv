@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:06 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/09 20:19:47 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/09 21:54:53 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,13 +26,10 @@ class Client {
 		Client& operator=(Client&& other) noexcept;
 		~Client(void);
 
-		int							getFd(void) const;
-		const std::string&			getInBuf(void) const;
-		const std::string&			getOutBuf(void) const;
-		size_t						getOutProgress(void) const;
-		RequestParser::ParsingState	getRequestState(void) const;
-		const HttpRequestContainer&	getRequest(void) const;
-		const ServerConfig*			getServer(void) const;
+		int					getFd(void) const;
+		const std::string&	getInBuf(void) const;
+		const std::string&	getOutBuf(void) const;
+		size_t				getOutProgress(void) const;
 
 		void	advanceOutProgress(ssize_t bytes);
 		void	appendToInBuf(const char* input, size_t size);
@@ -40,12 +37,12 @@ class Client {
 		void	clearInBuf(void);
 		void	clearOutBuf(void);
 		bool	hasPendingOutput(void) const;
-		void	processInputBuffer(void);
-		void	resetRequestState(void);
+		void	processInput(void);
 
 
 	private:
 
+		/* client state */
 		int					_fd;
 		std::string			_inputBuffer; // TODO: limit size later
 		size_t				_inputReadProgress; // FIXME: not needed at all?
@@ -54,8 +51,12 @@ class Client {
 		sockaddr_in			_addr;
 		const ServerConfig*	_server;
 
+		/* HTTP management */
 		RequestParser			_requestParser;
 		HttpRequestContainer	_httpRequest;
+
+		void	_handleRequest(void);
+		void	_resetRequestState(void);
 
 		/* diallow copying */
 		Client(const Client&) = delete;

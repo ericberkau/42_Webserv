@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/09 20:23:20 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/09 21:46:18 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -273,23 +273,23 @@ void Server::_handleClientEvents(size_t& idx) {
 
 // }
 
-static
-void handleRequest(Client& client) {
-	RequestHandler reqHandler(client.getServer());
+// static
+// void handleRequest(Client& client) {
+// 	RequestHandler reqHandler(client.getServer());
 
-	const std::string response = reqHandler.processRequest(client.getRequest());
+// 	const std::string response = reqHandler.processRequest(client.getRequest());
 
-	client.appendToOutBuf(response);
-	client.resetRequestState();
-}
+// 	client.appendToOutBuf(response);
+// 	client.resetRequestState();
+// }
 
-static
-void processClientInput(Client& client) {
-	client.processInputBuffer();
+// static
+// void processClientInput(Client& client) {
+// 	client.processInputBuffer();
 
-	if (client.getRequestState() == RequestParser::PARSE_COMPLETE)
-		handleRequest(client);
-}
+// 	if (client.getRequestState() == RequestParser::PARSE_COMPLETE)
+// 		handleRequest(client);
+// }
 
 void Server::_handleIncomingData(size_t& idx) {
 	char msg[MSG_SIZE];
@@ -309,7 +309,7 @@ void Server::_handleIncomingData(size_t& idx) {
 
 	std::cout << "Message arrived from " << _pollfdArr[idx].fd << " -> " << currClient.getInBuf() << std::endl; // BUG: remove later
 
-	processClientInput(currClient);
+	currClient.processInput();
 
 	if (currClient.hasPendingOutput())
 		_pollfdArr[idx].events |= POLLOUT;

@@ -6,11 +6,12 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/09 20:20:17 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/09 21:55:50 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/Client.class.hpp"
+#include "classes/RequestHandler.class.hpp"
 #include <iostream>
 #include <unistd.h>
 
@@ -81,18 +82,6 @@ size_t Client::getOutProgress(void) const {
 	return this->_outputWriteProgress;
 }
 
-RequestParser::ParsingState Client::getRequestState(void) const {
-	return this->_requestParser.getState();
-}
-
-const HttpRequestContainer& Client::getRequest(void) const {
-	return this->_httpRequest;
-}
-
-const ServerConfig* Client::getServer(void) const {
-	return this->_server;
-}
-
 void Client::advanceOutProgress(ssize_t bytes) {
 	this->_outputWriteProgress += bytes;
 }
@@ -120,12 +109,25 @@ bool Client::hasPendingOutput(void) const {
 	return !this->_outputBuffer.empty() && this->_outputWriteProgress < this->_outputBuffer.size();
 }
 
-void Client::processInputBuffer(void) {
+void Client::processInput(void) {
 	_requestParser.feed(_inputBuffer, _httpRequest, _server);
 	clearInBuf();
+
+	if (_requestParser.getState() == RequestParser::PARSE_COMPLETE)
+		_handleRequest();
 }
 
-void Client::resetRequestState(void) {
+void Client::_handleRequest(void) {
+	RequestHandler requestHandler(_server);
+
+	const std::string response = requestHandler.processRequest(_httpRequest);
+
+	appendToOutBuf(response);
+
+	_resetRequestState();
+}
+
+void Client::_resetRequestState(void) {
 	_requestParser.reset();
 	// TODO: maybe reset HttpRequestContainer "_httpRequest" as well?
 }
