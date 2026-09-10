@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:16 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/10 14:51:40 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/10 17:21:58 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,8 +56,6 @@ static bool splitOnce(const std::string& s, char delim, std::string& left, std::
 	right = s.substr(pos + 1);
 	return true;
 }
-
-// RequestParser
 
 bool RequestParser::_isSupportedMethod(const std::string& method)
 {

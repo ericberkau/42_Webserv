@@ -6,12 +6,13 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/10 14:07:48 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/10 17:17:51 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/Client.class.hpp"
 #include "classes/RequestHandler.class.hpp"
+#include "classes/ResponseBuilder.class.hpp"
 #include <iostream>
 #include <unistd.h>
 
@@ -110,9 +111,17 @@ bool Client::hasPendingOutput(void) const {
 }
 
 void Client::processInput(void) {
+	try {
 	_requestParser.feed(_inputBuffer, _httpRequest, _server);
+	}
+	catch (const HttpParseException& e) {
+		ResponseBuilder rb;
+		rb.generateCustomErrorPage(e.getStatusCode(), *_server);
+		appendToOutBuf(rb.buildString());
+		_resetRequestState();
+	}
 	clearInBuf();
-
+	
 	if (_requestParser.getState() == RequestParser::PARSE_COMPLETE)
 		_handleRequest();
 }

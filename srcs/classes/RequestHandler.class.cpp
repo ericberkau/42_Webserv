@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/10 14:52:09 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/10 17:10:29 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -290,12 +290,6 @@ std::string RequestHandler::processRequest(const HttpRequestContainer& request)
 			statusCode = 500; // Fallback to Internal Error if conversion fails
 
 		response.generateCustomErrorPage(statusCode, *_config);
-		return response.buildString();
-	}
-	catch (const HttpParseException& parseError)
-	{
-		// captures bad request inputs coming out of initial Parser stages
-		response.generateCustomErrorPage(parseError.getStatusCode(), *_config);
 		return response.buildString();
 	}
 	catch (...)
