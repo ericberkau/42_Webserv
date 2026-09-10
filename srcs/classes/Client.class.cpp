@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.class.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/09 21:55:50 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/10 14:07:48 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,5 +129,5 @@ void Client::_handleRequest(void) {
 
 void Client::_resetRequestState(void) {
 	_requestParser.reset();
-	// TODO: maybe reset HttpRequestContainer "_httpRequest" as well?
+	_httpRequest.clear(); // TODO-TODONE?: maybe reset HttpRequestContainer "_httpRequest" as well?
 }

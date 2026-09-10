@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:54:11 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/08 16:17:29 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/10 14:05:20 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,8 @@ class HttpRequestContainer
 		// Returns "" if header not found. Header lookup is case-insensitive
 		// acc. to RFC, so we normalize keys to lowercase when storing them
 		std::string getHeader(const std::string& key) const;
+
+		void clear();
 
 		// For debugging to print everything that is parsed
 		void print() const;

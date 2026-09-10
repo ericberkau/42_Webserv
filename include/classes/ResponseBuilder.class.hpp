@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:58:56 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/09 17:50:37 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/10 14:06:23 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ class ResponseBuilder
 		// stitches everything into the raw string packet
 		std::string buildString() const;
 
-		// Clears the builder state so it can be reused on keep-alive loops
+		// Clears the builder state so it can be reused on keep-alive loops (not currently(10 Sep) needed)
 		void clear();
 
 		void setContentTypeFromExtension(const std::string& physicalPath);

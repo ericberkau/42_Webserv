@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:03:59 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/08 16:19:40 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/10 14:05:45 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,6 +96,16 @@ std::string HttpRequestContainer::getHeader(const std::string& key) const
 	if (it == _headers.end())
 		return "";
 	return it->second;
+}
+
+void HttpRequestContainer::clear()
+{
+	_method = HttpMethod::INVALID;
+	_uri.clear();
+	_version.clear();
+	_queryString.clear();
+	_body.clear();
+	_headers.clear();
 }
 
 void HttpRequestContainer::print() const
