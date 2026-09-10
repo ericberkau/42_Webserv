@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:26 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/07 18:35:38 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/10 14:50:39 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 ResponseBuilder::ResponseBuilder() : _httpVersion("HTTP/1.1"), _statusCode(200), _statusMessage("OK") {}
 ResponseBuilder::~ResponseBuilder() {}
 
-// Dictionary lookup for standard HTTP text statuses required by the protocol
 std::string ResponseBuilder::_getStandardStatusMessage(int code) const
 {
 	switch (code)
@@ -57,7 +56,7 @@ void ResponseBuilder::addHeader(const std::string& key, const std::string& value
 void ResponseBuilder::setBody(const std::string& body)
 {
 	_body = body;
-	setContentLength(_body.size()); // Automatically sync the header size!
+	setContentLength(_body.size());
 }
 
 void ResponseBuilder::setHttpVersion(const std::string& version)
@@ -91,33 +90,6 @@ void ResponseBuilder::generateDefaultErrorPage(int code)
 	setBody(bodyStream.str());
 }
 
-// void ResponseBuilder::generateCustomErrorPage(int code, const ServerConfig& config)
-// {
-// 	std::map<int, std::string>::const_iterator it = config.errorPages.find(code);
-	
-// 	if (it != config.errorPages.end())
-// 	{
-// 		std::string filePath = it->second;
-// 		// trying to physically open that custom HTML file from the computer's hard drive
-// 		// It opens it in binary mode (std::ios::binary) to make sure it reads the exact byte layout without altering newlines
-// 		std::ifstream file(filePath.c_str(), std::ios::in | std::ios::binary);
-		
-// 		if (file.is_open())
-// 		{
-// 			std::stringstream ss;
-// 			ss << file.rdbuf();
-// 			file.close();
-			
-// 			setStatus(code);
-// 			setContentTypeFromExtension(filePath);
-// 			setBody(ss.str());
-// 			return;
-// 		}
-// 	}
-// 	// default if custom file fails
-// 	generateDefaultErrorPage(code);
-// }
-
 void ResponseBuilder::generateCustomErrorPage(int code, const ServerConfig& config)
 {
 	std::map<int, std::string>::const_iterator it = config.errorPages.find(code);
@@ -126,7 +98,7 @@ void ResponseBuilder::generateCustomErrorPage(int code, const ServerConfig& conf
 	{
 		std::string filePath = it->second;
 
-		// RULEBOOK FIX: Verify that the custom error path exists AND is a regular file
+		// Verify that the custom error path exists AND is a regular file
 		struct stat pathStat;
 		if (stat(filePath.c_str(), &pathStat) == 0 && S_ISREG(pathStat.st_mode))
 		{
@@ -145,35 +117,29 @@ void ResponseBuilder::generateCustomErrorPage(int code, const ServerConfig& conf
 			}
 		}
 	}
-	
-	// Fallback requirement: If the file path is a directory, missing, or corrupt, 
-	// generate your hardcoded string fallback page immediately.
+	// If the file path is a directory, missing, or corrupt, 
+	// generate hardcoded string fallback page
 	generateDefaultErrorPage(code);
 }
 
-
-
-// Sticher: Merges everything into the exact byte packet the network socket needs
+// Merges everything into the byte packet the network socket needs
 std::string ResponseBuilder::buildString() const
 {
 	std::stringstream packet;
 
-	// 1. Status Line (Ex: HTTP/1.1 200 OK\r\n)
+	// Status Line (Ex: HTTP/1.1 200 OK\r\n)
 	packet << _httpVersion << " " << _statusCode << " " << _statusMessage << "\r\n";
 
-	// 2. Headers Block (Ex: Content-Length: 42\r\n)
+	// Headers Block (Ex: Content-Length: 42\r\n)
 	std::map<std::string, std::string>::const_iterator it;
 	for (it = _headers.begin(); it != _headers.end(); ++it)
 	{
 		packet << it->first << ": " << it->second << "\r\n";
 	}
-
-	// 3. The Mandatory Blank Line marking the end of headers
+	// Mandatory Blank Line marking the end of headers
 	packet << "\r\n";
-
-	// 4. The Payload Body (if any exists)
+	// The Payload Body (if any exists)
 	packet << _body;
-
 	return packet.str();
 }
 
@@ -190,7 +156,7 @@ void ResponseBuilder::setContentTypeFromExtension(const std::string& physicalPat
 {
 	size_t dotPos = physicalPath.find_last_of('.');
 		
-	// if there is no dot or extension, defaulting safely to raw octet stream/binary
+	// if there is no dot or extension, defaulting to raw octet stream/binary
 	if (dotPos == std::string::npos || dotPos == physicalPath.size() - 1)
 	{
 		setContentType("application/octet-stream");

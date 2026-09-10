@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/09 17:59:32 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/10 14:52:09 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,43 +63,6 @@ void RequestHandler::_verifyMethodAllowed(const HttpMethod& method, const Locati
 	if (location->allowedMethods.find(method) == location->allowedMethods.end())
 		throw std::runtime_error("405"); 
 }
-
-// translating the URI to a Real File Path on Your System (to serve a file, we combine the configuration's designated root 
-// folder directory with the client's requested trailing URI string path)
-// old func.
-// std::string RequestHandler::_translateToPhysicalPath(const std::string& uri, const LocationConfig* location) const
-// {
-// 	std::string baseRoot = location ? location->root : _config->locations[0].root; //BUG for multiple locations (also deref for nonexisting location)
-// 	std::string path = baseRoot + uri;
-
-// 	struct stat pathStat;
-// 	if (stat(path.c_str(), &pathStat) == 0)
-// 	{
-// 		if (S_ISDIR(pathStat.st_mode))
-// 		{
-// 			std::string indexFile = location ? location->index : _config->locations[0].index; //FIXME for multiple locations
-// 			if (indexFile.empty()) 
-// 				indexFile = "index.html"; //FIXME: remove hardcoding, "does not exist"/"not found" instead? default behavior for index not specified in config
-
-// 			std::string fullIndexPath = path;
-// 			if (fullIndexPath.back() == '/') 
-// 				fullIndexPath += indexFile;
-// 			else							 
-// 				fullIndexPath += "/" + indexFile;
-
-// 			// check if index.html actually exists on disk.
-// 			struct stat indexStat;
-// 			if (stat(fullIndexPath.c_str(), &indexStat) == 0)
-// 			{
-// 				return fullIndexPath; // If it exists, use it!
-// 			}
-// 			// if index.html DOES NOT exist, leave the path pointing to the directory 
-// 			// so _handleGet can trigger autoindex logic later!
-// 		}
-// 	}
-// 	return path;
-// }
-
 
 std::string RequestHandler::_translateToPhysicalPath(const std::string& uri, const LocationConfig* location) const
 {
@@ -220,8 +183,8 @@ std::string RequestHandler::_handleGet(const std::string& physicalPath, const Lo
 }
 
 
-// this function takes the raw body data sent by the client and saves it as a new file on your hard drive
-// if successful, it returns a 201 Created response.
+// this function takes the raw body data sent by the client and saves it as a new file on hard drive
+// if successful, it returns a 201 Created response
 std::string RequestHandler::_handlePost(const std::string& physicalPath, const HttpRequestContainer& request)
 {
 	// Attempt to create/open a file in binary write mode (overwrites if it exists)
@@ -251,7 +214,7 @@ std::string RequestHandler::_handlePost(const std::string& physicalPath, const H
 }
 
 // checks if a file exists, and if it does, deletes it using the standard C++ std::remove utility
-// if successful, it returns a 200 OK or 204 No Content response.
+// if successful, it returns a 200 OK or 204 No Content response
 std::string RequestHandler::_handleDelete(const std::string& physicalPath)
 {
 	// check if the file exists before attempting to delete it
@@ -282,40 +245,6 @@ std::string RequestHandler::_handleDelete(const std::string& physicalPath)
 
 	return response;
 }
-
-
-// std::string RequestHandler::processRequest(const HttpRequestContainer& request)
-// {
-// 	try {
-// 		// 1. Find configuration block matches
-// 		const LocationConfig* matchedLoc = _matchLocation(request.getUri());
-
-// 		// 2. Validate routing method permissions (Throws 405 if blocked)
-// 		_verifyMethodAllowed(request.getMethod(), matchedLoc);
-
-// 		// 3. Convert URI string to a real system file address path
-// 		std::string physicalPath = _translateToPhysicalPath(request.getUri(), matchedLoc);
-
-// 		// 4. Branch execution to chosen handler based on HTTP Method type
-// 		if (request.getMethod() == "GET") {
-// 			return _handleGet(physicalPath, matchedLoc);
-// 		} 
-// 		else if (request.getMethod() == "POST") {
-// 			return _handlePost(physicalPath, request);
-// 		} 
-// 		else if (request.getMethod() == "DELETE") {
-// 			return _handleDelete(physicalPath);
-// 		}
-		
-// 		throw std::runtime_error("501"); // Not Implemented fallback guard
-// 	}
-// 	catch (const std::runtime_error& errorMsg) {
-// 		// This is where the upcoming Response Builder takes over to format an Error Response packet
-// 		std::string status = errorMsg.what();
-// 		std::cout << "Handling Error Status Code: " << status << "\n";
-// 		return "HTTP/1.1 " + status + " Error\r\n\r\n"; // Temporary mock string
-// 	}
-// }
 
 // for status code conversion
 static int stringToInt(const std::string& s)

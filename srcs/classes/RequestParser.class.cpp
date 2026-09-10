@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:16 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/08 16:21:21 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/10 14:51:40 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -404,44 +404,3 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 			break;
 	}
 }
-
-// HttpRequestContainer RequestParser::parse(const std::string& raw)
-// {
-// 	HttpRequestContainer request;
-
-// 	// Headers are separated by CRLF ("\r\n"), and the header block ends
-// 	// with a blank line (CRLF CRLF). For now we assume the whole
-// 	// request (request line + headers) is already in `raw`. ACTUAL
-// 	// partial-data handling should be done later
-// 	size_t headerEnd = raw.find("\r\n\r\n"); // Stores the index of the very first character of that (entire) match (the first \r)
-// 	if (headerEnd == std::string::npos) // npos is a special constant in C++ that means 'not found'.
-// 		throw HttpParseException(400, "Bad Request: no end of headers found");
-
-// 	std::string headerBlock = raw.substr(0, headerEnd);
-// 	std::string rest = raw.substr(headerEnd + 4); // skip past "\r\n\r\n"
-
-// 	// Split headerBlock into lines on "\r\n"
-// 	std::istringstream stream(headerBlock);
-// 	std::string line;
-// 	bool firstLine = true;
-
-// 	while (std::getline(stream, line)) // getline() by default reads until it hits '\n'
-// 	{
-// 		// getline on "\r\n"-separated text leaves a trailing '\r' so strip it
-// 		if (!line.empty() && line[line.size() - 1] == '\r')
-// 			line.erase(line.size() - 1); // chops it off
-// 		if (firstLine)
-// 		{
-// 			_parseRequestLine(line, request);
-// 			firstLine = false;
-// 		}
-// 		else
-// 			_parseHeaderLine(line, request);
-// 	}
-
-// 	// NO Content-Length / chunked handling yet!!
-// 	// Whatever is left after the headers, we just store as-is for now
-// 	request.setBody(rest);
-
-// 	return request;
-// }

@@ -19,7 +19,7 @@ void simulateNetworkEvent(const std::string& testName, const ServerConfig& confi
 
 	try
 	{
-		// Step 1: Feed data chunks into your parser state machine (FIXED: added 'config')
+		// Step 1: Feed data chunks into parser state machine (FIXED: added 'config')
 		parser.feed(rawInput, request, config);
 
 		// Step 2: If parsing finishes successfully, pass it to the handler
@@ -69,7 +69,7 @@ int main()
 	// 3. Create a location block with autoindex explicitly TURNED ON
 	LocationConfig listableRoute;
 	listableRoute.path = "/files";
-	listableRoute.root = "."; // Points to your current project folder
+	listableRoute.root = "."; // Points to current project folder
 	listableRoute.allowedMethods.insert("GET");
 	listableRoute.autoindex = true; //TURN AUTOINDEX ON!
 	config.locations.push_back(listableRoute);
