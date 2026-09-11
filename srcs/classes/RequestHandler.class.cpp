@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/10 17:10:29 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/11 12:58:34 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -246,6 +246,20 @@ std::string RequestHandler::_handleDelete(const std::string& physicalPath)
 	return response;
 }
 
+std::string RequestHandler::_handleRedirect(const LocationConfig* location) const
+{
+	ResponseBuilder response;
+	response.setStatus(location->redirectStatusCode);
+	response.addHeader("Location", location->redirectTarget);
+
+	std::string body = "<html><head><title>" + std::to_string(location->redirectStatusCode) + " Redirect</title></head>"
+					"<body>Redirecting to <a href=\"" + location->redirectTarget + "\">" + location->redirectTarget + "</a></body></html>";
+	response.setContentType("text/html");
+	response.setBody(body);
+
+	return response.buildString();
+}
+
 // for status code conversion
 static int stringToInt(const std::string& s)
 {
@@ -261,18 +275,21 @@ std::string RequestHandler::processRequest(const HttpRequestContainer& request)
 
 	try
 	{
-		// 1. Find configuration block matches
+		// Find configuration block matches
 		const LocationConfig* matchedLoc = _matchLocation(request.getUri());
 
-		// 2. Validate routing method permissions
+		if (matchedLoc && matchedLoc->hasRedirect)
+			return _handleRedirect(matchedLoc);
+
+		// Validate routing method permissions
 		_verifyMethodAllowed(request.getMethod(), matchedLoc);
 
-		// 3. Convert abstract URI string to a real system file address path
+		// Convert abstract URI string to a real system file address path
 		std::string physicalPath = _translateToPhysicalPath(request.getUri(), matchedLoc);
 
 		
 
-		// 4. Branch execution to the matching handler based on HTTP Method type
+		// Branch execution to the matching handler based on HTTP Method type
 		if (request.getMethod() == HttpMethod::GET)
 			return _handleGet(physicalPath, matchedLoc);
 		else if (request.getMethod() == HttpMethod::POST)

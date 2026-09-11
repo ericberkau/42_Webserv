@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:55:03 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/10 17:05:19 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/11 12:55:44 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ class RequestHandler
 		std::string _handleGet(const std::string& physicalPath, const LocationConfig* location);
 		std::string _handlePost(const std::string& physicalPath, const HttpRequestContainer& request);
 		std::string _handleDelete(const std::string& physicalPath);
+		std::string _handleRedirect(const LocationConfig* location) const;
 
 };
 

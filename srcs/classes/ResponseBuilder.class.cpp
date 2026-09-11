@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:26 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/10 14:50:39 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/11 12:59:29 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,10 @@ std::string ResponseBuilder::_getStandardStatusMessage(int code) const
 		case 201: return "Created";
 		case 204: return "No Content";
 		case 301: return "Moved Permanently";
+		case 302: return "Found";
+		case 303: return "See Other";
+		case 307: return "Temporary Redirect";
+		case 308: return "Permanent Redirect";
 		case 400: return "Bad Request";
 		case 403: return "Forbidden";
 		case 404: return "Not Found";
