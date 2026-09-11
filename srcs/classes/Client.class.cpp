@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.class.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/11 14:14:10 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/11 19:17:11 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include <unistd.h>
 
 Client::Client(int fd, const sockaddr_in& addr, const ServerConfig* server)
-	: _fd(fd), _inputReadProgress(0), _outputWriteProgress(0), _addr(addr), _server(server)
+	: _fd(fd), _inputReadProgress(0), _outputWriteProgress(0), _addr(addr), _server(server), _fail(false)
 {
 	std::clog << "[Client] constructor called" << std::endl; // FIXME: for debugging, remove later
 
@@ -90,7 +90,7 @@ void Client::advanceOutProgress(ssize_t bytes) {
 void Client::appendToInBuf(const char* input, size_t size) {
 	_inputBuffer.append(input, size);
 	_inputReadProgress += size;
-}
+} // BUG: unused? -> remove
 
 void Client::appendToOutBuf(const std::string& input) {
 	_outputBuffer.append(input);
@@ -110,24 +110,31 @@ bool Client::hasPendingOutput(void) const {
 	return !this->_outputBuffer.empty() && this->_outputWriteProgress < this->_outputBuffer.size();
 }
 
+bool Client::shouldDisconnect(void) const {
+	return this->_fail;
+}
+
 void Client::processInput(void) {
 	try {
-	_requestParser.feed(_inputBuffer, _httpRequest, _server);
-	clearInBuf();
+		_requestParser.feed(_inputBuffer, _httpRequest, _server);
+		clearInBuf();
 
-	while (_requestParser.getState() == RequestParser::PARSE_COMPLETE)
-	{
-		_handleRequest();
-		_requestParser.feed("", _httpRequest, _server);
-	}
+		while (_requestParser.getState() == RequestParser::PARSE_COMPLETE)
+		{
+			_handleRequest();
+			_requestParser.feed("", _httpRequest, _server);
+		}
 	}
 	catch (const HttpParseException& e) {
 		ResponseBuilder rb;
+
 		rb.generateCustomErrorPage(e.getStatusCode(), *_server);
 		appendToOutBuf(rb.buildString());
+
 		_resetRequestState();
 		_requestParser.discardBuffer();
 		clearInBuf();
+		_fail = true;
 	}
 }
 
@@ -143,5 +150,5 @@ void Client::_handleRequest(void) {
 
 void Client::_resetRequestState(void) {
 	_requestParser.reset();
-	_httpRequest.clear(); // TODO-TODONE?: maybe reset HttpRequestContainer "_httpRequest" as well?
+	_httpRequest.clear();
 }
