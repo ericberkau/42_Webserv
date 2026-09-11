@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/11 19:17:11 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/11 20:15:44 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,13 +29,17 @@ Client::Client(Client&& other) noexcept
 	:	_fd(other._fd),
 		_inputBuffer(std::move(other._inputBuffer)),
 		_outputBuffer(std::move(other._outputBuffer)),
+		_inputReadProgress(other._inputReadProgress), // FIXME: not needed -> remove
 		_outputWriteProgress(other._outputWriteProgress),
 		_addr(other._addr),
-		_server(other._server)
+		_server(other._server),
+		_fail(other._fail),
+		_requestParser(std::move(other._requestParser)), // FIXME: moving possible?
+		_httpRequest(std::move(other._httpRequest)) // FIXME: moving possible?
 {
 	std::clog << "[Client] move constructor called" << std::endl; // FIXME: for debugging, remove later
 
-    other._fd = -1;
+	other._fd = -1;
 }
 
 Client& Client::operator=(Client&& other) noexcept {
@@ -48,10 +52,14 @@ Client& Client::operator=(Client&& other) noexcept {
 		_fd = other._fd;
 		_inputBuffer = std::move(other._inputBuffer);
 		_outputBuffer = std::move(other._outputBuffer);
+		_inputReadProgress = other._inputReadProgress; // FIXME: not needed -> remove
 		_outputWriteProgress = other._outputWriteProgress;
 		_addr = other._addr;
 		_server = other._server;
-		
+		_fail = other._fail;
+		_requestParser = std::move(other._requestParser); // FIXME: moving possible?
+		_httpRequest = std::move(other._httpRequest); // FIXME: moving possible?
+
 		other._fd = -1;
 	}
 
