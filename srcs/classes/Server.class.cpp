@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/09 21:46:18 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/11 03:56:03 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -235,7 +235,10 @@ void Server::_handleClientEvents(size_t& idx) {
 	/** At this point, the client might have disconnected (idx modified in subfunction)
 	 * with still pending outgoing data, originalIdx checks if a diconnect occured.
 	 * */
-	if (_pollfdArr[idx].revents & POLLOUT && idx == originalIdx)
+	if (idx != originalIdx)
+		return;
+
+	if (_pollfdArr[idx].revents & POLLOUT)
 		_handleOutgoingData(idx);
 }
 
@@ -313,6 +316,9 @@ void Server::_handleIncomingData(size_t& idx) {
 
 	if (currClient.hasPendingOutput())
 		_pollfdArr[idx].events |= POLLOUT;
+
+	if (currClient.shouldDisconnect())
+		_pollfdArr[idx].events &= ~POLLIN;
 }
 
 void Server::_handleOutgoingData(size_t& idx) {
@@ -336,6 +342,11 @@ void Server::_handleOutgoingData(size_t& idx) {
 	currClient.advanceOutProgress(sentBytes);
 
 	if (!currClient.hasPendingOutput()) {
+		if (currClient.shouldDisconnect()) {
+			_disconnectClient(idx);
+			return;
+		}
+
 		currClient.clearOutBuf();
 		_pollfdArr[idx].events &= ~POLLOUT;
 	}
