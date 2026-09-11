@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/10 17:17:51 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/11 14:14:10 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,17 +113,22 @@ bool Client::hasPendingOutput(void) const {
 void Client::processInput(void) {
 	try {
 	_requestParser.feed(_inputBuffer, _httpRequest, _server);
+	clearInBuf();
+
+	while (_requestParser.getState() == RequestParser::PARSE_COMPLETE)
+	{
+		_handleRequest();
+		_requestParser.feed("", _httpRequest, _server);
+	}
 	}
 	catch (const HttpParseException& e) {
 		ResponseBuilder rb;
 		rb.generateCustomErrorPage(e.getStatusCode(), *_server);
 		appendToOutBuf(rb.buildString());
 		_resetRequestState();
+		_requestParser.discardBuffer();
+		clearInBuf();
 	}
-	clearInBuf();
-	
-	if (_requestParser.getState() == RequestParser::PARSE_COMPLETE)
-		_handleRequest();
 }
 
 void Client::_handleRequest(void) {

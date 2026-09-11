@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:16 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/10 17:21:58 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/11 14:09:02 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -198,9 +198,14 @@ RequestParser::ParsingState RequestParser::getState() const
 void RequestParser::reset()
 { 
 	_state = PARSE_REQUEST_LINE;
-	_buffer.clear();
 	_expectedBodyBytes = 0;
 	_chunkSizeParsed = false;
+	// _buffer.clear();
+}
+
+void RequestParser::discardBuffer()
+{
+	_buffer.clear();
 }
 
 // helper function: Safe String-To-Size Integer Converter (avoiding std::stoi coz it throws uncaught 

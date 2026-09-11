@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:56:06 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/07 11:15:28 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/11 14:08:25 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ class RequestParser
 		// Getters for the server loop to know when a request is ready
 		ParsingState getState() const;
 		void reset();
+		void discardBuffer();
 		
 	private:
 	
