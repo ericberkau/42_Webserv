@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequestContainer.class.hpp                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:54:11 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/10 14:05:20 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/11 20:45:12 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ class HttpRequestContainer
 	public:
 	
 		HttpRequestContainer();
-		~HttpRequestContainer();
+		~HttpRequestContainer() = default;
 
 		// Setters
 		void setMethod(const HttpMethod& method);

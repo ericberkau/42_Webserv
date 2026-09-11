@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/11 20:15:44 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/11 20:53:04 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,14 +28,14 @@ Client::Client(int fd, const sockaddr_in& addr, const ServerConfig* server)
 Client::Client(Client&& other) noexcept
 	:	_fd(other._fd),
 		_inputBuffer(std::move(other._inputBuffer)),
-		_outputBuffer(std::move(other._outputBuffer)),
 		_inputReadProgress(other._inputReadProgress), // FIXME: not needed -> remove
+		_outputBuffer(std::move(other._outputBuffer)),
 		_outputWriteProgress(other._outputWriteProgress),
 		_addr(other._addr),
 		_server(other._server),
 		_fail(other._fail),
-		_requestParser(std::move(other._requestParser)), // FIXME: moving possible?
-		_httpRequest(std::move(other._httpRequest)) // FIXME: moving possible?
+		_requestParser(std::move(other._requestParser)),
+		_httpRequest(std::move(other._httpRequest))
 {
 	std::clog << "[Client] move constructor called" << std::endl; // FIXME: for debugging, remove later
 
@@ -57,8 +57,8 @@ Client& Client::operator=(Client&& other) noexcept {
 		_addr = other._addr;
 		_server = other._server;
 		_fail = other._fail;
-		_requestParser = std::move(other._requestParser); // FIXME: moving possible?
-		_httpRequest = std::move(other._httpRequest); // FIXME: moving possible?
+		_requestParser = std::move(other._requestParser);
+		_httpRequest = std::move(other._httpRequest);
 
 		other._fd = -1;
 	}

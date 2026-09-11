@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequestContainer.class.cpp                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:03:59 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/10 14:05:45 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/11 20:46:51 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,7 @@
 #include <iostream>
 #include <cctype> // for tolower
 
-HttpRequestContainer::HttpRequestContainer() {}
-HttpRequestContainer::~HttpRequestContainer() {}
+HttpRequestContainer::HttpRequestContainer() : _method(HttpMethod::INVALID) {}
 
 void HttpRequestContainer::setMethod(const HttpMethod& method)
 {

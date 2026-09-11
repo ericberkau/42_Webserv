@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.class.hpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:56:06 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/11 14:08:25 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/11 20:51:37 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ class RequestParser
 		};
 		
 		RequestParser();
-		~RequestParser();
+		~RequestParser() = default;
 		
 		// Feeds raw data coming out of recv() piece by piece
 		void feed(const std::string& chunk, HttpRequestContainer& request, const ServerConfig* config);
