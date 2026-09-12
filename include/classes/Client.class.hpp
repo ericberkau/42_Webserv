@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:06 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/11 19:13:05 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/12 20:49:01 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ class Client {
 		void	clearInBuf(void);
 		void	clearOutBuf(void);
 		bool	hasPendingOutput(void) const;
+		void	markForDisconnect(void);
 		void	processInput(void);
 		bool	shouldDisconnect(void) const;
 
@@ -51,7 +52,7 @@ class Client {
 		size_t				_outputWriteProgress;
 		sockaddr_in			_addr;
 		const ServerConfig*	_server;
-		bool				_fail;
+		bool				_pendingDisconnect;
 
 		/* HTTP management */
 		RequestParser			_requestParser;

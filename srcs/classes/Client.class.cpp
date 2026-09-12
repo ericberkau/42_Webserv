@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/11 20:53:04 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/12 20:52:01 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include <unistd.h>
 
 Client::Client(int fd, const sockaddr_in& addr, const ServerConfig* server)
-	: _fd(fd), _inputReadProgress(0), _outputWriteProgress(0), _addr(addr), _server(server), _fail(false)
+	: _fd(fd), _inputReadProgress(0), _outputWriteProgress(0), _addr(addr), _server(server), _pendingDisconnect(false)
 {
 	std::clog << "[Client] constructor called" << std::endl; // FIXME: for debugging, remove later
 
@@ -33,7 +33,7 @@ Client::Client(Client&& other) noexcept
 		_outputWriteProgress(other._outputWriteProgress),
 		_addr(other._addr),
 		_server(other._server),
-		_fail(other._fail),
+		_pendingDisconnect(other._pendingDisconnect),
 		_requestParser(std::move(other._requestParser)),
 		_httpRequest(std::move(other._httpRequest))
 {
@@ -56,7 +56,7 @@ Client& Client::operator=(Client&& other) noexcept {
 		_outputWriteProgress = other._outputWriteProgress;
 		_addr = other._addr;
 		_server = other._server;
-		_fail = other._fail;
+		_pendingDisconnect = other._pendingDisconnect;
 		_requestParser = std::move(other._requestParser);
 		_httpRequest = std::move(other._httpRequest);
 
@@ -118,8 +118,12 @@ bool Client::hasPendingOutput(void) const {
 	return !this->_outputBuffer.empty() && this->_outputWriteProgress < this->_outputBuffer.size();
 }
 
+void Client::markForDisconnect(void) {
+	this->_pendingDisconnect = true;
+}
+
 bool Client::shouldDisconnect(void) const {
-	return this->_fail;
+	return this->_pendingDisconnect;
 }
 
 void Client::processInput(void) {
@@ -127,8 +131,7 @@ void Client::processInput(void) {
 		_requestParser.feed(_inputBuffer, _httpRequest, _server);
 		clearInBuf();
 
-		while (_requestParser.getState() == RequestParser::PARSE_COMPLETE)
-		{
+		while (_requestParser.getState() == RequestParser::PARSE_COMPLETE) {
 			_handleRequest();
 			_requestParser.feed("", _httpRequest, _server);
 		}
@@ -142,7 +145,7 @@ void Client::processInput(void) {
 		_resetRequestState();
 		_requestParser.discardBuffer();
 		clearInBuf();
-		_fail = true;
+		markForDisconnect();
 	}
 }
 
