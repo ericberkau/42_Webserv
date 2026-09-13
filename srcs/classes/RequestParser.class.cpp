@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:16 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/13 15:41:42 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/13 16:33:51 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,11 +186,23 @@ void RequestParser::_parseHeaderLine(const std::string& line, HttpRequestContain
 	}
 
 	std::string lowerKey = ft_toLower(key);
+	value = trim(value);
+
+	// duplicate is fine only if it's an exact repeat of the same value, anything else is a 400
+	if (lowerKey == "content-length")
+	{
+		std::string existing = request.getHeader("content-length");
+		if (existing.empty())
+			request.addHeader(key, value);
+		else if (existing != value)
+			throw HttpParseException(400, "Bad Request: conflicting Content-Length values");
+		// exact duplicate: existing value is already correctly stored, nothing more to do
+		return;
+	}
 
 	if (lowerKey == "host" && !request.getHeader("host").empty())
 		throw HttpParseException(400, "Bad Request: duplicate Host header");
 		
-	value = trim(value);
 	request.addHeader(key, value);
 }
 

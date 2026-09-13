@@ -42,6 +42,23 @@ TEST_CASES = [
         "Host: anotherhost.com\r\n"
         "\r\n",
         "400"
+    ),
+    (
+        "VALID: Duplicate content-length Headers with same value",
+        "GET / HTTP/1.1\r\n"
+        "Content-Length: 1\r\n"
+        "Content-Length: 1\r\n"
+        "\r\n",
+        "1",
+        "200"
+    ),
+    (
+        "INVALID: Duplicate Content-length Headers with different values",
+        "GET / HTTP/1.1\r\n"
+        "Content-Length: 1\r\n"
+        "Content-Length: 5\r\n"
+        "\r\n",
+        "400"
     )
 ]
 
@@ -87,3 +104,82 @@ if __name__ == "__main__":
     for name, payload, expected in TEST_CASES:
         run_test(name, payload, expected)
         time.sleep(0.1)  # Brief pause between connections
+
+
+
+
+
+# import socket
+
+# HOST = "127.0.0.1"
+# PORT = 8080  # match your config's listen port
+
+# def send_raw(payload: bytes, label: str):
+#     print(f"=== {label} ===")
+#     with socket.create_connection((HOST, PORT)) as sock:
+#         sock.settimeout(1.0)
+#         sock.sendall(payload)
+#         response = b""
+#         try:
+#             while True:
+#                 chunk = sock.recv(4096)
+#                 if not chunk:
+#                     break
+#                 response += chunk
+#         except socket.timeout:
+#             pass
+#     if response:
+#         first_line = response.split(b"\r\n", 1)[0]
+#         print("Status line:", first_line.decode(errors="replace"))
+#     else:
+#         print("Status line: <no response — connection hung or closed with nothing sent>")
+#     print()
+
+# # Case 1: exact duplicate, same value, WITH the body byte actually sent
+# send_raw(
+#     b"GET / HTTP/1.1\r\n"
+#     b"Host: localhost\r\n"
+#     b"Content-Length: 1\r\n"
+#     b"Content-Length: 1\r\n"
+#     b"\r\n"
+#     b"a",  # the one body byte the header promises
+#     "Same value, body sent -> expect 200"
+# )
+
+# # Case 2: conflicting values -> must reject
+# send_raw(
+#     b"GET / HTTP/1.1\r\n"
+#     b"Host: localhost\r\n"
+#     b"Content-Length: 1\r\n"
+#     b"Content-Length: 5\r\n"
+#     b"\r\n"
+#     b"a",
+#     "Conflicting values -> expect 400"
+# )
+
+# # Case 3: same value, headers only, NO body byte sent -> should hang, not error
+# send_raw(
+#     b"GET / HTTP/1.1\r\n"
+#     b"Host: localhost\r\n"
+#     b"Content-Length: 1\r\n"
+#     b"Content-Length: 1\r\n"
+#     b"\r\n",
+#     "Same value, NO body sent -> expect no response before timeout (parser waiting)"
+# )
+
+# # Case 4: duplicate Host -> must reject
+# send_raw(
+#     b"GET / HTTP/1.1\r\n"
+#     b"Host: localhost\r\n"
+#     b"Host: localhost\r\n"
+#     b"\r\n",
+#     "Duplicate Host -> expect 400"
+# )
+
+# # Case 5: sanity check — totally normal request, no duplicates at all
+# send_raw(
+#     b"GET / HTTP/1.1\r\n"
+#     b"Host: localhost\r\n"
+#     b"\r\n",
+#     "Normal request, no duplicates -> expect 200 (or your real default response)"
+# )
