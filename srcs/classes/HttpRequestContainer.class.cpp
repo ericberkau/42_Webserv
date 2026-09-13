@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequestContainer.class.cpp                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:03:59 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/11 20:46:51 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/13 15:41:51 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/HttpRequestContainer.class.hpp"
 #include <iostream>
-#include <cctype> // for tolower
+#include "classes/StringUtils.hpp"
 
 HttpRequestContainer::HttpRequestContainer() : _method(HttpMethod::INVALID) {}
 
@@ -40,20 +40,11 @@ void HttpRequestContainer::setQueryString(const std::string& query)
 	_queryString = query;
 }
 
-
-// Lowercase the header key before storing
-// HTTP headers are case-insensitive by spec (Host, host, HOST are the same header)
-static std::string ft_toLower(const std::string& s)
-{
-	std::string result = s;
-	for (size_t i = 0; i < result.size(); ++i)
-		result[i] = static_cast<char>(std::tolower(static_cast<unsigned char>(result[i])));
-	return result;
-}
-
 void HttpRequestContainer::addHeader(const std::string& key, const std::string& value)
 {
-	std::string lowerKey = ft_toLower(key);
+	// Lowercase the header key before storing
+	// HTTP headers are case-insensitive by spec (Host, host, HOST are the same header)
+	std::string lowerKey = ft_toLower(key); 
 		
 	// If the header already exists append the new value with a comma
 	// EXCEPT for Set-Cookie headers which must remain separate - do we have to handle this too??? 

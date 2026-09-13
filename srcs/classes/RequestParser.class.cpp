@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.class.cpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:16 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/11 20:47:45 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/13 15:41:42 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/RequestParser.class.hpp"
 #include <sstream>
+#include "classes/StringUtils.hpp"
 
 HttpParseException::HttpParseException(int statusCode, const std::string& reason)
 	: _statusCode(statusCode), _reason(reason) {}
@@ -184,6 +185,11 @@ void RequestParser::_parseHeaderLine(const std::string& line, HttpRequestContain
 			throw HttpParseException(400, "Bad Request: illegal character in header name");
 	}
 
+	std::string lowerKey = ft_toLower(key);
+
+	if (lowerKey == "host" && !request.getHeader("host").empty())
+		throw HttpParseException(400, "Bad Request: duplicate Host header");
+		
 	value = trim(value);
 	request.addHeader(key, value);
 }
