@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 12:30:19 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/09/25 01:13:12 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/25 01:25:14 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,14 +27,16 @@ class CGIExecutor
 {
 	public:
 
-		CGIEnv		&getEnv();
+		CGIEnv&		getEnv();
 
 		std::string	execute(const std::string &scriptPath, const std::string &body);
 
 
 	private:
 
-		CGIEnv _env;
+		void	_handleChild(int* stdinPipeFd, int* stdoutPipeFd, const std::string& scriptPath);
+
+		CGIEnv	_env;
 
 };
 
