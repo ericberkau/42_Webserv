@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGIExecutor.class.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 12:30:19 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/09/23 16:07:45 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/24 18:50:04 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,13 +26,13 @@
 class CGIExecutor
 {
 private:
-    CGIEnv _env;
+	CGIEnv _env;
 
 public:
-    CGIEnv &getEnv();
-    std::string execute(
-        const std::string &scriptPath,
-        const std::string &body);
+	CGIEnv &getEnv();
+	std::string execute(
+		const std::string &scriptPath,
+		const std::string &body);
 };
 
 #endif
