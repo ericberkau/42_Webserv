@@ -1,19 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   CGIExecutor.hpp                                    :+:      :+:    :+:   */
+/*   CGIExecutor.class.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 12:30:19 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/07/18 14:52:51 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/09/23 16:07:45 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CGIEXECUTOR_HTTP
 #define CGIEXECUTOR_HTTP
 
-#include "CGIEnv.hpp"
+#include "CGIEnv.class.hpp"
 #include <iostream>
 #include <string>
 #include <map>

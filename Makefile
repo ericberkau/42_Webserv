@@ -6,7 +6,7 @@
 #    By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/05/11 14:54:40 by eberkau           #+#    #+#              #
-#    Updated: 2026/09/23 15:57:49 by djanardh         ###   ########.fr        #
+#    Updated: 2026/09/24 13:55:18 by djanardh         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -50,7 +50,8 @@ CXXFILES	=	testmain.cpp \
 				classes/RequestHandler.class.cpp \
 				classes/ResponseBuilder.class.cpp \
 				classes/StringUtils.cpp \
-				CGIExecutor.cpp CGIEnv.cpp main.cpp \
+				classes/CGIExecutor.class.cpp \
+				classes/CGIEnv.class.cpp
 #				and_so_on.cpp
 
 

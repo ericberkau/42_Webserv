@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   CGIExecutor.cpp                                    :+:      :+:    :+:   */
+/*   CGIExecutor.class.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 13:00:52 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/07/18 15:07:00 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/09/24 13:53:23 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "CGIExecutor.hpp"
+#include "classes/CGIExecutor.class.hpp"
 
 CGIEnv &CGIExecutor::getEnv()
 {

@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   CGIEnv.cpp                                         :+:      :+:    :+:   */
+/*   CGIEnv.class.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 12:31:01 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/06/22 16:56:36 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/09/23 16:09:58 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "CGIExecutor.hpp"
-#include "CGIEnv.hpp"
+#include "classes/CGIExecutor.class.hpp"
+#include "classes/CGIEnv.class.hpp"
 #include <cstring>
 
 void CGIEnv::set(const std::string &key,
