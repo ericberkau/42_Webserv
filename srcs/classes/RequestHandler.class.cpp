@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/11 12:58:34 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/24 14:31:41 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,9 @@
 #include <iostream>
 #include <cstdio> // for std::remove
 #include <cstdlib>
+#include "classes/StringUtils.hpp"
+#include "classes/CGIEnv.class.hpp"
+#include "classes/CGIExecutor.class.hpp"
 
 RequestHandler::RequestHandler(const ServerConfig* config) : _config(config) {}
 RequestHandler::~RequestHandler() {}
@@ -47,6 +50,19 @@ const LocationConfig* RequestHandler::_matchLocation(const std::string& uri) con
 		}
 	}
 	return bestMatch; // returns NULL if no location blocks match, falling back to server default root 
+}
+
+bool RequestHandler::_isCgiRequest(const std::string& physicalPath, const LocationConfig* location) const
+{
+	if (!location || location->cgiHandlers.empty())
+		return false;
+
+	size_t dotPos = physicalPath.find_last_of('.');
+	if (dotPos == std::string::npos)
+		return false;
+
+	std::string ext = physicalPath.substr(dotPos);
+	return location->cgiHandlers.find(ext) != location->cgiHandlers.end();
 }
 
 // checking the 405 Method Not Allowed Rule. If a location block specifies that only GET is allowed, 
@@ -246,6 +262,106 @@ std::string RequestHandler::_handleDelete(const std::string& physicalPath)
 	return response;
 }
 
+std::string RequestHandler::_buildResponseFromCgiOutput(const std::string& cgiOutput)
+{
+	ResponseBuilder response;
+
+	size_t headerEnd = cgiOutput.find("\r\n\r\n");
+	size_t sepLen = 4;
+	if (headerEnd == std::string::npos)
+	{
+		headerEnd = cgiOutput.find("\n\n"); // some scripts only emit \n
+		sepLen = 2;
+	}
+
+	std::string headerBlock = (headerEnd == std::string::npos) ? "" : cgiOutput.substr(0, headerEnd);
+	std::string body = (headerEnd == std::string::npos) ? cgiOutput : cgiOutput.substr(headerEnd + sepLen);
+
+	int statusCode = 200;
+	std::istringstream headerStream(headerBlock);
+	std::string line;
+	while (std::getline(headerStream, line))
+	{
+		if (!line.empty() && line.back() == '\r')
+			line.pop_back();
+		if (line.empty())
+			continue;
+
+		size_t pos = line.find(':');
+		if (pos == std::string::npos)
+			continue;
+
+		std::string key = line.substr(0, pos);
+		std::string value = line.substr(pos + 1);
+		size_t start = value.find_first_not_of(' ');
+		value = (start == std::string::npos) ? "" : value.substr(start);
+
+		if (key == "Status")
+			std::istringstream(value) >> statusCode;
+		else
+			response.addHeader(key, value);
+	}
+
+	response.setStatus(statusCode);
+	response.setBody(body); // recomputes Content-Length correctly
+	return response.buildString();
+}
+
+static std::string toUpperWithUnderscores(const std::string& key)
+{
+	std::string result = key;
+	for (size_t i = 0; i < result.size(); ++i)
+	{
+		if (result[i] == '-')
+			result[i] = '_';
+		else
+			result[i] = std::toupper(static_cast<unsigned char>(result[i]));
+	}
+	return result;
+}
+
+std::string RequestHandler::_handleCgi(const std::string& physicalPath, const HttpRequestContainer& request)
+{
+	struct stat pathStat;
+	if (stat(physicalPath.c_str(), &pathStat) != 0 || S_ISDIR(pathStat.st_mode))
+		throw std::runtime_error("404");
+
+	CGIExecutor executor;
+	CGIEnv& env = executor.getEnv();
+
+	env.set("REQUEST_METHOD", methodToString(request.getMethod()));
+	env.set("SCRIPT_FILENAME", physicalPath);
+	env.set("SCRIPT_NAME", request.getUri());
+	env.set("QUERY_STRING", request.getQueryString());
+	env.set("SERVER_PROTOCOL", request.getVersion());
+	env.set("GATEWAY_INTERFACE", "CGI/1.1");
+	env.set("REDIRECT_STATUS", "200");
+
+	std::string contentLength = request.getHeader("content-length");
+	if (!contentLength.empty())
+		env.set("CONTENT_LENGTH", contentLength);
+
+	std::string contentType = request.getHeader("content-type");
+	if (!contentType.empty())
+		env.set("CONTENT_TYPE", contentType);
+
+	for (const auto& [key, value] : request.getHeaders())
+	{
+		if (key == "content-length" || key == "content-type")
+			continue; // already handled above without the HTTP_ prefix
+		env.set("HTTP_" + toUpperWithUnderscores(key), value);
+	}
+
+	std::string cgiOutput;
+	try {
+		cgiOutput = executor.execute(physicalPath, request.getBody());
+	} catch (const std::exception&) {
+		throw std::runtime_error("500");
+	}
+
+	return _buildResponseFromCgiOutput(cgiOutput);
+}
+
 std::string RequestHandler::_handleRedirect(const LocationConfig* location) const
 {
 	ResponseBuilder response;
@@ -287,7 +403,9 @@ std::string RequestHandler::processRequest(const HttpRequestContainer& request)
 		// Convert abstract URI string to a real system file address path
 		std::string physicalPath = _translateToPhysicalPath(request.getUri(), matchedLoc);
 
-		
+		std::string interpreter;
+		if (_isCgiRequest(physicalPath, matchedLoc))
+			return _handleCgi(physicalPath, request);
 
 		// Branch execution to the matching handler based on HTTP Method type
 		if (request.getMethod() == HttpMethod::GET)

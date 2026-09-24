@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:03:59 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/13 15:41:51 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/24 14:32:37 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,11 @@ std::string HttpRequestContainer::getHeader(const std::string& key) const
 	if (it == _headers.end())
 		return "";
 	return it->second;
+}
+
+const std::map<std::string, std::string>& HttpRequestContainer::getHeaders() const
+{
+	return _headers;
 }
 
 void HttpRequestContainer::clear()

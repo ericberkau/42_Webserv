@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequestContainer.class.hpp                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:54:11 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/11 20:45:12 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/24 14:32:08 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ class HttpRequestContainer
 		// Returns "" if header not found. Header lookup is case-insensitive
 		// acc. to RFC, so we normalize keys to lowercase when storing them
 		std::string getHeader(const std::string& key) const;
+		const std::map<std::string, std::string>& getHeaders() const;
 
 		void clear();
 
