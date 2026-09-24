@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/24 15:48:52 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/24 19:51:47 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -406,7 +406,6 @@ std::string RequestHandler::processRequest(const HttpRequestContainer& request)
 		// Convert abstract URI string to a real system file address path
 		std::string physicalPath = _translateToPhysicalPath(request.getUri(), matchedLoc);
 
-		std::string interpreter;
 		if (_isCgiRequest(physicalPath, matchedLoc))
 			return _handleCgi(physicalPath, request);
 
