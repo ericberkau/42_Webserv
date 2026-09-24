@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/24 14:31:41 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/24 15:48:52 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -353,9 +353,12 @@ std::string RequestHandler::_handleCgi(const std::string& physicalPath, const Ht
 	}
 
 	std::string cgiOutput;
-	try {
+	try
+	{
 		cgiOutput = executor.execute(physicalPath, request.getBody());
-	} catch (const std::exception&) {
+	} 
+	catch (const std::exception&)
+	{
 		throw std::runtime_error("500");
 	}
 
