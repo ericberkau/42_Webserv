@@ -1,17 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   StringUtils.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/05/11 14:57:27 by eberkau           #+#    #+#             */
-/*   Updated: 2026/05/11 15:48:35 by eberkau          ###   ########.fr       */
+/*   Created: 2026/09/13 15:38:37 by djanardh          #+#    #+#             */
+/*   Updated: 2026/09/13 15:40:31 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-int main(void) {
+#ifndef STRINGUTILS_HPP
+#define STRINGUTILS_HPP
 
-	
-	return 0;
-}
+#include <string>
+#include <cctype> // for std::tolower
+
+std::string ft_toLower(const std::string& s);
+
+#endif

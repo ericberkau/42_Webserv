@@ -6,11 +6,13 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/04 19:20:30 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/11 03:56:03 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/Server.class.hpp"
+#include "classes/RequestHandler.class.hpp"
+#include "classes/ResponseBuilder.class.hpp"
 #include "signals.hpp"
 #include <fcntl.h>
 #include <iostream>
@@ -95,7 +97,7 @@ int Server::_setupListeningSocket(const ListenDirective& listenCfg) {
 	int serverFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (serverFd < 0) {
 		perror("socket");
-		throw 1;
+		throw std::runtime_error("socket() failed");
 	}
 
 	const int enableSetting = true;
@@ -107,12 +109,12 @@ int Server::_setupListeningSocket(const ListenDirective& listenCfg) {
 	if (0 != bind(serverFd, resolvedAddr->ai_addr, resolvedAddr->ai_addrlen)) {
 		close(serverFd);
 		perror("bind");
-		throw 1;
+		throw std::runtime_error("bind() failed");
 	}
 	if (0 != listen(serverFd, MAX_PEND_CONNECT_QUEUE)) {
 		close(serverFd);
 		perror("listen");
-		throw 1;
+		throw std::runtime_error("listen() failed");
 	}
 
 	pollfd serverPoll;
@@ -130,6 +132,24 @@ bool Server::_isDuplicateAddress(uint32_t host, uint16_t port) {
 void Server::_handleSocketEvent(size_t& idx) {
 	FdContext& currFd = _fdCtx.at(_pollfdArr[idx].fd);
 
+	if (_pollfdArr[idx].revents & (POLLERR | POLLHUP | POLLNVAL)) {
+		switch (currFd.type) {
+			case SocketType::LISTENER:
+				throw std::runtime_error("listening socket failed");
+
+			case SocketType::CLIENT:
+				_disconnectClient(idx);
+				return;
+
+			case SocketType::CGI_PIPE:
+				// TODO
+				return;
+
+			default:
+				throw std::logic_error("unknown socket type failed");
+		}
+	}
+
 	switch (currFd.type) {
 		case SocketType::LISTENER:
 			_handleListenerEvents(idx);
@@ -144,7 +164,7 @@ void Server::_handleSocketEvent(size_t& idx) {
 			break;
 
 		default:
-			break;
+			throw std::logic_error("event for unknown socket type");
 	}
 }
 
@@ -162,8 +182,8 @@ void Server::_handlePendingConnections(int listeningSocket) {
 		if (newClientFd == -1) {
 			if (errno == EAGAIN || errno == EWOULDBLOCK)
 				break;
-			perror("accept()");
-			throw 1;
+			perror("accept");
+			throw std::runtime_error("accept() failed");
 		}
 
 		const int currentFlags = fcntl(newClientFd, F_GETFL); // TODO: check return value for fail
@@ -187,7 +207,8 @@ void Server::_handlePendingConnections(int listeningSocket) {
 										relatedServer,
 										Client(
 											newClientFd,
-											newClientAddr
+											newClientAddr,
+											relatedServer
 										)
 									)
 								);
@@ -214,92 +235,120 @@ void Server::_handleClientEvents(size_t& idx) {
 	/** At this point, the client might have disconnected (idx modified in subfunction)
 	 * with still pending outgoing data, originalIdx checks if a diconnect occured.
 	 * */
-	if (_pollfdArr[idx].revents & POLLOUT && idx == originalIdx)
+	if (idx != originalIdx)
+		return;
+
+	if (_pollfdArr[idx].revents & POLLOUT)
 		_handleOutgoingData(idx);
 }
+
+// void Server::_handleIncomingData(size_t& idx) {
+// 	char msg[MSG_SIZE];
+// 	Client& currClient = _fdCtx.at(_pollfdArr[idx].fd).client.value();
+// 	ssize_t receivedBytes = -1;
+
+// 	while (!g_shutdownRequested) {
+// 		receivedBytes = recv(currClient.getFd(), msg, MSG_SIZE, 0);
+// 		if (receivedBytes == -1) {
+// 			if (errno == EAGAIN || errno == EWOULDBLOCK)
+// 				break;
+// 			else if (errno == EPIPE || errno == ECONNRESET) {
+// 				_disconnectClient(idx);
+// 				return;
+// 			}
+// 			perror("recv");
+// 			throw std::runtime_error("recv() failed");
+// 		}
+// 		else if (receivedBytes == 0) {
+// 			_disconnectClient(idx);
+// 			return;
+// 		}
+
+// 		currClient.appendToInBuf(msg, receivedBytes);
+// 	}
+
+// 	_processClientInput(currClient);
+
+// 	std::cout << "Message arrived from " << _pollfdArr[idx].fd << " -> " << currClient.getInBuf() << std::endl; // BUG: remove later
+// 	currClient.appendToOutBuf(std::string("\nYou just sent -> " + currClient.getInBuf() + "\n")); // BUG: remove later
+// 	_pollfdArr[idx].events |= POLLOUT; // BUG: remove later
+// 	currClient.clearInBuf(); // BUG: remove later
+
+// }
+
+// static
+// void handleRequest(Client& client) {
+// 	RequestHandler reqHandler(client.getServer());
+
+// 	const std::string response = reqHandler.processRequest(client.getRequest());
+
+// 	client.appendToOutBuf(response);
+// 	client.resetRequestState();
+// }
+
+// static
+// void processClientInput(Client& client) {
+// 	client.processInputBuffer();
+
+// 	if (client.getRequestState() == RequestParser::PARSE_COMPLETE)
+// 		handleRequest(client);
+// }
 
 void Server::_handleIncomingData(size_t& idx) {
 	char msg[MSG_SIZE];
 	Client& currClient = _fdCtx.at(_pollfdArr[idx].fd).client.value();
-	ssize_t receivedBytes = -1;
 
-	while (!g_shutdownRequested) {
-		receivedBytes = recv(currClient.getFd(), msg, MSG_SIZE, 0);
-		if (receivedBytes == -1) {
-			if (errno == EAGAIN || errno == EWOULDBLOCK)
-				break;
-			perror("recv()");
-			throw 1;
-		}
-		else if (receivedBytes == 0) {
-			_disconnectClient(idx);
-			return;
-		}
+	ssize_t receivedBytes = recv(currClient.getFd(), msg, MSG_SIZE, 0);
 
-		currClient.appendToInBuf(msg, receivedBytes);
+	if (receivedBytes == -1) {
+		perror("recv");
+		throw std::runtime_error("recv() failed");
+	} else if (receivedBytes == 0) {
+		_disconnectClient(idx);
+		return;
 	}
 
-	_processClientInput(currClient);
+	currClient.appendToInBuf(msg, receivedBytes);
 
 	std::cout << "Message arrived from " << _pollfdArr[idx].fd << " -> " << currClient.getInBuf() << std::endl; // BUG: remove later
-	currClient.appendToOutBuf(std::string("\nYou just sent -> " + currClient.getInBuf() + "\n")); // BUG: remove later
-	_pollfdArr[idx].events |= POLLOUT; // BUG: remove later
-	currClient.clearInBuf(); // BUG: remove later
 
-}
+	currClient.processInput();
 
-void Server::_processClientInput(Client& client) {
-	/**
-	 * //TODO
-	 * Feed client input buffer into HTTP parser.
-	 * Extract complete requests.
-	 * Call _handleRequest() for each request.
-	 */
-	_handleRequest(client);
-}
+	if (currClient.hasPendingOutput())
+		_pollfdArr[idx].events |= POLLOUT;
 
-void Server::_handleRequest(Client& client/*, HttpRequest*/) {
-	/**
-	 * //TODO
-	 * Match request against ServerConfig.
-	 * Find location block.
-	 * Generate response.
-	 * Queue response into client output buffer.
-	 */
-	(void)client;
+	if (currClient.shouldDisconnect())
+		_pollfdArr[idx].events &= ~POLLIN;
 }
 
 void Server::_handleOutgoingData(size_t& idx) {
 	Client& currClient = _fdCtx.at(_pollfdArr[idx].fd).client.value();
-	ssize_t sentBytes = -1;
 
-	while (!g_shutdownRequested) {
-		if (!currClient.hasPendingOutput()) {
-			currClient.clearOutBuf();
-			_pollfdArr[idx].events &= ~POLLOUT;
-			break;
+	ssize_t sentBytes = send(
+					currClient.getFd(),
+					currClient.getOutBuf().data() + currClient.getOutProgress(),
+					currClient.getOutBuf().size() - currClient.getOutProgress(),
+					MSG_NOSIGNAL
+				);
+
+	if (sentBytes == -1) {
+		perror("send");
+		throw std::runtime_error("send() failed");
+	}
+	else if (sentBytes == 0) {
+		std::cerr << "Logic warning: Sent empty output to client " << currClient.getFd() << std::endl;
+	}
+
+	currClient.advanceOutProgress(sentBytes);
+
+	if (!currClient.hasPendingOutput()) {
+		if (currClient.shouldDisconnect()) {
+			_disconnectClient(idx);
+			return;
 		}
 
-		sentBytes = send(currClient.getFd(),
-						currClient.getOutBuf().data() + currClient.getOutProgress(),
-						currClient.getOutBuf().size() - currClient.getOutProgress(),
-						MSG_NOSIGNAL);
-
-		if (sentBytes == -1) {
-			if (errno == EAGAIN || errno == EWOULDBLOCK)
-				break;
-			else if (errno == EPIPE || errno == ECONNRESET) {
-				_disconnectClient(idx);
-				return;
-			}
-			perror("send()");
-			throw 1;
-		}
-		else if (sentBytes == 0) {
-			std::cerr << "Sent empty output to client " << currClient.getFd() << std::endl;
-		}
-
-		currClient.advanceOutProgress(sentBytes);
+		currClient.clearOutBuf();
+		_pollfdArr[idx].events &= ~POLLOUT;
 	}
 }
 

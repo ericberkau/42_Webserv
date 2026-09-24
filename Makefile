@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+         #
+#    By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/05/11 14:54:40 by eberkau           #+#    #+#              #
-#    Updated: 2026/09/04 19:11:46 by eberkau          ###   ########.fr        #
+#    Updated: 2026/09/13 15:40:59 by djanardh         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -45,6 +45,11 @@ CXXFILES	=	testmain.cpp \
 				classes/Parser.server.class.cpp \
 				classes/parserUtils.cpp \
 				classes/Server.class.cpp \
+				classes/HttpRequestContainer.class.cpp \
+				classes/RequestParser.class.cpp \
+				classes/RequestHandler.class.cpp \
+				classes/ResponseBuilder.class.cpp \
+				classes/StringUtils.cpp \
 #				and_so_on.cpp
 
 

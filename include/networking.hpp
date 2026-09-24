@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 22:44:52 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/04 19:36:43 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/09 20:16:39 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 
 constexpr int		FOREVER = -1;
 constexpr int		MAX_PEND_CONNECT_QUEUE = 32;
-constexpr size_t	MSG_SIZE = 8; // FIXME: provide proper size later
+constexpr size_t	MSG_SIZE = 4096;
 
 
 enum class SocketType {
@@ -32,6 +32,10 @@ enum class SocketType {
 };
 
 struct FdContext {
+	SocketType				type;
+	const ServerConfig*		server;
+	std::optional<Client>	client;
+
 	explicit FdContext(
 		SocketType t,
 		const ServerConfig* s = NULL
@@ -47,7 +51,4 @@ struct FdContext {
 		: type(t), server(s), client(std::move(c))
 	{}
 
-	SocketType				type;
-	const ServerConfig*		server;
-	std::optional<Client>	client;
 };

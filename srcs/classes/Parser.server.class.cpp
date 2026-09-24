@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/27 22:50:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/27 23:52:39 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/08 15:08:12 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,8 @@ void Parser::_parseServerDirective(ServerConfig& server) {
 		server.locations.push_back(_parseLocation());
 	else if (directive.lexeme == "error_page")
 		_parseErrorPage(server);
+	else if (directive.lexeme == "root")
+		_parsePathSetting(server.root);
 	else
 		error(directive, "unknown server directive '" + directive.lexeme + "'");
 }

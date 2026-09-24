@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:11:25 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/30 23:44:21 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/08 15:05:50 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,10 @@
 #include <map>
 #include <netdb.h>
 #include <cstdint>
+#include <set>
 
 enum class HttpMethod {
+	INVALID = -1,
 	GET,
 	POST,
 	DELETE
@@ -30,7 +32,7 @@ struct LocationConfig {
 	std::string	index;
 	bool		autoIndex;
 
-	std::vector<HttpMethod>	allowedMethods;
+	std::set<HttpMethod>	allowedMethods;
 
 	bool		uploadEnabled;
 	std::string	uploadPath;
@@ -48,7 +50,7 @@ struct LocationConfig {
 			hasRedirect(false),
 			redirectStatusCode(0)
 	{
-		allowedMethods.push_back(HttpMethod::GET); // FIXME: allow default method(s)? discuss
+		allowedMethods.insert(HttpMethod::GET); // FIXME: allow default method(s)? discuss
 	}
 };
 
@@ -60,6 +62,7 @@ struct ListenDirective {
 struct ServerConfig {
 	std::vector<ListenDirective>	listen;
 	size_t							clientMaxBodySize;
+	std::string						root;
 	std::vector<LocationConfig>		locations;
 	std::map<int, std::string>		errorPages;
 

@@ -6,12 +6,14 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:06 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/02 01:57:12 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/12 20:49:01 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+#include "classes/RequestParser.class.hpp"
+#include "classes/HttpRequestContainer.class.hpp"
 #include <arpa/inet.h>
 #include <string>
 
@@ -19,38 +21,48 @@ class Client {
 
 	public:
 
-		Client(int fd, sockaddr_in addr);
+		Client(int fd, const sockaddr_in& addr, const ServerConfig* server);
 		Client(Client&& other) noexcept;
 		Client& operator=(Client&& other) noexcept;
-		~Client();
+		~Client(void);
 
-		int					getFd() const;
-		const std::string&	getInBuf() const;
-		const std::string&	getOutBuf() const;
-		size_t				getOutProgress() const;
-		
+		int					getFd(void) const;
+		const std::string&	getInBuf(void) const;
+		const std::string&	getOutBuf(void) const;
+		size_t				getOutProgress(void) const;
+
 		void	advanceOutProgress(ssize_t bytes);
-		void	appendToInBuf(const char* input, size_t size);
-		void	appendToOutBuf(const std::string& input);
-		void	clearInBuf();
-		void	clearOutBuf();
-		bool	hasPendingOutput() const;
+		void	appendToInBuf(const char* input, size_t size); // FIXME: not needed at all?
+		void	appendToOutBuf(const std::string& input); // TODO: private?
+		void	clearInBuf(void);
+		void	clearOutBuf(void);
+		bool	hasPendingOutput(void) const;
+		void	markForDisconnect(void);
+		void	processInput(void);
+		bool	shouldDisconnect(void) const;
 
 
 	private:
 
-		int			_fd;
-		std::string	_inputBuffer; // TODO: limit size later
-		size_t		_inputReadProgress;
-		std::string	_outputBuffer;
-		size_t		_outputWriteProgress;
-		sockaddr_in	_addr;
+		/* client state */
+		int					_fd;
+		std::string			_inputBuffer; // TODO: limit size later
+		size_t				_inputReadProgress; // FIXME: not needed at all?
+		std::string			_outputBuffer;
+		size_t				_outputWriteProgress;
+		sockaddr_in			_addr;
+		const ServerConfig*	_server;
+		bool				_pendingDisconnect;
+
+		/* HTTP management */
+		RequestParser			_requestParser;
+		HttpRequestContainer	_httpRequest;
+
+		void	_handleRequest(void);
+		void	_resetRequestState(void);
 
 		/* diallow copying */
 		Client(const Client&) = delete;
 		Client& operator=(const Client&) = delete;
-
-		// int			_requestParserState;
-		// int			_timeoutInfo
 
 };

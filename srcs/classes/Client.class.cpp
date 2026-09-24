@@ -6,29 +6,40 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/06/01 00:29:02 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/12 20:52:01 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/Client.class.hpp"
+#include "classes/RequestHandler.class.hpp"
+#include "classes/ResponseBuilder.class.hpp"
 #include <iostream>
 #include <unistd.h>
 
-Client::Client(int fd, sockaddr_in addr) : _fd(fd), _inputReadProgress(0), _outputWriteProgress(0), _addr(addr)
+Client::Client(int fd, const sockaddr_in& addr, const ServerConfig* server)
+	: _fd(fd), _inputReadProgress(0), _outputWriteProgress(0), _addr(addr), _server(server), _pendingDisconnect(false)
 {
 	std::clog << "[Client] constructor called" << std::endl; // FIXME: for debugging, remove later
+
+	if (!server)
+		throw std::logic_error("Client constructed with nullptr to ServerConfig");
 }
 
 Client::Client(Client&& other) noexcept
 	:	_fd(other._fd),
 		_inputBuffer(std::move(other._inputBuffer)),
+		_inputReadProgress(other._inputReadProgress), // FIXME: not needed -> remove
 		_outputBuffer(std::move(other._outputBuffer)),
 		_outputWriteProgress(other._outputWriteProgress),
-		_addr(other._addr)
+		_addr(other._addr),
+		_server(other._server),
+		_pendingDisconnect(other._pendingDisconnect),
+		_requestParser(std::move(other._requestParser)),
+		_httpRequest(std::move(other._httpRequest))
 {
 	std::clog << "[Client] move constructor called" << std::endl; // FIXME: for debugging, remove later
 
-    other._fd = -1;
+	other._fd = -1;
 }
 
 Client& Client::operator=(Client&& other) noexcept {
@@ -41,9 +52,14 @@ Client& Client::operator=(Client&& other) noexcept {
 		_fd = other._fd;
 		_inputBuffer = std::move(other._inputBuffer);
 		_outputBuffer = std::move(other._outputBuffer);
+		_inputReadProgress = other._inputReadProgress; // FIXME: not needed -> remove
 		_outputWriteProgress = other._outputWriteProgress;
 		_addr = other._addr;
-		
+		_server = other._server;
+		_pendingDisconnect = other._pendingDisconnect;
+		_requestParser = std::move(other._requestParser);
+		_httpRequest = std::move(other._httpRequest);
+
 		other._fd = -1;
 	}
 
@@ -71,7 +87,7 @@ const std::string& Client::getOutBuf(void) const {
 	return this->_outputBuffer; // FIXME: + current writeProgr maybe?
 }
 
-size_t Client::getOutProgress() const {
+size_t Client::getOutProgress(void) const {
 	return this->_outputWriteProgress;
 }
 
@@ -82,7 +98,7 @@ void Client::advanceOutProgress(ssize_t bytes) {
 void Client::appendToInBuf(const char* input, size_t size) {
 	_inputBuffer.append(input, size);
 	_inputReadProgress += size;
-}
+} // BUG: unused? -> remove
 
 void Client::appendToOutBuf(const std::string& input) {
 	_outputBuffer.append(input);
@@ -100,4 +116,50 @@ void Client::clearOutBuf(void) {
 
 bool Client::hasPendingOutput(void) const {
 	return !this->_outputBuffer.empty() && this->_outputWriteProgress < this->_outputBuffer.size();
+}
+
+void Client::markForDisconnect(void) {
+	this->_pendingDisconnect = true;
+}
+
+bool Client::shouldDisconnect(void) const {
+	return this->_pendingDisconnect;
+}
+
+void Client::processInput(void) {
+	try {
+		_requestParser.feed(_inputBuffer, _httpRequest, _server);
+		clearInBuf();
+
+		while (_requestParser.getState() == RequestParser::PARSE_COMPLETE) {
+			_handleRequest();
+			_requestParser.feed("", _httpRequest, _server);
+		}
+	}
+	catch (const HttpParseException& e) {
+		ResponseBuilder rb;
+
+		rb.generateCustomErrorPage(e.getStatusCode(), *_server);
+		appendToOutBuf(rb.buildString());
+
+		_resetRequestState();
+		_requestParser.discardBuffer();
+		clearInBuf();
+		markForDisconnect();
+	}
+}
+
+void Client::_handleRequest(void) {
+	RequestHandler requestHandler(_server);
+
+	const std::string response = requestHandler.processRequest(_httpRequest);
+
+	appendToOutBuf(response);
+
+	_resetRequestState();
+}
+
+void Client::_resetRequestState(void) {
+	_requestParser.reset();
+	_httpRequest.clear();
 }
