@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/11 03:56:03 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/24 21:54:03 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ void Server::_setupListeners(void) {
 
 			bool inserted = false;
 			try {
-				const auto result = _fdCtx.emplace(listenerFd, FdContext(SocketType::LISTENER, &serverCfg));
+				const auto result = _fdCtx.emplace(listenerFd, FdContext(&serverCfg));
 				inserted = result.second;
 			} catch (...) {
 				close(listenerFd);
@@ -203,7 +203,6 @@ void Server::_handlePendingConnections(int listeningSocket) {
 			const auto result = _fdCtx.emplace(
 									newClientFd,
 									FdContext(
-										SocketType::CLIENT,
 										relatedServer,
 										Client(
 											newClientFd,
