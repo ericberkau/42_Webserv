@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 20:26:46 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/09/24 18:49:40 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/25 01:13:01 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,17 +18,17 @@
 
 class CGIEnv
 {
-private:
-	std::map<std::string, std::string> _env;
+	public:
 
-public:
-	void set(
-		const std::string &key,
-		const std::string &value);
+		void		set(const std::string &key, const std::string &value);
+		char		**buildEnvp() const;
+		static void	freeEnvp(char **envp);
 
-	char **buildEnvp() const;
 
-	static void freeEnvp(char **envp);
+	private:
+
+		std::map<std::string, std::string>	_env;
+
 };
 
 #endif
