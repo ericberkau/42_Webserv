@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:54:11 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/24 14:32:08 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/25 23:39:32 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,24 +26,24 @@ class HttpRequestContainer
 		~HttpRequestContainer() = default;
 
 		// Setters
-		void setMethod(const HttpMethod& method);
-		void setUri(const std::string& uri);
-		void setVersion(const std::string& version);
-		void addHeader(const std::string& key, const std::string& value);
-		void setBody(const std::string& body);
-		void setQueryString(const std::string& query);
+		void	setMethod(const HttpMethod& method);
+		void	setUri(const std::string& uri);
+		void	setVersion(const std::string& version);
+		void	addHeader(const std::string& key, const std::string& value);
+		void	setBody(const std::string& body);
+		void	setQueryString(const std::string& query);
 
 		// Getters
-		const HttpMethod& getMethod() const;
-		const std::string& getUri() const;
-		const std::string& getVersion() const;
-		const std::string& getBody() const;
-		const std::string& getQueryString() const;
+		const HttpMethod&	getMethod() const;
+		const std::string&	getUri() const;
+		const std::string&	getVersion() const;
+		const std::string&	getBody() const;
+		const std::string&	getQueryString() const;
 
 		// Returns "" if header not found. Header lookup is case-insensitive
 		// acc. to RFC, so we normalize keys to lowercase when storing them
-		std::string getHeader(const std::string& key) const;
-		const std::map<std::string, std::string>& getHeaders() const;
+		std::string									getHeader(const std::string& key) const;
+		const std::map<std::string, std::string>&	getHeaders() const;
 
 		void clear();
 
@@ -52,12 +52,12 @@ class HttpRequestContainer
 		
 	private:
 	
-		HttpMethod _method;
-		std::string _uri;
-		std::string _version;
-		std::map<std::string, std::string> _headers; // keys stored lowercase
-		std::string _body;
-		std::string _queryString;
+		HttpMethod							_method;
+		std::string							_uri;
+		std::string							_version;
+		std::map<std::string, std::string>	_headers; // keys stored lowercase
+		std::string							_body;
+		std::string							_queryString;
 		
 };
 
