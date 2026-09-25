@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/24 21:54:03 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/25 02:11:03 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,11 @@ int Server::_setupListeningSocket(const ListenDirective& listenCfg) {
 	setsockopt(serverFd, SOL_SOCKET, SO_REUSEADDR, &enableSetting, sizeof(enableSetting)); // TODO: check return value
 
 	const int currentFlags = fcntl(serverFd, F_GETFL);
-	fcntl(serverFd, F_SETFL, currentFlags | O_NONBLOCK); // TODO: check return value
+	if (currentFlags == -1 || fcntl(serverFd, F_SETFL, currentFlags | O_NONBLOCK) == -1) {
+		close(serverFd);
+		perror("fcntl");
+		throw std::runtime_error("fcntl() failed to configure server socket");
+	}
 
 	if (0 != bind(serverFd, resolvedAddr->ai_addr, resolvedAddr->ai_addrlen)) {
 		close(serverFd);
@@ -187,7 +191,11 @@ void Server::_handlePendingConnections(int listeningSocket) {
 		}
 
 		const int currentFlags = fcntl(newClientFd, F_GETFL); // TODO: check return value for fail
-		fcntl(newClientFd, F_SETFL, currentFlags | O_NONBLOCK);
+		if (currentFlags == -1 || fcntl(newClientFd, F_SETFL, currentFlags | O_NONBLOCK) == -1) {
+			close(newClientFd);
+			perror("fcntl");
+			throw std::runtime_error("fcntl() failed to configure client socket");
+		};
 
 		std::cout << "Client accepted" << std::endl;
 
