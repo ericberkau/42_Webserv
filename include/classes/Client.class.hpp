@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:06 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/12 20:49:01 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/25 22:11:34 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,9 @@
 #include "classes/HttpRequestContainer.class.hpp"
 #include <arpa/inet.h>
 #include <string>
+#include <queue>
+
+struct RequestResult;
 
 class Client {
 
@@ -31,15 +34,15 @@ class Client {
 		const std::string&	getOutBuf(void) const;
 		size_t				getOutProgress(void) const;
 
-		void	advanceOutProgress(ssize_t bytes);
-		void	appendToInBuf(const char* input, size_t size); // FIXME: not needed at all?
-		void	appendToOutBuf(const std::string& input); // TODO: private?
-		void	clearInBuf(void);
-		void	clearOutBuf(void);
-		bool	hasPendingOutput(void) const;
-		void	markForDisconnect(void);
-		void	processInput(void);
-		bool	shouldDisconnect(void) const;
+		void						advanceOutProgress(ssize_t bytes);
+		void						appendToInBuf(const char* input, size_t size); // FIXME: not needed at all?
+		void						appendToOutBuf(const std::string& input); // TODO: private?
+		void						clearInBuf(void);
+		void						clearOutBuf(void);
+		bool						hasPendingOutput(void) const;
+		void						markForDisconnect(void);
+		std::queue<RequestResult>	processInput(void);
+		bool						shouldDisconnect(void) const;
 
 
 	private:
@@ -58,8 +61,8 @@ class Client {
 		RequestParser			_requestParser;
 		HttpRequestContainer	_httpRequest;
 
-		void	_handleRequest(void);
-		void	_resetRequestState(void);
+		RequestResult	_handleRequest(void);
+		void			_resetRequestState(void);
 
 		/* diallow copying */
 		Client(const Client&) = delete;

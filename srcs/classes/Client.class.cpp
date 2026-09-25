@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/12 20:52:01 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/26 01:17:03 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "classes/ResponseBuilder.class.hpp"
 #include <iostream>
 #include <unistd.h>
+#include <queue>
 
 Client::Client(int fd, const sockaddr_in& addr, const ServerConfig* server)
 	: _fd(fd), _inputReadProgress(0), _outputWriteProgress(0), _addr(addr), _server(server), _pendingDisconnect(false)
@@ -126,13 +127,15 @@ bool Client::shouldDisconnect(void) const {
 	return this->_pendingDisconnect;
 }
 
-void Client::processInput(void) {
+std::queue<RequestResult> Client::processInput(void) {
+	std::queue<RequestResult> results;
+
 	try {
 		_requestParser.feed(_inputBuffer, _httpRequest, _server);
 		clearInBuf();
 
 		while (_requestParser.getState() == RequestParser::PARSE_COMPLETE) {
-			_handleRequest();
+			results.push(_handleRequest());
 			_requestParser.feed("", _httpRequest, _server);
 		}
 	}
@@ -147,16 +150,18 @@ void Client::processInput(void) {
 		clearInBuf();
 		markForDisconnect();
 	}
+
+	return results;
 }
 
-void Client::_handleRequest(void) {
+RequestResult Client::_handleRequest(void) {
 	RequestHandler requestHandler(_server);
 
-	const std::string response = requestHandler.processRequest(_httpRequest);
-
-	appendToOutBuf(response);
+	RequestResult result = requestHandler.processRequest(_httpRequest);
 
 	_resetRequestState();
+
+	return result;
 }
 
 void Client::_resetRequestState(void) {
