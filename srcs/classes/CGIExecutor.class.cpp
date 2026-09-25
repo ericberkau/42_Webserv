@@ -6,19 +6,19 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 13:00:52 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/09/25 02:26:12 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/25 02:34:56 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/CGIExecutor.class.hpp"
 #include <fcntl.h>
 
-CGIEnv &CGIExecutor::getEnv()
+CGIEnv& CGIExecutor::getEnv()
 {
 	return _env;
 }
 
-PendingCgi CGIExecutor::start(const std::string &scriptPath, const std::string &body)
+PendingCgi CGIExecutor::start(const std::string& scriptPath, const std::string& body)
 {
 	int stdinPipeFd[2];
 	int stdoutPipeFd[2];
@@ -201,9 +201,9 @@ void CGIExecutor::_handleChild(int* stdinPipeFd, int* stdoutPipeFd, const std::s
 	}
 	close(stdoutPipeFd[1]);
 
-	char **envp = _env.buildEnvp();
+	char** envp = _env.buildEnvp();
 
-	char *argv[] = {const_cast<char *>(scriptPath.c_str()), NULL};
+	char* argv[] = {const_cast<char*>(scriptPath.c_str()), NULL};
 
 	execve(argv[0], argv, envp);
 

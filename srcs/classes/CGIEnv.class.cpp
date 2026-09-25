@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 12:31:01 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/09/24 18:49:23 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/25 02:35:33 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,15 +14,15 @@
 #include "classes/CGIEnv.class.hpp"
 #include <cstring>
 
-void CGIEnv::set(const std::string &key,
-				const std::string &value)
+void CGIEnv::set(const std::string& key,
+				const std::string& value)
 {
 	_env[key] = value;
 }
 
-char **CGIEnv::buildEnvp() const
+char** CGIEnv::buildEnvp() const
 {
-	char **envp = new char *[_env.size() + 1];
+	char** envp = new char*[_env.size() + 1];
 
 	size_t i = 0;
 
@@ -43,7 +43,7 @@ char **CGIEnv::buildEnvp() const
 	return envp;
 }
 
-void CGIEnv::freeEnvp(char **envp)
+void CGIEnv::freeEnvp(char** envp)
 {
 	if (!envp)
 		return;
