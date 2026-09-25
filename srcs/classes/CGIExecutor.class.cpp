@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 13:00:52 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/09/25 02:11:47 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/25 02:26:12 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,22 +181,24 @@ PendingCgi CGIExecutor::start(const std::string &scriptPath, const std::string &
 
 void CGIExecutor::_handleChild(int* stdinPipeFd, int* stdoutPipeFd, const std::string& scriptPath)
 {
+	close(stdinPipeFd[1]);
+	close(stdoutPipeFd[0]);
+
 	if (dup2(stdinPipeFd[0], STDIN_FILENO) == -1)
 	{
+		close(stdinPipeFd[0]);
+		close(stdoutPipeFd[1]);
 		perror("dup2");
 		_exit(EXIT_FAILURE);
 	}
+	close(stdinPipeFd[0]);
 
 	if (dup2(stdoutPipeFd[1], STDOUT_FILENO) == -1)
 	{
+		close(stdoutPipeFd[1]);
 		perror("dup2");
 		_exit(EXIT_FAILURE);
 	}
-
-	close(stdinPipeFd[0]);
-	close(stdinPipeFd[1]);
-
-	close(stdoutPipeFd[0]);
 	close(stdoutPipeFd[1]);
 
 	char **envp = _env.buildEnvp();
