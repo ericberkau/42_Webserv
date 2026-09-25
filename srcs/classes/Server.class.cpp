@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/25 02:11:03 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/26 01:13:21 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <memory>
 #include <netdb.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 Server::Server(const Config& config) : _config(config) {}
 
@@ -131,6 +132,36 @@ int Server::_setupListeningSocket(const ListenDirective& listenCfg) {
 
 bool Server::_isDuplicateAddress(uint32_t host, uint16_t port) {
 	return !_usedAddresses.insert(std::make_pair(host, port)).second;
+}
+
+void Server::_registerCgiPipe(const PendingCgi& cgiInfo) {
+	bool inserted = false;
+	bool duplicate = false;
+	try {
+		const auto emplResult = _fdCtx.emplace(cgiInfo.pipeFd, FdContext(cgiInfo));
+		inserted = emplResult.second;
+
+		if (!inserted) {
+			duplicate = true;
+			throw std::logic_error("attempted to register CGI pipe with duplicate file descriptor");
+		}
+
+		pollfd cgiPipe;
+		cgiPipe.fd = cgiInfo.pipeFd;
+		cgiPipe.events = POLLIN;
+		_pollfdArr.push_back(cgiPipe);
+	} catch (...) {
+		close(cgiInfo.pipeFd);
+		kill(cgiInfo.pid, SIGKILL);
+		waitpid(cgiInfo.pid, NULL, 0);
+		if (inserted)
+			_fdCtx.erase(cgiInfo.pipeFd);
+
+		if (duplicate)
+			throw;
+
+		std::cerr << "Runtime warning: failed to register CGI pipe FD context -> killed CGI process" << std::endl; // FIXME: maybe send error 500 to client and disconnect?
+	}
 }
 
 void Server::_handleSocketEvent(size_t& idx) {
@@ -319,7 +350,21 @@ void Server::_handleIncomingData(size_t& idx) {
 
 	std::cout << "Message arrived from " << _pollfdArr[idx].fd << " -> " << currClient.getInBuf() << std::endl; // BUG: remove later
 
-	currClient.processInput();
+	std::queue<RequestResult> reqResults = currClient.processInput();
+
+	while (!reqResults.empty()) {
+		RequestResult& singleResult = reqResults.front();
+		
+		if (singleResult.response)
+			currClient.appendToOutBuf(singleResult.response.value());
+		else if (singleResult.cgi) {
+			singleResult.cgi->clientFd = currClient.getFd(); // FIXME: maybe remove clientFd from this struct and only add in FdContext?
+
+			_registerCgiPipe(singleResult.cgi.value());
+		}
+
+		reqResults.pop();
+	}
 
 	if (currClient.hasPendingOutput())
 		_pollfdArr[idx].events |= POLLOUT;
