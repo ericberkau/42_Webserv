@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/25 01:50:18 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/25 21:54:30 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -320,7 +320,7 @@ static std::string toUpperWithUnderscores(const std::string& key)
 	return result;
 }
 
-std::string RequestHandler::_handleCgi(const std::string& physicalPath, const HttpRequestContainer& request)
+PendingCgi RequestHandler::_handleCgi(const std::string& physicalPath, const HttpRequestContainer& request)
 {
 	struct stat pathStat;
 	if (stat(physicalPath.c_str(), &pathStat) != 0 || S_ISDIR(pathStat.st_mode))
@@ -352,10 +352,10 @@ std::string RequestHandler::_handleCgi(const std::string& physicalPath, const Ht
 		env.set("HTTP_" + toUpperWithUnderscores(key), value);
 	}
 
-	PendingCgi cgiInfo; // NOTE: renamed due to new use case
+	PendingCgi cgiInfo;
 	try
 	{
-		cgiInfo = executor.start(physicalPath, request.getBody()); // NOTE: return type changed (as discussed)
+		cgiInfo = executor.start(physicalPath, request.getBody());
 	} 
 	catch (const std::exception&)
 	{
@@ -363,7 +363,7 @@ std::string RequestHandler::_handleCgi(const std::string& physicalPath, const Ht
 	}
 
 	// return _buildResponseFromCgiOutput(cgiOutput); // FIXME: don't know how to proceed here -Eric
-	return ""; // BUG: placeholder for successful compilation
+	return cgiInfo;
 }
 
 std::string RequestHandler::_handleRedirect(const LocationConfig* location) const
@@ -389,7 +389,7 @@ static int stringToInt(const std::string& s)
 	return num;
 }
 
-std::string RequestHandler::processRequest(const HttpRequestContainer& request)
+RequestResult RequestHandler::processRequest(const HttpRequestContainer& request)
 {
 	ResponseBuilder response;
 
@@ -399,7 +399,7 @@ std::string RequestHandler::processRequest(const HttpRequestContainer& request)
 		const LocationConfig* matchedLoc = _matchLocation(request.getUri());
 
 		if (matchedLoc && matchedLoc->hasRedirect)
-			return _handleRedirect(matchedLoc);
+			return RequestResult(_handleRedirect(matchedLoc));
 
 		// Validate routing method permissions
 		_verifyMethodAllowed(request.getMethod(), matchedLoc);
@@ -408,16 +408,14 @@ std::string RequestHandler::processRequest(const HttpRequestContainer& request)
 		std::string physicalPath = _translateToPhysicalPath(request.getUri(), matchedLoc);
 
 		if (_isCgiRequest(physicalPath, matchedLoc))
-			return _handleCgi(physicalPath, request);
-
-		// Branch execution to the matching handler based on HTTP Method type
-		if (request.getMethod() == HttpMethod::GET)
-			return _handleGet(physicalPath, matchedLoc);
+			return RequestResult(_handleCgi(physicalPath, request));
+		else if (request.getMethod() == HttpMethod::GET)
+			return RequestResult(_handleGet(physicalPath, matchedLoc));
 		else if (request.getMethod() == HttpMethod::POST)
-			return _handlePost(physicalPath, request);
+			return RequestResult(_handlePost(physicalPath, request));
 		else if (request.getMethod() == HttpMethod::DELETE)
-			return _handleDelete(physicalPath);
-		
+			return RequestResult(_handleDelete(physicalPath));
+
 		throw std::runtime_error("501"); // Not Implemented fallback guard if INVALID
 	}
 	catch (const std::runtime_error& errorMsg)
@@ -428,12 +426,12 @@ std::string RequestHandler::processRequest(const HttpRequestContainer& request)
 			statusCode = 500; // Fallback to Internal Error if conversion fails
 
 		response.generateCustomErrorPage(statusCode, *_config);
-		return response.buildString();
+		return RequestResult(response.buildString());
 	}
 	catch (...)
 	{
 		// global safety net catch-all for any unexpected system failure
 		response.generateCustomErrorPage(500, *_config);
-		return response.buildString();
+		return RequestResult(response.buildString());
 	}
 }

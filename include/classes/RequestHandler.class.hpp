@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.class.hpp                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:55:03 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/24 14:41:31 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/25 22:00:04 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #define REQUESTHANDLER_HPP
 
 #include "HttpRequestContainer.class.hpp"
+#include "networking.hpp"
 #include "../config.hpp"
 #include <string>
 #include <sys/types.h>
@@ -27,7 +28,7 @@ class RequestHandler
 		~RequestHandler();
 
 		// execution entry point
-		std::string processRequest(const HttpRequestContainer& request);
+		RequestResult processRequest(const HttpRequestContainer& request);
 		
 	private:
 	
@@ -43,7 +44,7 @@ class RequestHandler
 		std::string _handlePost(const std::string& physicalPath, const HttpRequestContainer& request);
 		std::string _handleDelete(const std::string& physicalPath);
 		std::string _buildResponseFromCgiOutput(const std::string& cgiOutput);
-		std::string _handleCgi(const std::string& physicalPath, const HttpRequestContainer& request);
+		PendingCgi _handleCgi(const std::string& physicalPath, const HttpRequestContainer& request);
 		std::string _handleRedirect(const LocationConfig* location) const;
 
 };
