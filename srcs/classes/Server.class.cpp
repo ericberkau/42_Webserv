@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/26 01:13:21 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/26 01:28:28 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -279,58 +279,6 @@ void Server::_handleClientEvents(size_t& idx) {
 	if (_pollfdArr[idx].revents & POLLOUT)
 		_handleOutgoingData(idx);
 }
-
-// void Server::_handleIncomingData(size_t& idx) {
-// 	char msg[MSG_SIZE];
-// 	Client& currClient = _fdCtx.at(_pollfdArr[idx].fd).client.value();
-// 	ssize_t receivedBytes = -1;
-
-// 	while (!g_shutdownRequested) {
-// 		receivedBytes = recv(currClient.getFd(), msg, MSG_SIZE, 0);
-// 		if (receivedBytes == -1) {
-// 			if (errno == EAGAIN || errno == EWOULDBLOCK)
-// 				break;
-// 			else if (errno == EPIPE || errno == ECONNRESET) {
-// 				_disconnectClient(idx);
-// 				return;
-// 			}
-// 			perror("recv");
-// 			throw std::runtime_error("recv() failed");
-// 		}
-// 		else if (receivedBytes == 0) {
-// 			_disconnectClient(idx);
-// 			return;
-// 		}
-
-// 		currClient.appendToInBuf(msg, receivedBytes);
-// 	}
-
-// 	_processClientInput(currClient);
-
-// 	std::cout << "Message arrived from " << _pollfdArr[idx].fd << " -> " << currClient.getInBuf() << std::endl; // BUG: remove later
-// 	currClient.appendToOutBuf(std::string("\nYou just sent -> " + currClient.getInBuf() + "\n")); // BUG: remove later
-// 	_pollfdArr[idx].events |= POLLOUT; // BUG: remove later
-// 	currClient.clearInBuf(); // BUG: remove later
-
-// }
-
-// static
-// void handleRequest(Client& client) {
-// 	RequestHandler reqHandler(client.getServer());
-
-// 	const std::string response = reqHandler.processRequest(client.getRequest());
-
-// 	client.appendToOutBuf(response);
-// 	client.resetRequestState();
-// }
-
-// static
-// void processClientInput(Client& client) {
-// 	client.processInputBuffer();
-
-// 	if (client.getRequestState() == RequestParser::PARSE_COMPLETE)
-// 		handleRequest(client);
-// }
 
 void Server::_handleIncomingData(size_t& idx) {
 	char msg[MSG_SIZE];
