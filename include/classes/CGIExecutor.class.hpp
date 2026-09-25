@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 12:30:19 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/09/25 01:25:14 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/25 01:29:15 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #define CGIEXECUTOR_HTTP
 
 #include "CGIEnv.class.hpp"
+#include "networking.hpp"
 #include <iostream>
 #include <string>
 #include <map>
@@ -29,7 +30,7 @@ class CGIExecutor
 
 		CGIEnv&		getEnv();
 
-		std::string	execute(const std::string &scriptPath, const std::string &body);
+		PendingCgi	start(const std::string &scriptPath, const std::string &body);
 
 
 	private:

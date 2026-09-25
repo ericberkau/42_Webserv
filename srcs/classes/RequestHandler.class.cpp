@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.class.cpp                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/24 19:51:47 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/25 01:50:18 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -352,17 +352,18 @@ std::string RequestHandler::_handleCgi(const std::string& physicalPath, const Ht
 		env.set("HTTP_" + toUpperWithUnderscores(key), value);
 	}
 
-	std::string cgiOutput;
+	PendingCgi cgiInfo; // NOTE: renamed due to new use case
 	try
 	{
-		cgiOutput = executor.execute(physicalPath, request.getBody());
+		cgiInfo = executor.start(physicalPath, request.getBody()); // NOTE: return type changed (as discussed)
 	} 
 	catch (const std::exception&)
 	{
 		throw std::runtime_error("500");
 	}
 
-	return _buildResponseFromCgiOutput(cgiOutput);
+	// return _buildResponseFromCgiOutput(cgiOutput); // FIXME: don't know how to proceed here -Eric
+	return ""; // BUG: placeholder for successful compilation
 }
 
 std::string RequestHandler::_handleRedirect(const LocationConfig* location) const
