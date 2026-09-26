@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/26 01:28:28 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/26 21:13:26 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,14 @@
 Server::Server(const Config& config) : _config(config) {}
 
 Server::~Server(void) {
-	for (auto& [fd, ctx] : _fdCtx)
+	for (auto& [fd, ctx] : _fdCtx) {
+		if (ctx.type == SocketType::CGI_PIPE && ctx.pid > 0) {
+			kill(ctx.pid, SIGKILL);
+			waitpid(ctx.pid, NULL, 0);
+		}
+
 		close(fd);
+	}
 }
 
 void Server::run(void) {
