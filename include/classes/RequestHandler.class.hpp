@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.class.hpp                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:55:03 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/25 22:00:04 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/27 19:12:50 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,25 +27,24 @@ class RequestHandler
 		RequestHandler(const ServerConfig* config);
 		~RequestHandler();
 
-		// execution entry point
-		RequestResult processRequest(const HttpRequestContainer& request);
+		RequestResult	processRequest(const HttpRequestContainer& request);
 		
 	private:
 	
-		const ServerConfig* _config;
+		const ServerConfig*	_config;
 
 		// Internal steps for routing
-		const LocationConfig* _matchLocation(const std::string& uri) const;
-		std::string _translateToPhysicalPath(const std::string& uri, const LocationConfig* location) const;
-		bool _isCgiRequest(const std::string& physicalPath, const LocationConfig* location) const;
-		void _verifyMethodAllowed(const HttpMethod& method, const LocationConfig* location) const;
+		const LocationConfig*	_matchLocation(const std::string& uri) const;
+		std::string				_translateToPhysicalPath(const std::string& uri, const LocationConfig* location) const;
+		bool					_isCgiRequest(const std::string& physicalPath, const LocationConfig* location) const;
+		void					_verifyMethodAllowed(const HttpMethod& method, const LocationConfig* location) const;
 
-		std::string _handleGet(const std::string& physicalPath, const LocationConfig* location);
-		std::string _handlePost(const std::string& physicalPath, const HttpRequestContainer& request);
-		std::string _handleDelete(const std::string& physicalPath);
-		std::string _buildResponseFromCgiOutput(const std::string& cgiOutput);
-		PendingCgi _handleCgi(const std::string& physicalPath, const HttpRequestContainer& request);
-		std::string _handleRedirect(const LocationConfig* location) const;
+		std::string	_handleGet(const std::string& physicalPath, const LocationConfig* location);
+		std::string	_handlePost(const std::string& physicalPath, const HttpRequestContainer& request);
+		std::string	_handleDelete(const std::string& physicalPath);
+		std::string	_buildResponseFromCgiOutput(const std::string& cgiOutput);
+		PendingCgi	_handleCgi(const std::string& physicalPath, const HttpRequestContainer& request);
+		std::string	_handleRedirect(const LocationConfig* location) const;
 
 };
 

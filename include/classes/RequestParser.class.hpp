@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.class.hpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:56:06 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/11 20:51:37 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/27 19:17:37 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,14 +25,16 @@ class HttpParseException : public std::exception
 	public:
 	
 		HttpParseException(int statusCode, const std::string& reason);
-		virtual ~HttpParseException() throw();
-		virtual const char* what() const throw();
-		int getStatusCode() const;
+		
+		virtual				~HttpParseException() throw();
+		virtual const char*	what() const throw();
+		
+		int	getStatusCode() const;
 		
 	private:
 	
-		int _statusCode;
-		std::string _reason;
+		int	_statusCode;
+		std::string	_reason;
 
 };
 
@@ -52,25 +54,25 @@ class RequestParser
 		~RequestParser() = default;
 		
 		// Feeds raw data coming out of recv() piece by piece
-		void feed(const std::string& chunk, HttpRequestContainer& request, const ServerConfig* config);
+		void	feed(const std::string& chunk, HttpRequestContainer& request, const ServerConfig* config);
 
 		// Getters for the server loop to know when a request is ready
-		ParsingState getState() const;
-		void reset();
-		void discardBuffer();
+		ParsingState	getState() const;
+		void			reset();
+		void			discardBuffer();
 		
 	private:
 	
-		ParsingState _state;
-		std::string _buffer;
-		size_t _expectedBodyBytes; // Stores Content-Length or current chunk size
-		bool _chunkSizeParsed; // Tracks if we are waiting for a chunk size line or chunk data bytes
+		ParsingState	_state;
+		std::string		_buffer;
+		size_t			_expectedBodyBytes; // Stores Content-Length or current chunk size
+		bool			_chunkSizeParsed; // Tracks if we are waiting for a chunk size line or chunk data bytes
 		
-		void _parseRequestLine(const std::string& line, HttpRequestContainer& request); // Splits "METHOD URI VERSION" and validates each piece
-		bool _isValidHeaderKeyChar(unsigned char c);
-		void _parseHeaderLine(const std::string& line, HttpRequestContainer& request); // Splits "Key: Value" and adds it to the request
-		bool _isSupportedMethod(const std::string& method);
-		bool _isKnownHttpMethod(const std::string& method);
+		void	_parseRequestLine(const std::string& line, HttpRequestContainer& request); // Splits "METHOD URI VERSION" and validates each piece
+		bool	_isValidHeaderKeyChar(unsigned char c);
+		void	_parseHeaderLine(const std::string& line, HttpRequestContainer& request); // Splits "Key: Value" and adds it to the request
+		bool	_isSupportedMethod(const std::string& method);
+		bool	_isKnownHttpMethod(const std::string& method);
 		
 };
 

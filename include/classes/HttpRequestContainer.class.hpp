@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:54:11 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/25 23:39:32 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/27 19:13:05 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,10 +45,10 @@ class HttpRequestContainer
 		std::string									getHeader(const std::string& key) const;
 		const std::map<std::string, std::string>&	getHeaders() const;
 
-		void clear();
+		void	clear();
 
 		// For debugging to print everything that is parsed
-		void print() const;
+		void	print() const;
 		
 	private:
 	
