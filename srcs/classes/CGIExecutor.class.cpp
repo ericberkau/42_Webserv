@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 13:00:52 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/09/25 02:34:56 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/28 00:23:17 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ PendingCgi CGIExecutor::start(const std::string& scriptPath, const std::string& 
 		}
 
 		written += ret;
-	}
+	} // FIXME: might block on huge bodies! -> think and discuss
 
 	close(stdinPipeFd[1]);
 

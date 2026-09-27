@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/26 21:13:26 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/28 00:32:12 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,7 +183,7 @@ void Server::_handleSocketEvent(size_t& idx) {
 				return;
 
 			case SocketType::CGI_PIPE:
-				// TODO
+				// BUG: don't disconnect, pipe may have remaining bytes
 				return;
 
 			default:
@@ -201,7 +201,7 @@ void Server::_handleSocketEvent(size_t& idx) {
 			break;
 
 		case SocketType::CGI_PIPE:
-			// TODO
+			_handleCgiOutput(idx);
 			break;
 
 		default:
@@ -310,7 +310,7 @@ void Server::_handleIncomingData(size_t& idx) {
 		RequestResult& singleResult = reqResults.front();
 		
 		if (singleResult.response)
-			currClient.appendToOutBuf(singleResult.response.value());
+			currClient.appendToOutBuf(singleResult.response.value()); // FIXME: consider adding a transaction queue to keep proper request<->response order grouping
 		else if (singleResult.cgi) {
 			singleResult.cgi->clientFd = currClient.getFd(); // FIXME: maybe remove clientFd from this struct and only add in FdContext?
 
@@ -356,6 +356,40 @@ void Server::_handleOutgoingData(size_t& idx) {
 		currClient.clearOutBuf();
 		_pollfdArr[idx].events &= ~POLLOUT;
 	}
+}
+
+void Server::_handleCgiOutput(size_t& idx) {
+	if (!(_pollfdArr[idx].revents & POLLIN))
+		return;
+
+	FdContext& currCgi = _fdCtx.at(_pollfdArr[idx].fd);
+	Client& owningClient = _fdCtx.at(currCgi.owningClientFd).client.value();
+
+	char buffer[MSG_SIZE];
+	std::string output;
+
+	while (true) {
+		ssize_t bytes = read(_pollfdArr[idx].fd, buffer, sizeof(buffer));
+
+		if (bytes > 0)
+			output.append(buffer, bytes);
+		else if (bytes == 0) {
+			owningClient.appendToOutBuf(
+				RequestHandler::buildResponseFromCgiOutput(output)
+			);
+
+			_disconnectClient(idx);
+			return;
+		} else {
+			if (errno == EAGAIN || errno == EWOULDBLOCK)
+				return;
+
+			perror("read");
+			_disconnectClient(idx);
+			return;
+		}
+	}
+	// FIXME: change to incremental reading instead of draining
 }
 
 void Server::_disconnectClient(size_t& idx) {

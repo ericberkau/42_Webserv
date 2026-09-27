@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:10 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/26 00:42:29 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/27 22:10:26 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ class Server {
 
 		/* event handling */
 		void	_disconnectClient(size_t& idx);
+		void	_handleCgiOutput(size_t& idx);
 		void	_handleClientEvents(size_t& idx);
 		void	_handleIncomingData(size_t& idx);
 		void	_handleListenerEvents(size_t idx);
