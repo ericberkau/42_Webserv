@@ -1,6 +1,6 @@
 # Webserv
 
-This project has been created as part of the 42 curriculum by eberkau, skomyshe, djanardh.
+_This project has been created as part of the 42 curriculum by eberkau, skomyshe, djanardh._
 
 ## Description
 Webserv is an HTTP server written in C++.
@@ -26,20 +26,50 @@ make
 
 ### Compilation
 Clone the repository and run:
-make
-
+`make`
 This creates the webserv executable.
 
+### Execution
+Run the server:
+`./webserv`
+Without a second argument, basic.conf runs by default.
+
+The server can be run with a configuration file of choice too:
+`./webserv configs/example.conf`
+
+The server will start listening on the ports defined in the configuration file.
+
+You can then connect to it using a web browser or a tool such as curl:
+`curl http://localhost:8080`
+
 To remove object files:
-make clean
+`make clean`
 
 To remove all generated files:
-make fclean
+`make fclean`
 
 To recompile everything:
-make re
+`make re`
+
+## Features
+Multiple server configurations
+Multiple listening ports
+HTTP/1.1 request handling
+GET, POST, and DELETE
+Static file serving
+Custom error pages
+Redirects
+File uploads
+CGI support
+Non-blocking sockets
+Multiple simultaneous clients
+Configurable routes and server settings
 
 ## Resources
+HTTP/1.1 — RFC 9112
+[https://www.rfc-editor.org/rfc/rfc2616](https://datatracker.ietf.org/doc/html/rfc9112)
 
+HTTP Semantics — RFC 9110
+[https://www.rfc-editor.org/rfc/rfc9110](https://datatracker.ietf.org/doc/html/rfc9110)
 
 
