@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:55:03 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/27 19:12:50 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/27 22:16:12 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,8 @@ class RequestHandler
 		RequestHandler(const ServerConfig* config);
 		~RequestHandler();
 
-		RequestResult	processRequest(const HttpRequestContainer& request);
+		RequestResult		processRequest(const HttpRequestContainer& request);
+		static std::string	buildResponseFromCgiOutput(const std::string& cgiOutput);
 		
 	private:
 	
@@ -42,7 +43,6 @@ class RequestHandler
 		std::string	_handleGet(const std::string& physicalPath, const LocationConfig* location);
 		std::string	_handlePost(const std::string& physicalPath, const HttpRequestContainer& request);
 		std::string	_handleDelete(const std::string& physicalPath);
-		std::string	_buildResponseFromCgiOutput(const std::string& cgiOutput);
 		PendingCgi	_handleCgi(const std::string& physicalPath, const HttpRequestContainer& request);
 		std::string	_handleRedirect(const LocationConfig* location) const;
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.class.cpp                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/25 21:54:30 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/27 22:17:40 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -262,7 +262,7 @@ std::string RequestHandler::_handleDelete(const std::string& physicalPath)
 	return response;
 }
 
-std::string RequestHandler::_buildResponseFromCgiOutput(const std::string& cgiOutput)
+std::string RequestHandler::buildResponseFromCgiOutput(const std::string& cgiOutput)
 {
 	ResponseBuilder response;
 
@@ -303,7 +303,7 @@ std::string RequestHandler::_buildResponseFromCgiOutput(const std::string& cgiOu
 	}
 
 	response.setStatus(statusCode);
-	response.setBody(body); // recomputes Content-Length correctly
+	response.setBody(body);
 	return response.buildString();
 }
 
