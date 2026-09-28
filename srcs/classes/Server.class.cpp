@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/28 00:32:12 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/28 02:40:58 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -359,7 +359,7 @@ void Server::_handleOutgoingData(size_t& idx) {
 }
 
 void Server::_handleCgiOutput(size_t& idx) {
-	if (!(_pollfdArr[idx].revents & POLLIN))
+	if (!(_pollfdArr[idx].revents & (POLLIN | POLLHUP)))
 		return;
 
 	FdContext& currCgi = _fdCtx.at(_pollfdArr[idx].fd);
@@ -377,6 +377,12 @@ void Server::_handleCgiOutput(size_t& idx) {
 			owningClient.appendToOutBuf(
 				RequestHandler::buildResponseFromCgiOutput(output)
 			);
+
+			size_t clientIdx = _findPollEntryIdxByFd(currCgi.owningClientFd);
+			if (clientIdx == _pollfdArr.size())
+				throw std::logic_error("owning client fd not found");
+
+			_pollfdArr[clientIdx].events |= POLLOUT;
 
 			_disconnectClient(idx);
 			return;
@@ -402,4 +408,12 @@ void Server::_disconnectClient(size_t& idx) {
 	_pollfdArr[idx] = _pollfdArr.back();
 	_pollfdArr.pop_back();
 	--idx;
+}
+
+size_t Server::_findPollEntryIdxByFd(int fd) {
+	for (size_t i = 0; i < _pollfdArr.size(); ++i) {
+		if (_pollfdArr[i].fd == fd)
+			return i;
+	}
+	return _pollfdArr.size();
 }

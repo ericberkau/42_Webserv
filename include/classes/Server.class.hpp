@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:10 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/27 22:10:26 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/28 02:38:42 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,14 +32,16 @@ class Server {
 
 	private:
 
-		/* setup */
-		void	_setupListeners(void);
-		int		_setupListeningSocket(const ListenDirective& listenCfg);
+		/* setup and management */
+		void	_disconnectClient(size_t& idx);
+		size_t	_findPollEntryIdxByFd(int fd);
 		bool	_isDuplicateAddress(uint32_t host, uint16_t port);
 		void	_registerCgiPipe(const PendingCgi& cgiInfo);
+		void	_setupListeners(void);
+		int		_setupListeningSocket(const ListenDirective& listenCfg);
+
 
 		/* event handling */
-		void	_disconnectClient(size_t& idx);
 		void	_handleCgiOutput(size_t& idx);
 		void	_handleClientEvents(size_t& idx);
 		void	_handleIncomingData(size_t& idx);
