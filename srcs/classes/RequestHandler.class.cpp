@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.class.cpp                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/27 22:17:40 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/09/29 18:58:30 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -362,7 +362,6 @@ PendingCgi RequestHandler::_handleCgi(const std::string& physicalPath, const Htt
 		throw std::runtime_error("500");
 	}
 
-	// return _buildResponseFromCgiOutput(cgiOutput); // FIXME: don't know how to proceed here -Eric
 	return cgiInfo;
 }
 
