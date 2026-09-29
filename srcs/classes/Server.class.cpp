@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/30 01:08:55 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/30 01:26:16 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -179,7 +179,7 @@ void Server::_handleSocketEvent(size_t& idx) {
 				throw std::runtime_error("listening socket failed");
 
 			case SocketType::CLIENT:
-				_disconnectClient(idx);
+				_disconnectFd(idx);
 				return;
 
 			case SocketType::CGI_PIPE:
@@ -302,7 +302,7 @@ void Server::_handleIncomingData(size_t& idx) {
 		perror("recv");
 		throw std::runtime_error("recv() failed");
 	} else if (receivedBytes == 0) {
-		_disconnectClient(idx);
+		_disconnectFd(idx);
 		return;
 	}
 
@@ -355,7 +355,7 @@ void Server::_handleOutgoingData(size_t& idx) {
 
 	if (!currClient.hasPendingOutput()) {
 		if (currClient.shouldDisconnect()) {
-			_disconnectClient(idx);
+			_disconnectFd(idx);
 			return;
 		}
 
@@ -397,30 +397,35 @@ void Server::_handleCgiOutput(size_t& idx) {
 
 			_pollfdArr[clientIdx].events |= POLLOUT;
 
-			_disconnectClient(idx);
+			_disconnectFd(idx);
 			return;
 		} else {
 			if (errno == EAGAIN || errno == EWOULDBLOCK)
 				return;
 
 			perror("read");
-			_disconnectClient(idx);
+			_disconnectFd(idx);
 			return;
 		}
 	}
 	// FIXME: change to incremental reading instead of draining
 }
 
-void Server::_disconnectClient(size_t& idx) {
-	std::cout << "Client " << _pollfdArr[idx].fd << " disconnected" << std::endl;
-
+void Server::_disconnectFd(size_t& idx) {
 	const int fd = _pollfdArr[idx].fd;
+	const FdContext& currCtx = _fdCtx.at(fd);
+	
+	if (currCtx.type == SocketType::CGI_PIPE)
+		waitpid(currCtx.pid, NULL, 0); // FIXME: remember to SIGKILL the child elsewehere in abnormal disconnect!
+	
 	_fdCtx.erase(fd);
 	close(fd);
-
+	
 	_pollfdArr[idx] = _pollfdArr.back();
 	_pollfdArr.pop_back();
 	--idx;
+
+	std::cout << "FD " << fd << " disconnected" << std::endl;
 }
 
 size_t Server::_findPollEntryIdxByFd(int fd) {
