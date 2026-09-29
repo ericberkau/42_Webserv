@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/28 02:40:58 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/09/30 01:08:55 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,7 +152,7 @@ void Server::_registerCgiPipe(const PendingCgi& cgiInfo) {
 			throw std::logic_error("attempted to register CGI pipe with duplicate file descriptor");
 		}
 
-		pollfd cgiPipe;
+		pollfd cgiPipe = {};
 		cgiPipe.fd = cgiInfo.pipeFd;
 		cgiPipe.events = POLLIN;
 		_pollfdArr.push_back(cgiPipe);
@@ -184,6 +184,12 @@ void Server::_handleSocketEvent(size_t& idx) {
 
 			case SocketType::CGI_PIPE:
 				// BUG: don't disconnect, pipe may have remaining bytes
+				printf("POLLERR: %i\nPOLLHUP: %i\nPOLLNVAL: %i\n",
+					_pollfdArr[idx].revents & POLLERR ? 1 : 0,
+					_pollfdArr[idx].revents & POLLHUP ? 1 : 0,
+					_pollfdArr[idx].revents & POLLNVAL ? 1 : 0
+				); // BUG: for debugging, remove later!
+				_handleCgiOutput(idx);
 				return;
 
 			default:
@@ -362,20 +368,27 @@ void Server::_handleCgiOutput(size_t& idx) {
 	if (!(_pollfdArr[idx].revents & (POLLIN | POLLHUP)))
 		return;
 
+	printf("Error in cgi fetcher? -> "); // BUG: for debugging, remove later!
 	FdContext& currCgi = _fdCtx.at(_pollfdArr[idx].fd);
-	Client& owningClient = _fdCtx.at(currCgi.owningClientFd).client.value();
+	printf("no for CGI\n"); // BUG: for debugging, remove later!
+	printf("owning client: %d\n", currCgi.owningClientFd); // BUG: for debugging, remove later!
+	Client& owningClient = _fdCtx.at(currCgi.owningClientFd).client.value(); //BUG: produced error for unordered_map::at() after owning client disconnected earlier, try-catch maybe?
+	printf("-> no for client\n"); // BUG: for debugging, remove later!
 
 	char buffer[MSG_SIZE];
-	std::string output;
 
 	while (true) {
 		ssize_t bytes = read(_pollfdArr[idx].fd, buffer, sizeof(buffer));
 
-		if (bytes > 0)
-			output.append(buffer, bytes);
+		printf("bytes: %zd\n", bytes); // BUG: for debugging, remove later!
+		printf("buffer: %s\n", buffer); // BUG: for debugging, remove later!
+		if (bytes > 0) {
+			currCgi.cgiOutput.append(buffer, bytes);
+			buffer[0] = '\0';
+		}
 		else if (bytes == 0) {
 			owningClient.appendToOutBuf(
-				RequestHandler::buildResponseFromCgiOutput(output)
+				RequestHandler::buildResponseFromCgiOutput(currCgi.cgiOutput)
 			);
 
 			size_t clientIdx = _findPollEntryIdxByFd(currCgi.owningClientFd);
