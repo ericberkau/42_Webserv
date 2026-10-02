@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 13:00:52 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/10/02 02:48:04 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/02 04:06:16 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,14 +70,14 @@ CgiContext CGIExecutor::start(const std::string& scriptPath, const std::string& 
 
 	close(stdinPipeFd[1]);
 
-	const int currentFlags = fcntl(stdoutPipeFd[0], F_GETFL);
-	if (currentFlags == -1 || fcntl(stdoutPipeFd[0], F_SETFL, currentFlags | O_NONBLOCK) == -1)
-	{
-		close(stdoutPipeFd[0]);
-		kill(pid, SIGKILL);
-		waitpid(pid, NULL, 0);
-		throw std::runtime_error("fcntl failed to configure CGI pipe");
-	}
+	// const int currentFlags = fcntl(stdoutPipeFd[0], F_GETFL);
+	// if (currentFlags == -1 || fcntl(stdoutPipeFd[0], F_SETFL, currentFlags | O_NONBLOCK) == -1)
+	// {
+	// 	close(stdoutPipeFd[0]);
+	// 	kill(pid, SIGKILL);
+	// 	waitpid(pid, NULL, 0);
+	// 	throw std::runtime_error("fcntl failed to configure CGI pipe");
+	// } // FIXME: remove later
 
 	CgiContext cgiInfo;
 	cgiInfo.pid = pid;

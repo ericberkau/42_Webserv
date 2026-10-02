@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/02 04:02:56 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/02 04:09:40 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -408,9 +408,6 @@ void Server::_handleCgiOutput(size_t& idx) {
 		_disconnectFd(idx);
 		return;
 	}
-
-	// if (errno == EAGAIN || errno == EWOULDBLOCK) // FIXME: remove and find another way?
-	// 	return;
 
 	perror("read");
 	_disconnectFd(idx);
