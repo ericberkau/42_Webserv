@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.class.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/02 04:26:58 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/03 01:12:31 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,34 +141,55 @@ bool Server::_isDuplicateAddress(uint32_t host, uint16_t port) {
 	return !_usedAddresses.insert(std::make_pair(host, port)).second;
 }
 
-void Server::_registerCgiPipe(const CgiContext& cgiInfo) {
-	bool inserted = false;
-	bool duplicate = false;
+void Server::_registerCgi(const CgiContext& cgiInfo) {
 	try {
-		const auto emplResult = _fdCtx.emplace(cgiInfo.pipeFd, FdContext(cgiInfo));
-		inserted = emplResult.second;
-
-		if (!inserted) {
-			duplicate = true;
-			throw std::logic_error("attempted to register CGI pipe with duplicate file descriptor");
-		}
-
-		pollfd cgiPipe = {};
-		cgiPipe.fd = cgiInfo.pipeFd;
-		cgiPipe.events = POLLIN;
-		_pollfdArr.push_back(cgiPipe);
+		_registerCgiPipe(cgiInfo, POLLIN);
+		_registerCgiPipe(cgiInfo, POLLOUT);
+	} catch (const std::logic_error&) {
+		_abortCgiRegistration(cgiInfo);
+		throw;
 	} catch (...) {
-		close(cgiInfo.pipeFd);
-		kill(cgiInfo.pid, SIGKILL);
-		waitpid(cgiInfo.pid, NULL, 0);
-		if (inserted)
-			_fdCtx.erase(cgiInfo.pipeFd);
-
-		if (duplicate)
-			throw;
-
+		_abortCgiRegistration(cgiInfo);
 		std::cerr << "Runtime warning: failed to register CGI pipe FD context -> killed CGI process" << std::endl; // FIXME: maybe send error 500 to client and disconnect?
 	}
+}
+
+void Server::_registerCgiPipe(const CgiContext& cgiInfo, const short events) {
+	if (events != POLLIN && events != POLLOUT)
+		throw std::runtime_error("tried to register CGI pipe with unsupported poll event");
+
+	const int pipeFd = (events == POLLIN ? cgiInfo.readPipeFd : cgiInfo.writePipeFd);
+
+	const auto emplResult = _fdCtx.emplace(pipeFd, FdContext(cgiInfo));
+	bool inserted = emplResult.second;
+
+	if (!inserted)
+		throw std::logic_error("attempted to register CGI pipe with duplicate file descriptor");
+
+	pollfd cgiPipe = {};
+	cgiPipe.fd = pipeFd;
+	cgiPipe.events = events;
+	_pollfdArr.push_back(cgiPipe);
+}
+
+void Server::_abortCgiRegistration(const CgiContext& cgiInfo) {
+	_fdCtx.erase(cgiInfo.readPipeFd);
+	_fdCtx.erase(cgiInfo.writePipeFd);
+
+	_pollfdArr.erase(
+		std::remove_if(
+			_pollfdArr.begin(),
+			_pollfdArr.end(),
+			[&](const pollfd& pfd) {
+				return pfd.fd == cgiInfo.readPipeFd ||
+					pfd.fd == cgiInfo.writePipeFd;
+			}),
+		_pollfdArr.end());
+
+	close(cgiInfo.readPipeFd);
+	close(cgiInfo.writePipeFd);
+	kill(cgiInfo.pid, SIGKILL);
+	waitpid(cgiInfo.pid, NULL, 0);
 }
 
 void Server::_handleSocketEvent(size_t& idx) {
@@ -329,7 +350,7 @@ void Server::_handleIncomingData(size_t& idx) {
 			CgiContext& cgi = std::get<CgiContext>(singleResult.result);
 
 			cgi.clientFd = currClient.getFd();
-			_registerCgiPipe(cgi);
+			_registerCgi(cgi);
 		}
 
 		reqResults.pop();

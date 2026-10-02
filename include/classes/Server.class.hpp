@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.class.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:10 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/02 02:48:04 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/03 01:02:59 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,9 @@ class Server {
 		void	_disconnectFd(size_t& idx);
 		size_t	_findPollEntryIdxByFd(int fd);
 		bool	_isDuplicateAddress(uint32_t host, uint16_t port);
-		void	_registerCgiPipe(const CgiContext& cgiInfo);
+		void	_registerCgi(const CgiContext& cgiInfo);
+		void	_registerCgiPipe(const CgiContext& cgiInfo, const short events);
+		void	_abortCgiRegistration(const CgiContext& cgiInfo);
 		void	_setupListeners(void);
 		int		_setupListeningSocket(const ListenDirective& listenCfg);
 
