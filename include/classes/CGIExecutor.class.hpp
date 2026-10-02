@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGIExecutor.class.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 12:30:19 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/10/02 02:48:04 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/02 22:36:47 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ class CGIExecutor
 
 		CGIEnv&		getEnv();
 
-		CgiContext	start(const std::string& scriptPath, const std::string& body);
+		CgiContext	start(const std::string& scriptPath);
 
 
 	private:

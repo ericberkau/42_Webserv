@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.class.cpp                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/02 02:48:04 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/02 22:46:10 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -355,7 +355,8 @@ CgiContext RequestHandler::_handleCgi(const std::string& physicalPath, const Htt
 	CgiContext cgiInfo;
 	try
 	{
-		cgiInfo = executor.start(physicalPath, request.getBody());
+		cgiInfo = executor.start(physicalPath);
+		cgiInfo.body = request.getBody();
 	} 
 	catch (const std::exception&)
 	{

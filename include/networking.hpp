@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   networking.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 22:44:52 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/02 03:23:59 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/02 22:29:43 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,10 @@ enum class SocketType {
 
 struct CgiContext {
 	pid_t		pid;
-	int			pipeFd;
+	int			readPipeFd;
+	int			writePipeFd;
 	int			clientFd;
+	std::string	body;
 	std::string	output;
 };
 

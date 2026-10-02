@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGIExecutor.class.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 13:00:52 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/10/02 04:06:16 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/03 01:08:55 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ CGIEnv& CGIExecutor::getEnv()
 	return _env;
 }
 
-CgiContext CGIExecutor::start(const std::string& scriptPath, const std::string& body)
+CgiContext CGIExecutor::start(const std::string& scriptPath)
 {
 	int stdinPipeFd[2];
 	int stdoutPipeFd[2];
@@ -46,30 +46,30 @@ CgiContext CGIExecutor::start(const std::string& scriptPath, const std::string& 
 
 	close(stdinPipeFd[0]);
 	close(stdoutPipeFd[1]);
+////////
+	// size_t written = 0;
+	// while (written < body.size())
+	// {
+	// 	ssize_t ret = write(
+	// 					stdinPipeFd[1],
+	// 					body.c_str() + written,
+	// 					body.size() - written
+	// 				);
 
-	size_t written = 0;
-	while (written < body.size())
-	{
-		ssize_t ret = write(
-						stdinPipeFd[1],
-						body.c_str() + written,
-						body.size() - written
-					);
+	// 	if (ret <= 0)
+	// 	{
+	// 		close(stdinPipeFd[1]);
+	// 		close(stdoutPipeFd[0]);
+	// 		kill(pid, SIGKILL);
+	// 		waitpid(pid, NULL, 0);
+	// 		throw std::runtime_error("write failed");
+	// 	}
 
-		if (ret <= 0)
-		{
-			close(stdinPipeFd[1]);
-			close(stdoutPipeFd[0]);
-			kill(pid, SIGKILL);
-			waitpid(pid, NULL, 0);
-			throw std::runtime_error("write failed");
-		}
+	// 	written += ret;
+	// } // FIXME: might block on huge bodies! -> think and discuss
 
-		written += ret;
-	} // FIXME: might block on huge bodies! -> think and discuss
-
-	close(stdinPipeFd[1]);
-
+	// close(stdinPipeFd[1]);
+//////////
 	// const int currentFlags = fcntl(stdoutPipeFd[0], F_GETFL);
 	// if (currentFlags == -1 || fcntl(stdoutPipeFd[0], F_SETFL, currentFlags | O_NONBLOCK) == -1)
 	// {
@@ -79,9 +79,10 @@ CgiContext CGIExecutor::start(const std::string& scriptPath, const std::string& 
 	// 	throw std::runtime_error("fcntl failed to configure CGI pipe");
 	// } // FIXME: remove later
 
-	CgiContext cgiInfo;
+	CgiContext cgiInfo = {};
 	cgiInfo.pid = pid;
-	cgiInfo.pipeFd = stdoutPipeFd[0];
+	cgiInfo.readPipeFd = stdoutPipeFd[0];
+	cgiInfo.writePipeFd = stdinPipeFd[1];
 	cgiInfo.clientFd = -1;
 
 	return cgiInfo;
