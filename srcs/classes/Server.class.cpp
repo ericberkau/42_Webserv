@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/02 03:33:23 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/02 04:02:56 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -374,18 +374,13 @@ void Server::_handleCgiOutput(size_t& idx) {
 	FdContext& currFdCtx = _fdCtx.at(_pollfdArr[idx].fd);
 	printf("no for CGI\n"); // BUG: for debugging, remove later!
 	CgiContext& currCgi = currFdCtx.cgi.value();
-	Client* owningClient = NULL;
-	try {
-		printf("owning client: %d\n", currCgi.clientFd); // BUG: for debugging, remove later!
-		owningClient = &_fdCtx.at(currCgi.clientFd).client.value();
-		printf("-> no for client\n"); // BUG: for debugging, remove later!
-	} catch (...) {
-		pid_t result = waitpid(currCgi.pid, NULL, WNOHANG);
-		if (result != currCgi.pid)
-			kill(currCgi.pid, SIGKILL);
+
+	auto it = _fdCtx.find(currCgi.clientFd);
+	if (it == _fdCtx.end()) {
 		_disconnectFd(idx);
 		return;
 	}
+	Client& owningClient = it->second.client.value();
 
 	char buffer[MSG_SIZE];
 
@@ -400,7 +395,7 @@ void Server::_handleCgiOutput(size_t& idx) {
 	}
 
 	if (bytes == 0) {
-		owningClient->appendToOutBuf(
+		owningClient.appendToOutBuf(
 			RequestHandler::buildResponseFromCgiOutput(currCgi.output)
 		);
 
@@ -414,20 +409,24 @@ void Server::_handleCgiOutput(size_t& idx) {
 		return;
 	}
 
-	// if (errno == EAGAIN || errno == EWOULDBLOCK)
+	// if (errno == EAGAIN || errno == EWOULDBLOCK) // FIXME: remove and find another way?
 	// 	return;
 
 	perror("read");
 	_disconnectFd(idx);
-	// FIXME: change to incremental reading instead of draining
 }
 
 void Server::_disconnectFd(size_t& idx) {
 	const int fd = _pollfdArr[idx].fd;
 	const FdContext& currCtx = _fdCtx.at(fd);
 	
-	if (currCtx.type == SocketType::CGI_PIPE)
-		waitpid(currCtx.cgi->pid, NULL, 0); // FIXME: remember to SIGKILL the child elsewehere in abnormal disconnect!
+	if (currCtx.type == SocketType::CGI_PIPE) {
+		pid_t result = waitpid(currCtx.cgi->pid, NULL, WNOHANG);
+		if (result == 0) {
+			kill(currCtx.cgi->pid, SIGKILL);
+			waitpid(currCtx.cgi->pid, NULL, 0);
+		}
+	}
 	
 	_fdCtx.erase(fd);
 	close(fd);
