@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:26 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/11 12:59:29 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/02 13:09:15 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ std::string ResponseBuilder::_getStandardStatusMessage(int code) const
 		case 411: return "Length Required";
 		case 413: return "Payload Too Large";
 		case 414: return "URI Too Long";
+		case 431: return "Request Header Fields Too Large";
 		case 500: return "Internal Server Error";
 		case 501: return "Not Implemented";
 		default:  return "Unknown Status";
