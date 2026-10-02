@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/02 03:22:03 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/02 03:33:23 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -389,37 +389,36 @@ void Server::_handleCgiOutput(size_t& idx) {
 
 	char buffer[MSG_SIZE];
 
-	while (true) {
-		ssize_t bytes = read(_pollfdArr[idx].fd, buffer, sizeof(buffer));
+	ssize_t bytes = read(_pollfdArr[idx].fd, buffer, sizeof(buffer));
 
-		printf("bytes: %zd\n", bytes); // BUG: for debugging, remove later!
-		printf("buffer: %s\n", buffer); // BUG: for debugging, remove later!
-		if (bytes > 0) {
-			currCgi.output.append(buffer, bytes);
-			buffer[0] = '\0';
-		}
-		else if (bytes == 0) {
-			owningClient->appendToOutBuf(
-				RequestHandler::buildResponseFromCgiOutput(currCgi.output)
-			);
+	printf("bytes: %zd\n", bytes); // BUG: for debugging, remove later!
+	// printf("buffer: %s\n", buffer); // BUG: for debugging, remove later!
 
-			size_t clientIdx = _findPollEntryIdxByFd(currCgi.clientFd);
-			if (clientIdx == _pollfdArr.size())
-				throw std::logic_error("owning client fd not found");
-
-			_pollfdArr[clientIdx].events |= POLLOUT;
-
-			_disconnectFd(idx);
-			return;
-		} else {
-			if (errno == EAGAIN || errno == EWOULDBLOCK)
-				return;
-
-			perror("read");
-			_disconnectFd(idx);
-			return;
-		}
+	if (bytes > 0) {
+		currCgi.output.append(buffer, bytes);
+		return;
 	}
+
+	if (bytes == 0) {
+		owningClient->appendToOutBuf(
+			RequestHandler::buildResponseFromCgiOutput(currCgi.output)
+		);
+
+		size_t clientIdx = _findPollEntryIdxByFd(currCgi.clientFd);
+		if (clientIdx == _pollfdArr.size())
+			throw std::logic_error("owning client fd not found");
+
+		_pollfdArr[clientIdx].events |= POLLOUT;
+
+		_disconnectFd(idx);
+		return;
+	}
+
+	// if (errno == EAGAIN || errno == EWOULDBLOCK)
+	// 	return;
+
+	perror("read");
+	_disconnectFd(idx);
 	// FIXME: change to incremental reading instead of draining
 }
 
