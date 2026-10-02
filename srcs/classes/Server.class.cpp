@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/02 04:09:40 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/02 04:26:58 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -172,9 +172,13 @@ void Server::_registerCgiPipe(const CgiContext& cgiInfo) {
 }
 
 void Server::_handleSocketEvent(size_t& idx) {
+	const short revents = _pollfdArr[idx].revents;
+	if (revents & POLLNVAL)
+		throw std::logic_error("poll() monitored invalid file descriptor");
+
 	FdContext& currFd = _fdCtx.at(_pollfdArr[idx].fd);
 
-	if (_pollfdArr[idx].revents & (POLLERR | POLLHUP | POLLNVAL)) {
+	if (revents & (POLLERR | POLLHUP)) {
 		switch (currFd.type) {
 			case SocketType::LISTENER:
 				throw std::runtime_error("listening socket failed");
@@ -184,13 +188,16 @@ void Server::_handleSocketEvent(size_t& idx) {
 				return;
 
 			case SocketType::CGI_PIPE:
-				// BUG: don't disconnect, pipe may have remaining bytes
-				printf("POLLERR: %i\nPOLLHUP: %i\nPOLLNVAL: %i\n",
-					_pollfdArr[idx].revents & POLLERR ? 1 : 0,
-					_pollfdArr[idx].revents & POLLHUP ? 1 : 0,
-					_pollfdArr[idx].revents & POLLNVAL ? 1 : 0
+				printf("POLLERR: %i\nPOLLHUP: %i\n",
+					revents & POLLERR ? 1 : 0,
+					revents & POLLHUP ? 1 : 0
 				); // BUG: for debugging, remove later!
-				_handleCgiOutput(idx);
+
+				if (revents & POLLERR)
+					_disconnectFd(idx);
+				else
+					_handleCgiOutput(idx);
+
 				return;
 
 			default:
