@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.class.hpp                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:55:03 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/27 22:16:12 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/02 02:48:04 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ class RequestHandler
 		std::string	_handleGet(const std::string& physicalPath, const LocationConfig* location);
 		std::string	_handlePost(const std::string& physicalPath, const HttpRequestContainer& request);
 		std::string	_handleDelete(const std::string& physicalPath);
-		PendingCgi	_handleCgi(const std::string& physicalPath, const HttpRequestContainer& request);
+		CgiContext	_handleCgi(const std::string& physicalPath, const HttpRequestContainer& request);
 		std::string	_handleRedirect(const LocationConfig* location) const;
 
 };

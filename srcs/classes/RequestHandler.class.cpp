@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/29 18:58:30 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/02 02:48:04 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -320,7 +320,7 @@ static std::string toUpperWithUnderscores(const std::string& key)
 	return result;
 }
 
-PendingCgi RequestHandler::_handleCgi(const std::string& physicalPath, const HttpRequestContainer& request)
+CgiContext RequestHandler::_handleCgi(const std::string& physicalPath, const HttpRequestContainer& request)
 {
 	struct stat pathStat;
 	if (stat(physicalPath.c_str(), &pathStat) != 0 || S_ISDIR(pathStat.st_mode))
@@ -352,7 +352,7 @@ PendingCgi RequestHandler::_handleCgi(const std::string& physicalPath, const Htt
 		env.set("HTTP_" + toUpperWithUnderscores(key), value);
 	}
 
-	PendingCgi cgiInfo;
+	CgiContext cgiInfo;
 	try
 	{
 		cgiInfo = executor.start(physicalPath, request.getBody());

@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 22:44:52 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/30 00:58:28 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/02 02:58:54 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,35 +31,34 @@ enum class SocketType {
 	CGI_PIPE
 };
 
-struct PendingCgi {
-	pid_t	pid;
-	int		pipeFd;
-	int		clientFd;
+struct CgiContext {
+	pid_t		pid;
+	int			pipeFd;
+	int			clientFd;
+	std::string	output;
 };
 
 struct RequestResult {
 	std::optional<std::string>	response;
-	std::optional<PendingCgi>	cgi;
+	std::optional<CgiContext>	cgi;
 
 	/* constructors */
 	/* for immediate response */
-	explicit RequestResult(const std::string& response)
-		: response(response), cgi(std::nullopt)
+	explicit RequestResult(std::string&& response)
+		: response(std::move(response)), cgi(std::nullopt)
 	{}
 
 	/* for CGI */
-	explicit RequestResult(const PendingCgi& cgi)
-		: response(std::nullopt), cgi(cgi)
+	explicit RequestResult(CgiContext&& cgi)
+		: response(std::nullopt), cgi(std::move(cgi))
 	{}
 };
 
 struct FdContext {
-	SocketType				type;
-	const ServerConfig*		server;
-	std::optional<Client>	client;
-	int						owningClientFd;
-	pid_t					pid;
-	std::string				cgiOutput;
+	SocketType					type;
+	const ServerConfig*			server;
+	std::optional<Client>		client;
+	std::optional<CgiContext>	cgi;
 
 
 	/* constructors */
@@ -68,8 +67,7 @@ struct FdContext {
 		:	type(SocketType::LISTENER),
 			server(serverConfig),
 			client(std::nullopt),
-			owningClientFd(-1),
-			pid(-1)
+			cgi(std::nullopt)
 	{
 		if (serverConfig == nullptr)
 			throw std::logic_error("server must not be empty in FD context");
@@ -83,19 +81,17 @@ struct FdContext {
 		:	type(SocketType::CLIENT),
 			server(serverConfig),
 			client(std::move(client)),
-			owningClientFd(-1),
-			pid(-1)
+			cgi(std::nullopt)
 	{
 		if (serverConfig == nullptr)
 			throw std::logic_error("server must not be empty in FD context");
 	}
 
 	/* for CGI pipe */
-	explicit FdContext(const PendingCgi& cgi)
+	explicit FdContext(const CgiContext& cgi)
 		:	type(SocketType::CGI_PIPE),
 			server(nullptr),
 			client(std::nullopt),
-			owningClientFd(cgi.clientFd),
-			pid(cgi.pid)
+			cgi(std::move(cgi))
 	{}
 };

@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/02 02:40:12 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/02 02:53:29 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,9 @@ Server::Server(const Config& config) : _config(config) {}
 
 Server::~Server(void) {
 	for (auto& [fd, ctx] : _fdCtx) {
-		if (ctx.type == SocketType::CGI_PIPE && ctx.pid > 0) {
-			kill(ctx.pid, SIGKILL);
-			waitpid(ctx.pid, NULL, 0);
+		if (ctx.type == SocketType::CGI_PIPE && ctx.cgi->pid > 0) {
+			kill(ctx.cgi->pid, SIGKILL);
+			waitpid(ctx.cgi->pid, NULL, 0);
 		}
 
 		close(fd);
@@ -140,7 +140,7 @@ bool Server::_isDuplicateAddress(uint32_t host, uint16_t port) {
 	return !_usedAddresses.insert(std::make_pair(host, port)).second;
 }
 
-void Server::_registerCgiPipe(const PendingCgi& cgiInfo) {
+void Server::_registerCgiPipe(const CgiContext& cgiInfo) {
 	bool inserted = false;
 	bool duplicate = false;
 	try {
@@ -369,12 +369,13 @@ void Server::_handleCgiOutput(size_t& idx) {
 		return;
 
 	printf("Error in cgi fetcher? -> "); // BUG: for debugging, remove later!
-	FdContext& currCgi = _fdCtx.at(_pollfdArr[idx].fd);
+	FdContext& currFdCtx = _fdCtx.at(_pollfdArr[idx].fd);
 	printf("no for CGI\n"); // BUG: for debugging, remove later!
+	CgiContext& currCgi = currFdCtx.cgi.value();
 	Client* owningClient = NULL;
 	try {
-		printf("owning client: %d\n", currCgi.owningClientFd); // BUG: for debugging, remove later!
-		owningClient = &_fdCtx.at(currCgi.owningClientFd).client.value();
+		printf("owning client: %d\n", currCgi.clientFd); // BUG: for debugging, remove later!
+		owningClient = &_fdCtx.at(currCgi.clientFd).client.value();
 		printf("-> no for client\n"); // BUG: for debugging, remove later!
 	} catch (...) {
 		pid_t result = waitpid(currCgi.pid, NULL, WNOHANG);
@@ -392,15 +393,15 @@ void Server::_handleCgiOutput(size_t& idx) {
 		printf("bytes: %zd\n", bytes); // BUG: for debugging, remove later!
 		printf("buffer: %s\n", buffer); // BUG: for debugging, remove later!
 		if (bytes > 0) {
-			currCgi.cgiOutput.append(buffer, bytes);
+			currCgi.output.append(buffer, bytes);
 			buffer[0] = '\0';
 		}
 		else if (bytes == 0) {
 			owningClient->appendToOutBuf(
-				RequestHandler::buildResponseFromCgiOutput(currCgi.cgiOutput)
+				RequestHandler::buildResponseFromCgiOutput(currCgi.output)
 			);
 
-			size_t clientIdx = _findPollEntryIdxByFd(currCgi.owningClientFd);
+			size_t clientIdx = _findPollEntryIdxByFd(currCgi.clientFd);
 			if (clientIdx == _pollfdArr.size())
 				throw std::logic_error("owning client fd not found");
 
@@ -425,7 +426,7 @@ void Server::_disconnectFd(size_t& idx) {
 	const FdContext& currCtx = _fdCtx.at(fd);
 	
 	if (currCtx.type == SocketType::CGI_PIPE)
-		waitpid(currCtx.pid, NULL, 0); // FIXME: remember to SIGKILL the child elsewehere in abnormal disconnect!
+		waitpid(currCtx.cgi->pid, NULL, 0); // FIXME: remember to SIGKILL the child elsewehere in abnormal disconnect!
 	
 	_fdCtx.erase(fd);
 	close(fd);

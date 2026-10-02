@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 13:00:52 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/09/28 00:23:17 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/02 02:48:04 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ CGIEnv& CGIExecutor::getEnv()
 	return _env;
 }
 
-PendingCgi CGIExecutor::start(const std::string& scriptPath, const std::string& body)
+CgiContext CGIExecutor::start(const std::string& scriptPath, const std::string& body)
 {
 	int stdinPipeFd[2];
 	int stdoutPipeFd[2];
@@ -79,7 +79,7 @@ PendingCgi CGIExecutor::start(const std::string& scriptPath, const std::string& 
 		throw std::runtime_error("fcntl failed to configure CGI pipe");
 	}
 
-	PendingCgi cgiInfo;
+	CgiContext cgiInfo;
 	cgiInfo.pid = pid;
 	cgiInfo.pipeFd = stdoutPipeFd[0];
 	cgiInfo.clientFd = -1;
