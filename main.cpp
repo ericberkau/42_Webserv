@@ -6,7 +6,7 @@
 /*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/20 18:39:09 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/07/18 14:53:44 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/09/27 21:48:55 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,33 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <cstring>
+#include <csignal>
+
+volatile sig_atomic_t g_stop = 0;
+
+void handleSigint(int)
+{
+    g_stop = 1;
+    // printf("hello");
+}
+int main()
+{
+    signal(SIGINT, handleSigint);
+
+    CGIExecutor cgi;
+
+    try
+    {
+        std::string result = cgi.execute("./slow.py", "");
+        std::cout << result << std::endl;
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << std::endl;
+    }
+
+    return 0;
+}
 
 // int main()
 // {
@@ -193,12 +220,12 @@
 //     }
 // }
 
-int main()
-{
-    CGIExecutor cgi;
+// int main()
+// {
+//     CGIExecutor cgi;
 
-    std::string result =
-        cgi.execute("./partial.py", "");
+//     std::string result =
+//         cgi.execute("./partial.py", "");
 
-    std::cout << result << std::endl;
-}
+//     std::cout << result << std::endl;
+// }

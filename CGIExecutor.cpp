@@ -6,7 +6,7 @@
 /*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 13:00:52 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/07/18 15:07:00 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/09/27 23:02:31 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,11 @@ std::string CGIExecutor::execute(const std::string &scriptPath, const std::strin
         throw std::runtime_error("pipe failed");
 
     if (pipe(stdoutpipefd) == -1)
+    {
+        close(stdinpipefd[0]);
+        close(stdinpipefd[1]);
         throw std::runtime_error("pipe failed");
+    }
 
     pid_t pid = fork();
 
@@ -39,6 +43,8 @@ std::string CGIExecutor::execute(const std::string &scriptPath, const std::strin
         close(stdoutpipefd[1]);
         throw std::runtime_error("fork failed");
     }
+
+    int status = 0;
 
     if (pid == 0)
     {
@@ -82,6 +88,10 @@ std::string CGIExecutor::execute(const std::string &scriptPath, const std::strin
     {
         close(stdinpipefd[1]);
         close(stdoutpipefd[0]);
+
+        kill(pid, SIGKILL);
+        waitpid(pid, &status, 0);
+
         throw std::runtime_error("write failed");
     }
 
@@ -94,7 +104,6 @@ std::string CGIExecutor::execute(const std::string &scriptPath, const std::strin
     pfd.fd = stdoutpipefd[0];
     pfd.events = POLLIN;
 
-    int status = 0;
     bool childExited = false;
 
     time_t start = time(NULL);
@@ -118,6 +127,10 @@ std::string CGIExecutor::execute(const std::string &scriptPath, const std::strin
         if (ret == -1)
         {
             close(stdoutpipefd[0]);
+
+            kill(pid, SIGKILL);
+            waitpid(pid, &status, 0);
+
             throw std::runtime_error("poll failed");
         }
 
@@ -126,19 +139,42 @@ std::string CGIExecutor::execute(const std::string &scriptPath, const std::strin
             if (pfd.revents & POLLERR)
             {
                 close(stdoutpipefd[0]);
+
+                kill(pid, SIGKILL);
+                waitpid(pid, &status, 0);
+
                 throw std::runtime_error("poll error");
             }
 
             if (pfd.revents & (POLLIN | POLLHUP))
             {
 
+                // ssize_t bytes = read(stdoutpipefd[0], buffer, sizeof(buffer));
+
+                // if (bytes > 0)
+                //     output.append(buffer, bytes);
+
+                // if (pfd.revents & POLLHUP)
+                //     break;
                 ssize_t bytes = read(stdoutpipefd[0], buffer, sizeof(buffer));
 
                 if (bytes > 0)
+                {
                     output.append(buffer, bytes);
-
-                        if (pfd.revents & POLLHUP)
+                }
+                else if (bytes == 0)
+                {
                     break;
+                }
+                else
+                {
+                    close(stdoutpipefd[0]);
+
+                    kill(pid, SIGKILL);
+                    waitpid(pid, &status, 0);
+
+                    throw std::runtime_error("read failed");
+                }
             }
         }
 
