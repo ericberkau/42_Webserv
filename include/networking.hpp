@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 22:44:52 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/02 02:58:54 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/02 03:23:59 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <optional>
 #include <poll.h>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
 constexpr int		FOREVER = -1;
@@ -39,18 +40,17 @@ struct CgiContext {
 };
 
 struct RequestResult {
-	std::optional<std::string>	response;
-	std::optional<CgiContext>	cgi;
+	std::variant<std::string, CgiContext>	result;
 
 	/* constructors */
 	/* for immediate response */
 	explicit RequestResult(std::string&& response)
-		: response(std::move(response)), cgi(std::nullopt)
+		: result(std::move(response))
 	{}
 
 	/* for CGI */
 	explicit RequestResult(CgiContext&& cgi)
-		: response(std::nullopt), cgi(std::move(cgi))
+		: result(std::move(cgi))
 	{}
 };
 

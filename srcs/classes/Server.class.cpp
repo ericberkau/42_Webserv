@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/02 02:53:29 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/02 03:22:03 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,9 @@
 #include <iostream>
 #include <memory>
 #include <netdb.h>
-#include <unistd.h>
 #include <sys/wait.h>
+#include <unistd.h>
+#include <variant>
 
 Server::Server(const Config& config) : _config(config) {}
 
@@ -315,12 +316,13 @@ void Server::_handleIncomingData(size_t& idx) {
 	while (!reqResults.empty()) {
 		RequestResult& singleResult = reqResults.front();
 		
-		if (singleResult.response)
-			currClient.appendToOutBuf(singleResult.response.value()); // FIXME: consider adding a transaction queue to keep proper request<->response order grouping
-		else if (singleResult.cgi) {
-			singleResult.cgi->clientFd = currClient.getFd(); // FIXME: maybe remove clientFd from this struct and only add in FdContext?
+		if (std::holds_alternative<std::string>(singleResult.result))
+			currClient.appendToOutBuf(std::get<std::string>(singleResult.result)); // FIXME: consider adding a transaction queue to keep proper request<->response order grouping
+		else {
+			CgiContext& cgi = std::get<CgiContext>(singleResult.result);
 
-			_registerCgiPipe(singleResult.cgi.value());
+			cgi.clientFd = currClient.getFd();
+			_registerCgiPipe(cgi);
 		}
 
 		reqResults.pop();
