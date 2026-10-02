@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/30 01:26:16 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/02 02:40:12 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -371,9 +371,18 @@ void Server::_handleCgiOutput(size_t& idx) {
 	printf("Error in cgi fetcher? -> "); // BUG: for debugging, remove later!
 	FdContext& currCgi = _fdCtx.at(_pollfdArr[idx].fd);
 	printf("no for CGI\n"); // BUG: for debugging, remove later!
-	printf("owning client: %d\n", currCgi.owningClientFd); // BUG: for debugging, remove later!
-	Client& owningClient = _fdCtx.at(currCgi.owningClientFd).client.value(); //BUG: produced error for unordered_map::at() after owning client disconnected earlier, try-catch maybe?
-	printf("-> no for client\n"); // BUG: for debugging, remove later!
+	Client* owningClient = NULL;
+	try {
+		printf("owning client: %d\n", currCgi.owningClientFd); // BUG: for debugging, remove later!
+		owningClient = &_fdCtx.at(currCgi.owningClientFd).client.value();
+		printf("-> no for client\n"); // BUG: for debugging, remove later!
+	} catch (...) {
+		pid_t result = waitpid(currCgi.pid, NULL, WNOHANG);
+		if (result != currCgi.pid)
+			kill(currCgi.pid, SIGKILL);
+		_disconnectFd(idx);
+		return;
+	}
 
 	char buffer[MSG_SIZE];
 
@@ -387,7 +396,7 @@ void Server::_handleCgiOutput(size_t& idx) {
 			buffer[0] = '\0';
 		}
 		else if (bytes == 0) {
-			owningClient.appendToOutBuf(
+			owningClient->appendToOutBuf(
 				RequestHandler::buildResponseFromCgiOutput(currCgi.cgiOutput)
 			);
 
