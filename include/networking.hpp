@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   networking.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 22:44:52 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/03 02:18:37 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/10/03 20:48:05 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ struct CgiContext {
 	int			readPipeFd;
 	int			writePipeFd;
 	int			clientFd;
+	size_t		writeProgress;
 	std::string	input;
 	std::string	output;
 };

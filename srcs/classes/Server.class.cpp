@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/03 18:14:54 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/03 22:25:10 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -380,6 +380,7 @@ void Server::_handleOutgoingData(size_t& idx) {
 
 void Server::_handleCgiEvents(size_t& idx) {
 	const short revents = _pollfdArr[idx].revents;
+	CgiContext& cgi = _fdCtx.at(_pollfdArr[idx].fd).cgi.value();
 
 	printf("POLLERR: %i\nPOLLHUP: %i\n",
 		revents & POLLERR ? 1 : 0,
@@ -387,81 +388,90 @@ void Server::_handleCgiEvents(size_t& idx) {
 	); // BUG: for debugging, remove later!
 
 	if (revents & POLLERR) {
-		_disconnectFd(idx); // FIXME: maybe _abortCgiRegistration() instead? check how this affects idx tracking during cleanup
+		_abortCgiRegistration(cgi);
 		return;
 	}
 
-	// CgiContext& cgi = _fdCtx.at(_pollfdArr[idx].fd).cgi.value(); // FIXME: maybe change parameters of subfunctions?
-
 	if (revents & (POLLIN | POLLHUP))
-		_handleCgiOutput(idx);
+		_handleCgiOutput(cgi, idx);
 	else if (revents & POLLOUT)
-		_handleCgiInput(idx);
+		_handleCgiInput(cgi, idx);
 }
 
-void Server::_handleCgiInput(size_t& idx) {
-	// TODO: also remember to disconnect input pipe WITHOUT killing the process, or disconnect input pipe after finalized CGI output reading
-	(void)idx;
+void Server::_handleCgiInput(CgiContext& cgi, size_t& idx) {
+	if (cgi.writeProgress == cgi.input.size()) {
+		_disconnectFd(idx);
+		return;
+	}
+
+	const size_t bytesRemaining = cgi.input.size() - cgi.writeProgress;
+	const size_t nBytesToWrite = (bytesRemaining > MSG_SIZE ? MSG_SIZE : bytesRemaining);
+
+	ssize_t written = write(
+						cgi.writePipeFd,
+						cgi.input.c_str() + cgi.writeProgress,
+						nBytesToWrite
+					);
+
+	if (written <= 0) {
+		std::cerr << "Runtime warning: write() to CGI child process failed, CGI process stopped for client: " << cgi.clientFd << std::endl;
+		_abortCgiRegistration(cgi);
+		return;
+	} else
+		cgi.writeProgress += written;
+
+	if (cgi.writeProgress == cgi.input.size())
+		_disconnectFd(idx);
 }
 
-void Server::_handleCgiOutput(size_t& idx) {
+void Server::_handleCgiOutput(CgiContext& cgi, size_t& idx) {
 	if (!(_pollfdArr[idx].revents & (POLLIN | POLLHUP)))
 		return;
 
-	printf("Error in cgi fetcher? -> "); // BUG: for debugging, remove later!
-	FdContext& currFdCtx = _fdCtx.at(_pollfdArr[idx].fd);
-	printf("no for CGI\n"); // BUG: for debugging, remove later!
-	CgiContext& currCgi = currFdCtx.cgi.value();
-
-	auto it = _fdCtx.find(currCgi.clientFd);
+	auto it = _fdCtx.find(cgi.clientFd);
 	if (it == _fdCtx.end()) {
-		_disconnectFd(idx);
+		_abortCgiRegistration(cgi);
 		return;
 	}
 	Client& owningClient = it->second.client.value();
 
 	char buffer[MSG_SIZE];
 
-	ssize_t bytes = read(_pollfdArr[idx].fd, buffer, sizeof(buffer));
+	ssize_t bytes = read(cgi.readPipeFd, buffer, sizeof(buffer));
 
 	printf("bytes: %zd\n", bytes); // BUG: for debugging, remove later!
 	// printf("buffer: %s\n", buffer); // BUG: for debugging, remove later!
 
 	if (bytes > 0) {
-		currCgi.output.append(buffer, bytes);
+		cgi.output.append(buffer, bytes);
 		return;
 	}
 
 	if (bytes == 0) {
 		owningClient.appendToOutBuf(
-			RequestHandler::buildResponseFromCgiOutput(currCgi.output)
+			RequestHandler::buildResponseFromCgiOutput(cgi.output)
 		);
 
-		size_t clientIdx = _findPollEntryIdxByFd(currCgi.clientFd);
+		size_t clientIdx = _findPollEntryIdxByFd(cgi.clientFd);
 		if (clientIdx == _pollfdArr.size())
 			throw std::logic_error("owning client fd not found");
 
 		_pollfdArr[clientIdx].events |= POLLOUT;
 
+		if (waitpid(cgi.pid, NULL, WNOHANG) == 0) {
+			kill(cgi.pid, SIGKILL);
+			waitpid(cgi.pid, NULL, 0);
+		}
 		_disconnectFd(idx);
 		return;
 	}
 
 	perror("read");
-	_disconnectFd(idx);
+	_abortCgiRegistration(cgi);
 }
 
 void Server::_disconnectFd(size_t& idx) {
 	const int fd = _pollfdArr[idx].fd;
-	const FdContext& currCtx = _fdCtx.at(fd);
-	
-	if (currCtx.type == SocketType::CGI_PIPE) {
-		pid_t result = waitpid(currCtx.cgi->pid, NULL, WNOHANG);
-		if (result == 0) {
-			kill(currCtx.cgi->pid, SIGKILL);
-			waitpid(currCtx.cgi->pid, NULL, 0);
-		}
-	}
 	
 	_fdCtx.erase(fd);
 	close(fd);
