@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.class.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:10 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/03 01:02:59 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/10/03 17:53:43 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,8 @@ class Server {
 
 
 		/* event handling */
+		void	_handleCgiEvents(size_t& idx);
+		void	_handleCgiInput(size_t& idx);
 		void	_handleCgiOutput(size_t& idx);
 		void	_handleClientEvents(size_t& idx);
 		void	_handleIncomingData(size_t& idx);

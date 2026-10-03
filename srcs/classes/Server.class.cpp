@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.class.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/03 02:19:46 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/10/03 18:14:54 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ void Server::run(void) {
 
 		for (size_t i = 0; i < _pollfdArr.size() && ready > 0; ++i) {
 			if (!_pollfdArr[i].revents)
-				continue;
+				continue; // TODO: maybe check for client timeouts for long idle times
 
 			_handleSocketEvent(i);
 			--ready;
@@ -193,38 +193,10 @@ void Server::_abortCgiRegistration(const CgiContext& cgiInfo) {
 }
 
 void Server::_handleSocketEvent(size_t& idx) {
-	const short revents = _pollfdArr[idx].revents;
-	if (revents & POLLNVAL)
+	if (_pollfdArr[idx].revents & POLLNVAL)
 		throw std::logic_error("poll() monitored invalid file descriptor");
 
 	FdContext& currFd = _fdCtx.at(_pollfdArr[idx].fd);
-
-	if (revents & (POLLERR | POLLHUP)) {
-		switch (currFd.type) {
-			case SocketType::LISTENER:
-				throw std::runtime_error("listening socket failed");
-
-			case SocketType::CLIENT:
-				_disconnectFd(idx);
-				return;
-
-			case SocketType::CGI_PIPE:
-				printf("POLLERR: %i\nPOLLHUP: %i\n",
-					revents & POLLERR ? 1 : 0,
-					revents & POLLHUP ? 1 : 0
-				); // BUG: for debugging, remove later!
-
-				if (revents & POLLERR)
-					_disconnectFd(idx);
-				else
-					_handleCgiOutput(idx);
-
-				return;
-
-			default:
-				throw std::logic_error("unknown socket type failed");
-		}
-	}
 
 	switch (currFd.type) {
 		case SocketType::LISTENER:
@@ -236,7 +208,7 @@ void Server::_handleSocketEvent(size_t& idx) {
 			break;
 
 		case SocketType::CGI_PIPE:
-			_handleCgiOutput(idx);
+			_handleCgiEvents(idx);
 			break;
 
 		default:
@@ -245,6 +217,11 @@ void Server::_handleSocketEvent(size_t& idx) {
 }
 
 void Server::_handleListenerEvents(size_t idx) {
+	const short revents = _pollfdArr[idx].revents;
+
+	if(revents & (POLLERR | POLLHUP))
+		throw std::runtime_error("listening socket failed");
+
 	if (_pollfdArr[idx].revents & POLLIN)
 		_handlePendingConnections(_pollfdArr[idx].fd);
 }
@@ -306,9 +283,16 @@ void Server::_handlePendingConnections(int listeningSocket) {
 }
 
 void Server::_handleClientEvents(size_t& idx) {
+	const short revents = _pollfdArr[idx].revents;
+
+	if(revents & (POLLERR | POLLHUP)) {
+		_disconnectFd(idx);
+		return;
+	}
+
 	size_t originalIdx = idx;
 
-	if (_pollfdArr[idx].revents & POLLIN)
+	if (revents & POLLIN)
 		_handleIncomingData(idx);
 
 	/** At this point, the client might have disconnected (idx modified in subfunction)
@@ -317,7 +301,7 @@ void Server::_handleClientEvents(size_t& idx) {
 	if (idx != originalIdx)
 		return;
 
-	if (_pollfdArr[idx].revents & POLLOUT)
+	if (revents & POLLOUT)
 		_handleOutgoingData(idx);
 }
 
@@ -392,6 +376,32 @@ void Server::_handleOutgoingData(size_t& idx) {
 		currClient.clearOutBuf();
 		_pollfdArr[idx].events &= ~POLLOUT;
 	}
+}
+
+void Server::_handleCgiEvents(size_t& idx) {
+	const short revents = _pollfdArr[idx].revents;
+
+	printf("POLLERR: %i\nPOLLHUP: %i\n",
+		revents & POLLERR ? 1 : 0,
+		revents & POLLHUP ? 1 : 0
+	); // BUG: for debugging, remove later!
+
+	if (revents & POLLERR) {
+		_disconnectFd(idx); // FIXME: maybe _abortCgiRegistration() instead? check how this affects idx tracking during cleanup
+		return;
+	}
+
+	// CgiContext& cgi = _fdCtx.at(_pollfdArr[idx].fd).cgi.value(); // FIXME: maybe change parameters of subfunctions?
+
+	if (revents & (POLLIN | POLLHUP))
+		_handleCgiOutput(idx);
+	else if (revents & POLLOUT)
+		_handleCgiInput(idx);
+}
+
+void Server::_handleCgiInput(size_t& idx) {
+	// TODO: also remember to disconnect input pipe WITHOUT killing the process, or disconnect input pipe after finalized CGI output reading
+	(void)idx;
 }
 
 void Server::_handleCgiOutput(size_t& idx) {
