@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/04 00:04:21 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/04 00:21:07 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,7 +131,7 @@ std::string RequestHandler::_translateToPhysicalPath(const std::string& uri, con
 
 // attempts to open a file on our hard drive. If it exists, it reads the content and builds a 200 OK response
 // If it doesn't exist, it throws a 404 Not Found error
-std::string RequestHandler::_handleGet(const std::string& physicalPath, const LocationConfig* location)
+std::string RequestHandler::_handleGet(const std::string& physicalPath, const LocationConfig* location, const std::string& uri)
 {
 	ResponseBuilder response;
 
@@ -142,16 +142,11 @@ std::string RequestHandler::_handleGet(const std::string& physicalPath, const Lo
 	// CASE 1: The path is a directory (meaning index.html was missing)
 	if (S_ISDIR(pathStat.st_mode))
 	{
-		// If the path is a directory but doesn't end with a '/', send a 301 Redirect
-		if (!physicalPath.empty() && physicalPath.back() != '/')
+		if (uri.empty() || uri.back() != '/')
 		{
-			std::string targetUri = location ? location->path : "/";
-			if (targetUri.empty() || targetUri.back() != '/')
-				targetUri += "/";
-
 			response.setStatus(301);
-			response.addHeader("Location", targetUri);
-			response.setBody(""); 
+			response.addHeader("Location", uri + "/");
+			response.setBody("");
 			return response.buildString();
 		}
 		
@@ -425,7 +420,7 @@ RequestResult RequestHandler::processRequest(const HttpRequestContainer& request
 		if (_isCgiRequest(physicalPath, matchedLoc))
 			return RequestResult(_handleCgi(physicalPath, request));
 		else if (request.getMethod() == HttpMethod::GET)
-			return RequestResult(_handleGet(physicalPath, matchedLoc));
+			return RequestResult(_handleGet(physicalPath, matchedLoc, request.getUri()));
 		else if (request.getMethod() == HttpMethod::POST)
 			return RequestResult(_handlePost(physicalPath, request));
 		else if (request.getMethod() == HttpMethod::DELETE)

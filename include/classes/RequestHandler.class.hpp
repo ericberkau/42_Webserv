@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.class.hpp                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:55:03 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/02 02:48:04 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/04 00:20:35 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ class RequestHandler
 		bool					_isCgiRequest(const std::string& physicalPath, const LocationConfig* location) const;
 		void					_verifyMethodAllowed(const HttpMethod& method, const LocationConfig* location) const;
 
-		std::string	_handleGet(const std::string& physicalPath, const LocationConfig* location);
+		std::string	_handleGet(const std::string& physicalPath, const LocationConfig* location, const std::string& uri);
 		std::string	_handlePost(const std::string& physicalPath, const HttpRequestContainer& request);
 		std::string	_handleDelete(const std::string& physicalPath);
 		CgiContext	_handleCgi(const std::string& physicalPath, const HttpRequestContainer& request);
