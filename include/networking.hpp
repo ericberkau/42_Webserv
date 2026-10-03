@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 22:44:52 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/03 20:48:05 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/03 23:29:49 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,11 +79,11 @@ struct FdContext {
 	/* for client */
 	explicit FdContext(
 		const ServerConfig* serverConfig,
-		Client&& client
+		Client&& _client
 	)
 		:	type(SocketType::CLIENT),
 			server(serverConfig),
-			client(std::move(client)),
+			client(std::move(_client)),
 			cgi(std::nullopt)
 	{
 		if (serverConfig == nullptr)
@@ -91,10 +91,10 @@ struct FdContext {
 	}
 
 	/* for CGI pipe */
-	explicit FdContext(const CgiContext& cgi)
+	explicit FdContext(const CgiContext& _cgi)
 		:	type(SocketType::CGI_PIPE),
 			server(nullptr),
 			client(std::nullopt),
-			cgi(std::move(cgi))
+			cgi(std::move(_cgi))
 	{}
 };
