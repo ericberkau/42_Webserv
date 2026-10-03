@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/03 18:47:44 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/04 00:04:21 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,9 +82,20 @@ void RequestHandler::_verifyMethodAllowed(const HttpMethod& method, const Locati
 
 std::string RequestHandler::_translateToPhysicalPath(const std::string& uri, const LocationConfig* location) const
 {
-	// if no location block exists, using system's current directory "." as a safe root
-	std::string baseRoot = location ? (location->root.empty() ? "html" : location->root) : "html";
-	std::string path = baseRoot + uri;
+	std::string baseRoot = "html";
+	if (location && !location->root.empty())
+		baseRoot = location->root;
+	else if (!_config->root.empty())
+		baseRoot = _config->root;
+
+	std::string rest = uri;
+	if (location && uri.compare(0, location->path.size(), location->path) == 0)
+	{
+		rest = uri.substr(location->path.size());
+		if (rest.empty() || rest[0] != '/')
+			rest = "/" + rest;
+	}
+	std::string path = baseRoot + rest;
 
 	struct stat pathStat;
 	if (stat(path.c_str(), &pathStat) == 0)
