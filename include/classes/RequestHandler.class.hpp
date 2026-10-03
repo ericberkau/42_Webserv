@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:55:03 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/04 00:20:35 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/04 00:30:36 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,19 @@
 #include <string>
 #include <sys/types.h>
 #include <dirent.h>
+#include <ctime> // time()
+#include <cctype>
+#include "classes/ResponseBuilder.class.hpp"
+#include "classes/RequestParser.class.hpp"
+#include <sys/stat.h> // for checking if files exist
+#include <fstream>
+#include <sstream>
+#include <iostream>
+#include <cstdio> // for std::remove
+#include <cstdlib>
+#include "classes/StringUtils.hpp"
+#include "classes/CGIEnv.class.hpp"
+#include "classes/CGIExecutor.class.hpp"
 
 class RequestHandler
 {
@@ -41,7 +54,7 @@ class RequestHandler
 		void					_verifyMethodAllowed(const HttpMethod& method, const LocationConfig* location) const;
 
 		std::string	_handleGet(const std::string& physicalPath, const LocationConfig* location, const std::string& uri);
-		std::string	_handlePost(const std::string& physicalPath, const HttpRequestContainer& request);
+		std::string	_handlePost(const HttpRequestContainer& request, const LocationConfig* location);
 		std::string	_handleDelete(const std::string& physicalPath);
 		CgiContext	_handleCgi(const std::string& physicalPath, const HttpRequestContainer& request);
 		std::string	_handleRedirect(const LocationConfig* location) const;

@@ -6,22 +6,11 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/04 00:21:07 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/04 00:31:06 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/RequestHandler.class.hpp"
-#include "classes/ResponseBuilder.class.hpp"
-#include "classes/RequestParser.class.hpp"
-#include <sys/stat.h> // for checking if files exist
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include <cstdio> // for std::remove
-#include <cstdlib>
-#include "classes/StringUtils.hpp"
-#include "classes/CGIEnv.class.hpp"
-#include "classes/CGIExecutor.class.hpp"
 
 RequestHandler::RequestHandler(const ServerConfig* config) : _config(config) {}
 RequestHandler::~RequestHandler() {}
@@ -204,39 +193,69 @@ std::string RequestHandler::_handleGet(const std::string& physicalPath, const Lo
 	return response.buildString();
 }
 
-
-// this function takes the raw body data sent by the client and saves it as a new file on hard drive
-// if successful, it returns a 201 Created response
-std::string RequestHandler::_handlePost(const std::string& physicalPath, const HttpRequestContainer& request)
+static std::string sanitizeFilename(const std::string& raw)
 {
-	struct stat st;
-	if (stat(physicalPath.c_str(), &st) == 0)
-		throw std::runtime_error("409"); // Conflict: resource already exists
-		
-	// Attempt to create/open a file in binary write mode (overwrites if it exists)
-	std::ofstream file(physicalPath.c_str(), std::ios::binary);
-	if (!file.is_open())
-		throw std::runtime_error("500"); // internal Server Error (ex., directory doesn't exist)
+	std::string out;
+	for (size_t i = 0; i < raw.size(); ++i)
+	{
+		unsigned char c = raw[i];
+		if (std::isalnum(c) || c == '.' || c == '_' || c == '-')
+			out += c;
+	}
+	while (!out.empty() && out[0] == '.')
+		out.erase(0, 1);
+	return out;
+}
 
-	// write the request body directly into the file
+static std::string generateUploadName()
+{
+	static unsigned long counter = 0;
+	std::ostringstream ss;
+	ss << "upload_" << time(NULL) << "_" << counter++;
+	return ss.str();
+}
+
+std::string RequestHandler::_handlePost(const HttpRequestContainer& request, const LocationConfig* location)
+{
+	if (!location || !location->uploadEnabled)
+		throw std::runtime_error("403");
+
+	struct stat st;
+	if (stat(location->uploadPath.c_str(), &st) != 0 || !S_ISDIR(st.st_mode))
+		throw std::runtime_error("500");
+
+	const std::string& uri = request.getUri();
+	std::string name = sanitizeFilename(uri.substr(uri.find_last_of('/') + 1));
+	if (name.empty())
+		name = generateUploadName();
+
+	std::string target = location->uploadPath;
+	if (target.back() != '/')
+		target += '/';
+	target += name;
+
+	if (stat(target.c_str(), &st) == 0)
+		throw std::runtime_error("409");
+
+	std::ofstream file(target.c_str(), std::ios::binary);
+	if (!file.is_open())
+		throw std::runtime_error("500");
 	file.write(request.getBody().data(), request.getBody().size());
 	file.close();
 
-	// prepare a confirmation body payload
+	std::string base = location->path;
+	if (base.empty() || base.back() != '/')
+		base += '/';
+
 	std::string bodyMessage = "<h1>File Created Successfully</h1>";
 	std::stringstream lengthStream;
 	lengthStream << bodyMessage.size();
 
-	// build the 201 Created response
-	std::string response = 
-		"HTTP/1.1 201 Created\r\n"
+	return "HTTP/1.1 201 Created\r\n"
 		"Content-Length: " + lengthStream.str() + "\r\n"
 		"Content-Type: text/html\r\n"
-		"Location: " + request.getUri() + "\r\n"
-		"\r\n" + 
-		bodyMessage;
-
-	return response;
+		"Location: " + base + name + "\r\n"
+		"\r\n" + bodyMessage;
 }
 
 // checks if a file exists, and if it does, deletes it using the standard C++ std::remove utility
@@ -422,7 +441,7 @@ RequestResult RequestHandler::processRequest(const HttpRequestContainer& request
 		else if (request.getMethod() == HttpMethod::GET)
 			return RequestResult(_handleGet(physicalPath, matchedLoc, request.getUri()));
 		else if (request.getMethod() == HttpMethod::POST)
-			return RequestResult(_handlePost(physicalPath, request));
+			return RequestResult(_handlePost(request, matchedLoc));
 		else if (request.getMethod() == HttpMethod::DELETE)
 			return RequestResult(_handleDelete(physicalPath));
 
