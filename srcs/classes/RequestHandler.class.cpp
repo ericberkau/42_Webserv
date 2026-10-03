@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/04 00:31:06 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/04 01:05:34 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,13 +72,18 @@ void RequestHandler::_verifyMethodAllowed(const HttpMethod& method, const Locati
 std::string RequestHandler::_translateToPhysicalPath(const std::string& uri, const LocationConfig* location) const
 {
 	std::string baseRoot = "html";
+	bool stripPrefix = false;
+
 	if (location && !location->root.empty())
+	{
 		baseRoot = location->root;
+		stripPrefix = true;
+	}
 	else if (!_config->root.empty())
 		baseRoot = _config->root;
 
 	std::string rest = uri;
-	if (location && uri.compare(0, location->path.size(), location->path) == 0)
+	if (stripPrefix && uri.compare(0, location->path.size(), location->path) == 0)
 	{
 		rest = uri.substr(location->path.size());
 		if (rest.empty() || rest[0] != '/')
