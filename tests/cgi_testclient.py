@@ -15,7 +15,7 @@ requests = {
         "POST /cgi-bin/cgi_testscript.py HTTP/1.1\r\n"
         "Host: localhost\r\n"
         "Content-Type: application/x-www-form-urlencoded\r\n"
-        "Content-Length: 11\r\n"
+        "Content-Length: 10\r\n"
         "Connection: keep-alive\r\n"
         "\r\n"
         "name=world"
