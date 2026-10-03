@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/03 22:49:43 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/03 22:56:31 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -450,6 +450,14 @@ void Server::_handleCgiOutput(CgiContext& cgi, size_t& idx) {
 	_cleanupCompleteCgi(cgi);
 }
 
+size_t Server::_findPollEntryIdxByFd(int fd) {
+	for (size_t i = 0; i < _pollfdArr.size(); ++i) {
+		if (_pollfdArr[i].fd == fd)
+			return i;
+	}
+	return _pollfdArr.size();
+}
+
 void Server::_cleanupCompleteCgi(const CgiContext& cgiInfo) {
 	_fdCtx.erase(cgiInfo.readPipeFd);
 	_fdCtx.erase(cgiInfo.writePipeFd);
@@ -485,10 +493,3 @@ void Server::_disconnectFd(size_t& idx) {
 	std::cout << "FD " << fd << " disconnected" << std::endl;
 }
 
-size_t Server::_findPollEntryIdxByFd(int fd) {
-	for (size_t i = 0; i < _pollfdArr.size(); ++i) {
-		if (_pollfdArr[i].fd == fd)
-			return i;
-	}
-	return _pollfdArr.size();
-}

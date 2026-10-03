@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:10 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/03 22:51:58 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/03 22:55:20 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,17 +32,13 @@ class Server {
 
 	private:
 
-		/* setup and management */
-		void	_cleanupCompleteCgi(const CgiContext& cgiInfo);
-		void	_disconnectFd(size_t& idx);
-		size_t	_findPollEntryIdxByFd(int fd);
-		bool	_isDuplicateAddress(uint32_t host, uint16_t port);
+		/* setup */
 		void	_registerCgi(const CgiContext& cgiInfo);
 		void	_registerCgiPipe(const CgiContext& cgiInfo, const short events);
 		void	_setupListeners(void);
 		int		_setupListeningSocket(const ListenDirective& listenCfg);
-
-
+		
+		
 		/* event handling */
 		void	_handleCgiEvents(size_t& idx);
 		void	_handleCgiInput(CgiContext& cgi, size_t& idx);
@@ -53,6 +49,12 @@ class Server {
 		void	_handleOutgoingData(size_t& idx);
 		void	_handlePendingConnections(int listeningSocket);
 		void	_handleSocketEvent(size_t& idx);
+		
+		/* helpers and cleanup */
+		void	_cleanupCompleteCgi(const CgiContext& cgiInfo);
+		void	_disconnectFd(size_t& idx);
+		size_t	_findPollEntryIdxByFd(int fd);
+		bool	_isDuplicateAddress(uint32_t host, uint16_t port);
 
 		/* server state */
 		const Config&							_config;
