@@ -6,7 +6,7 @@
 /*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/02 22:46:10 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/10/03 02:18:54 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -356,7 +356,7 @@ CgiContext RequestHandler::_handleCgi(const std::string& physicalPath, const Htt
 	try
 	{
 		cgiInfo = executor.start(physicalPath);
-		cgiInfo.body = request.getBody();
+		cgiInfo.input = request.getBody();
 	} 
 	catch (const std::exception&)
 	{

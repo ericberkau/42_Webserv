@@ -6,7 +6,7 @@
 /*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 22:44:52 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/02 22:29:43 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/10/03 02:18:37 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ struct CgiContext {
 	int			readPipeFd;
 	int			writePipeFd;
 	int			clientFd;
-	std::string	body;
+	std::string	input;
 	std::string	output;
 };
 
