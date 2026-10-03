@@ -6,7 +6,7 @@
 /*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/03 01:12:31 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/10/03 02:19:46 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,7 +180,7 @@ void Server::_abortCgiRegistration(const CgiContext& cgiInfo) {
 		std::remove_if(
 			_pollfdArr.begin(),
 			_pollfdArr.end(),
-			[&](const pollfd& pfd) {
+			[&cgiInfo](const pollfd& pfd) {
 				return pfd.fd == cgiInfo.readPipeFd ||
 					pfd.fd == cgiInfo.writePipeFd;
 			}),
