@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.class.cpp                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/03 02:18:54 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/10/03 18:47:44 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -203,6 +203,10 @@ std::string RequestHandler::_handleGet(const std::string& physicalPath, const Lo
 // if successful, it returns a 201 Created response
 std::string RequestHandler::_handlePost(const std::string& physicalPath, const HttpRequestContainer& request)
 {
+	struct stat st;
+	if (stat(physicalPath.c_str(), &st) == 0)
+		throw std::runtime_error("409"); // Conflict: resource already exists
+		
 	// Attempt to create/open a file in binary write mode (overwrites if it exists)
 	std::ofstream file(physicalPath.c_str(), std::ios::binary);
 	if (!file.is_open())

@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:26 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/02 13:09:15 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/03 18:47:08 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ std::string ResponseBuilder::_getStandardStatusMessage(int code) const
 		case 403: return "Forbidden";
 		case 404: return "Not Found";
 		case 405: return "Method Not Allowed";
+		case 409: return "Conflict";
 		case 411: return "Length Required";
 		case 413: return "Payload Too Large";
 		case 414: return "URI Too Long";
