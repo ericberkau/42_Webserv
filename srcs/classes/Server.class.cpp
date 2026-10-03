@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/03 22:25:10 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/03 22:49:43 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,10 +146,10 @@ void Server::_registerCgi(const CgiContext& cgiInfo) {
 		_registerCgiPipe(cgiInfo, POLLIN);
 		_registerCgiPipe(cgiInfo, POLLOUT);
 	} catch (const std::logic_error&) {
-		_abortCgiRegistration(cgiInfo);
+		_cleanupCompleteCgi(cgiInfo);
 		throw;
 	} catch (...) {
-		_abortCgiRegistration(cgiInfo);
+		_cleanupCompleteCgi(cgiInfo);
 		std::cerr << "Runtime warning: failed to register CGI pipe FD context -> killed CGI process" << std::endl; // FIXME: maybe send error 500 to client and disconnect?
 	}
 }
@@ -170,26 +170,6 @@ void Server::_registerCgiPipe(const CgiContext& cgiInfo, const short events) {
 	cgiPipe.fd = pipeFd;
 	cgiPipe.events = events;
 	_pollfdArr.push_back(cgiPipe);
-}
-
-void Server::_abortCgiRegistration(const CgiContext& cgiInfo) {
-	_fdCtx.erase(cgiInfo.readPipeFd);
-	_fdCtx.erase(cgiInfo.writePipeFd);
-
-	_pollfdArr.erase(
-		std::remove_if(
-			_pollfdArr.begin(),
-			_pollfdArr.end(),
-			[&cgiInfo](const pollfd& pfd) {
-				return pfd.fd == cgiInfo.readPipeFd ||
-					pfd.fd == cgiInfo.writePipeFd;
-			}),
-		_pollfdArr.end());
-
-	close(cgiInfo.readPipeFd);
-	close(cgiInfo.writePipeFd);
-	kill(cgiInfo.pid, SIGKILL);
-	waitpid(cgiInfo.pid, NULL, 0);
 }
 
 void Server::_handleSocketEvent(size_t& idx) {
@@ -388,7 +368,7 @@ void Server::_handleCgiEvents(size_t& idx) {
 	); // BUG: for debugging, remove later!
 
 	if (revents & POLLERR) {
-		_abortCgiRegistration(cgi);
+		_cleanupCompleteCgi(cgi);
 		return;
 	}
 
@@ -415,7 +395,7 @@ void Server::_handleCgiInput(CgiContext& cgi, size_t& idx) {
 
 	if (written <= 0) {
 		std::cerr << "Runtime warning: write() to CGI child process failed, CGI process stopped for client: " << cgi.clientFd << std::endl;
-		_abortCgiRegistration(cgi);
+		_cleanupCompleteCgi(cgi);
 		return;
 	} else
 		cgi.writeProgress += written;
@@ -430,7 +410,7 @@ void Server::_handleCgiOutput(CgiContext& cgi, size_t& idx) {
 
 	auto it = _fdCtx.find(cgi.clientFd);
 	if (it == _fdCtx.end()) {
-		_abortCgiRegistration(cgi);
+		_cleanupCompleteCgi(cgi);
 		return;
 	}
 	Client& owningClient = it->second.client.value();
@@ -467,7 +447,29 @@ void Server::_handleCgiOutput(CgiContext& cgi, size_t& idx) {
 	}
 
 	perror("read");
-	_abortCgiRegistration(cgi);
+	_cleanupCompleteCgi(cgi);
+}
+
+void Server::_cleanupCompleteCgi(const CgiContext& cgiInfo) {
+	_fdCtx.erase(cgiInfo.readPipeFd);
+	_fdCtx.erase(cgiInfo.writePipeFd);
+
+	for (size_t i = 0; i < _pollfdArr.size();) {
+		if (_pollfdArr[i].fd == cgiInfo.readPipeFd ||
+			_pollfdArr[i].fd == cgiInfo.writePipeFd)
+		{
+			_pollfdArr[i] = _pollfdArr.back();
+			_pollfdArr.pop_back();
+			continue;
+		}
+
+		++i;
+	}
+
+	close(cgiInfo.readPipeFd);
+	close(cgiInfo.writePipeFd);
+	kill(cgiInfo.pid, SIGKILL);
+	waitpid(cgiInfo.pid, NULL, 0);
 }
 
 void Server::_disconnectFd(size_t& idx) {
