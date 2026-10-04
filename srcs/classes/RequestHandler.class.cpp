@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/04 01:05:34 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/04 16:33:29 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,6 @@ RequestHandler::RequestHandler(const ServerConfig* config) : _config(config) {}
 RequestHandler::~RequestHandler() {}
 
 // Matching the Location Block (Prefix Matching)
-// If a user requests /images/avatar.png, and we have location configurations for / and /images,
-// the router must choose the longest, most specific match (/images)
-
 const LocationConfig* RequestHandler::_matchLocation(const std::string& uri) const
 {
 	const LocationConfig* bestMatch = NULL;
@@ -27,18 +24,27 @@ const LocationConfig* RequestHandler::_matchLocation(const std::string& uri) con
 	for (size_t i = 0; i < _config->locations.size(); ++i)
 	{
 		const LocationConfig& loc = _config->locations[i];
-		
-		// prefix match evaluation
-		if (uri.rfind(loc.path, 0) == 0)
+
+		// must start with the location path
+		if (uri.rfind(loc.path, 0) != 0)
+			continue;
+
+		// match must end on a path boundary
+		bool boundary = loc.path.empty()
+			|| loc.path.back() == '/' // "/images/" already ends at a boundary
+			|| uri.size() == loc.path.size() // exact match: "/images"
+			|| uri[loc.path.size()] == '/'; // "/images/logo.jpg"
+
+		if (!boundary)
+			continue;
+
+		if (loc.path.size() > longestMatchLength)
 		{
-			if (loc.path.size() > longestMatchLength)
-			{
-				longestMatchLength = loc.path.size();
-				bestMatch = &loc;
-			}
+			longestMatchLength = loc.path.size();
+			bestMatch = &loc;
 		}
 	}
-	return bestMatch; // returns NULL if no location blocks match, falling back to server default root 
+	return bestMatch; // returns NULL if no location blocks match, falling back to server default root
 }
 
 bool RequestHandler::_isCgiRequest(const std::string& physicalPath, const LocationConfig* location) const
