@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 22:44:52 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 17:46:41 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 20:48:17 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,11 +21,12 @@
 #include <variant>
 #include <vector>
 
-constexpr int					POLL_TIMEOUT_MS = 10000;
-constexpr std::chrono::seconds	IDLE_CHECK_INTERVAL(10);
-constexpr std::chrono::seconds	CLIENT_IDLE_TIMEOUT(30);
 constexpr int					MAX_PEND_CONNECT_QUEUE = 32;
 constexpr size_t				MSG_SIZE = 4096;
+constexpr int					POLL_TIMEOUT_MS = 10000;
+constexpr std::chrono::seconds	TIMEOUT_CHECK_INTERVAL(5);
+constexpr std::chrono::seconds	CGI_TIMEOUT(5);
+constexpr std::chrono::seconds	CLIENT_IDLE_TIMEOUT(30);
 
 enum class SocketType {
 	INVALID = -1,
@@ -35,13 +36,15 @@ enum class SocketType {
 };
 
 struct CgiContext {
-	pid_t		pid;
-	int			readPipeFd;
-	int			writePipeFd;
-	int			clientFd;
-	size_t		writeProgress;
-	std::string	input;
-	std::string	output;
+	pid_t				pid;
+	int					readPipeFd;
+	int					writePipeFd;
+	int					clientFd;
+	size_t				writeProgress;
+	std::string			input;
+	std::string			output;
+	Clock::time_point	startTime;
+	bool				aborted;
 	std::list<ResponseSlot>::iterator	responseSlot;
 
 	/* constructors */
@@ -51,7 +54,9 @@ struct CgiContext {
 			readPipeFd(-1),
 			writePipeFd(-1),
 			clientFd(-1),
-			writeProgress(0)
+			writeProgress(0),
+			startTime(Clock::now()),
+			aborted(false)
 	{}
 
 	/* variable copy constructor (copy buffers -> yes/no) */
@@ -61,6 +66,8 @@ struct CgiContext {
 			writePipeFd(other.writePipeFd),
 			clientFd(other.clientFd),
 			writeProgress(other.writeProgress),
+			startTime(other.startTime),
+			aborted(other.aborted),
 			responseSlot(other.responseSlot)
 	{
 		if (copyBuffers) {

@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 18:53:52 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 21:03:19 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ Server::~Server(void) {
 void Server::run(void) {
 	_setupListeners();
 
-	_lastIdleCheck = Clock::now();
+	_lastTimeoutCheck = Clock::now();
 
 	while (!g_shutdownRequested) {
 		std::cout << "listening ..." << std::endl;
@@ -52,15 +52,11 @@ void Server::run(void) {
 			throw std::runtime_error("poll() failed");
 		}
 
-		const Clock::time_point now = Clock::now();
-		if (now - _lastIdleCheck >= IDLE_CHECK_INTERVAL) {
-			_checkIdleClients(now);
-			_lastIdleCheck = now;
-		}
+		_handleTimeouts();
 
 		for (size_t i = 0; i < _pollfdArr.size() && ready > 0; ++i) {
 			if (!_pollfdArr[i].revents)
-				continue; // TODO: maybe check for client timeouts for long idle times
+				continue;
 
 			_handleSocketEvent(i);
 			--ready;
@@ -70,6 +66,47 @@ void Server::run(void) {
 	}
 
 	std::cout << "\nServer shutting down ..." << std::endl;
+}
+
+void Server::_handleTimeouts(void) {
+	const Clock::time_point now = Clock::now();
+
+	if (now - _lastTimeoutCheck < TIMEOUT_CHECK_INTERVAL)
+		return;
+
+	for (auto it = _fdCtx.begin(); it != _fdCtx.end(); ++it) {
+		if (it->second.type == SocketType::CLIENT) {
+			Client& client = it->second.client.value();
+
+			if (now - client.getLastActivity() >= CLIENT_IDLE_TIMEOUT)
+				_handleClientTimeout(client);
+		}
+		else if (it->second.type == SocketType::CGI_PIPE &&
+			it->first == it->second.cgi->readPipeFd)
+		{
+			CgiContext& cgi = it->second.cgi.value();
+
+			if (!cgi.aborted && now - cgi.startTime >= CGI_TIMEOUT) {
+				cgi.aborted = true;
+				kill(cgi.pid, SIGKILL);			
+			}
+		}
+	}
+
+	_lastTimeoutCheck = now;
+}
+
+void Server::_handleClientTimeout(Client& client) {
+	client.markForDisconnect();
+	
+	size_t clientIdx = _findPollEntryIdxByFd(client.getFd());
+	if (clientIdx == _pollfdArr.size())
+		throw std::logic_error("timed-out client fd not found");
+
+	_pollfdArr[clientIdx].events &= ~POLLIN;
+
+	if (client.queueEmpty())
+		_pollfdArr[clientIdx].events |= POLLOUT;
 }
 
 void Server::_checkIdleClients(const Clock::time_point now) {

@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:10 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 18:52:48 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 21:01:32 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,11 +44,13 @@ class Server {
 		void	_handleCgiInput(CgiContext& cgi, size_t& idx);
 		void	_handleCgiOutput(CgiContext& cgi, size_t& idx);
 		void	_handleClientEvents(size_t& idx);
+		void	_handleClientTimeout(Client& client);
 		void	_handleIncomingData(size_t& idx);
 		void	_handleListenerEvents(size_t idx);
 		void	_handleOutgoingData(size_t& idx);
 		void	_handlePendingConnections(int listeningSocket);
 		void	_handleSocketEvent(size_t& idx);
+		void	_handleTimeouts(void);
 		
 		/* helpers and cleanup */
 		void	_checkIdleClients(const Clock::time_point now);
@@ -60,7 +62,7 @@ class Server {
 		/* server state */
 		const Config&							_config;
 		std::unordered_map<int, FdContext>		_fdCtx;
-		Clock::time_point						_lastIdleCheck;
+		Clock::time_point						_lastTimeoutCheck;
 		std::vector<pollfd>						_pollfdArr;
 		std::set<std::pair<uint32_t, uint16_t>>	_usedAddresses;
 
