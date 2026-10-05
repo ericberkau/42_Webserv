@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:06 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 18:07:15 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 22:02:03 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "classes/RequestParser.class.hpp"
 #include "classes/HttpRequestContainer.class.hpp"
 #include <arpa/inet.h>
+#include <chrono>
 #include <list>
 #include <string>
 #include <queue>
