@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:10 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/03 22:55:20 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 05:42:45 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,8 @@ class Server {
 	private:
 
 		/* setup */
-		void	_registerCgi(const CgiContext& cgiInfo);
-		void	_registerCgiPipe(const CgiContext& cgiInfo, const short events);
+		void	_registerCgi(CgiContext&& cgiInfo);
+		void	_registerCgiPipe(CgiContext&& cgiInfo, const short events);
 		void	_setupListeners(void);
 		int		_setupListeningSocket(const ListenDirective& listenCfg);
 		

@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:14:29 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 04:59:29 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 05:58:34 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,26 +22,30 @@
 // #include <netdb.h>
 // #include <variant>
 
-void Server::_registerCgi(const CgiContext& cgiInfo) {
+void Server::_registerCgi(CgiContext&& cgiInfo) {
+	CgiContext cgiPreserve(cgiInfo, false);
+	
 	try {
-		_registerCgiPipe(cgiInfo, POLLIN);
-		_registerCgiPipe(cgiInfo, POLLOUT);
+		CgiContext cgiEmptyBuffers(cgiInfo, false);
+
+		_registerCgiPipe(std::move(cgiInfo), POLLOUT);
+		_registerCgiPipe(std::move(cgiEmptyBuffers), POLLIN);
 	} catch (const std::logic_error&) {
-		_cleanupCompleteCgi(cgiInfo);
+		_cleanupCompleteCgi(cgiPreserve);
 		throw;
 	} catch (...) {
-		_cleanupCompleteCgi(cgiInfo);
+		_cleanupCompleteCgi(cgiPreserve);
 		std::cerr << "Runtime warning: failed to register CGI pipe FD context -> killed CGI process" << std::endl; // FIXME: maybe send error 500 to client and disconnect?
 	}
 }
 
-void Server::_registerCgiPipe(const CgiContext& cgiInfo, const short events) {
+void Server::_registerCgiPipe(CgiContext&& cgiInfo, const short events) {
 	if (events != POLLIN && events != POLLOUT)
 		throw std::runtime_error("tried to register CGI pipe with unsupported poll event");
 
 	const int pipeFd = (events == POLLIN ? cgiInfo.readPipeFd : cgiInfo.writePipeFd);
 
-	const auto emplResult = _fdCtx.emplace(pipeFd, FdContext(cgiInfo));
+	const auto emplResult = _fdCtx.try_emplace(pipeFd, std::move(cgiInfo));
 	bool inserted = emplResult.second;
 
 	if (!inserted)

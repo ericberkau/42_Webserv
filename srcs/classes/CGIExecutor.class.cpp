@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 13:00:52 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/10/03 20:48:20 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 06:08:13 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,12 +79,10 @@ CgiContext CGIExecutor::start(const std::string& scriptPath)
 	// 	throw std::runtime_error("fcntl failed to configure CGI pipe");
 	// } // FIXME: remove later
 
-	CgiContext cgiInfo = {};
+	CgiContext cgiInfo;
 	cgiInfo.pid = pid;
 	cgiInfo.readPipeFd = stdoutPipeFd[0];
 	cgiInfo.writePipeFd = stdinPipeFd[1];
-	cgiInfo.clientFd = -1;
-	cgiInfo.writeProgress = 0;
 
 	return cgiInfo;
 }

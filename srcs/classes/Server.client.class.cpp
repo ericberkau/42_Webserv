@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:13:08 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 04:59:10 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 06:02:14 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,7 @@ void Server::_handleIncomingData(size_t& idx) {
 			cgi.clientFd = currClient.getFd();
 			cgi.responseSlot = singleResult.responseSlot;
 
-			_registerCgi(cgi);
+			_registerCgi(std::move(cgi));
 		}
 
 		reqResults.pop();
@@ -128,10 +128,13 @@ void Server::_handleIncomingData(size_t& idx) {
 void Server::_handleOutgoingData(size_t& idx) {
 	Client& currClient = _fdCtx.at(_pollfdArr[idx].fd).client.value();
 
+	const size_t bytesRemaining = currClient.getOutBuf().size() - currClient.getOutProgress();
+	const size_t nBytesToWrite = (bytesRemaining > MSG_SIZE ? MSG_SIZE : bytesRemaining);
+
 	ssize_t sentBytes = send(
 					currClient.getFd(),
 					currClient.getOutBuf().data() + currClient.getOutProgress(),
-					currClient.getOutBuf().size() - currClient.getOutProgress(),
+					nBytesToWrite,
 					MSG_NOSIGNAL
 				);
 

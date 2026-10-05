@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 22:44:52 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 04:58:23 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 06:07:44 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,31 @@ struct CgiContext {
 	std::string	input;
 	std::string	output;
 	std::list<ResponseSlot>::iterator	responseSlot;
+
+	/* constructors */
+	/* default */
+	CgiContext(void)
+		:	pid(-1),
+			readPipeFd(-1),
+			writePipeFd(-1),
+			clientFd(-1),
+			writeProgress(0)
+	{}
+
+	/* variable copy constructor (copy buffers -> yes/no) */
+	explicit CgiContext(const CgiContext& other, bool copyBuffers)
+		:	pid(other.pid),
+			readPipeFd(other.readPipeFd),
+			writePipeFd(other.writePipeFd),
+			clientFd(other.clientFd),
+			writeProgress(other.writeProgress),
+			responseSlot(other.responseSlot)
+	{
+		if (copyBuffers) {
+			input = other.input;
+			output = other.output;
+		}
+	}
 };
 
 struct ResponseSlot {
@@ -99,7 +124,7 @@ struct FdContext {
 	}
 
 	/* for CGI pipe */
-	explicit FdContext(const CgiContext& _cgi)
+	explicit FdContext(CgiContext&& _cgi)
 		:	type(SocketType::CGI_PIPE),
 			server(nullptr),
 			client(std::nullopt),
