@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:10 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 05:42:45 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 18:52:48 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ class Server {
 		void	_handleSocketEvent(size_t& idx);
 		
 		/* helpers and cleanup */
+		void	_checkIdleClients(const Clock::time_point now);
 		void	_cleanupCompleteCgi(const CgiContext& cgiInfo);
 		void	_disconnectFd(size_t& idx);
 		size_t	_findPollEntryIdxByFd(int fd);
@@ -58,8 +59,9 @@ class Server {
 
 		/* server state */
 		const Config&							_config;
-		std::vector<pollfd>						_pollfdArr;
 		std::unordered_map<int, FdContext>		_fdCtx;
+		Clock::time_point						_lastIdleCheck;
+		std::vector<pollfd>						_pollfdArr;
 		std::set<std::pair<uint32_t, uint16_t>>	_usedAddresses;
 
 		/* disallow copying or moving */

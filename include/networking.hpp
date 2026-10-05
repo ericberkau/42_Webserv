@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 22:44:52 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 06:07:44 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 17:46:41 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,11 @@
 #include <variant>
 #include <vector>
 
-constexpr int		FOREVER = -1;
-constexpr int		MAX_PEND_CONNECT_QUEUE = 32;
-constexpr size_t	MSG_SIZE = 4096;
-
+constexpr int					POLL_TIMEOUT_MS = 10000;
+constexpr std::chrono::seconds	IDLE_CHECK_INTERVAL(10);
+constexpr std::chrono::seconds	CLIENT_IDLE_TIMEOUT(30);
+constexpr int					MAX_PEND_CONNECT_QUEUE = 32;
+constexpr size_t				MSG_SIZE = 4096;
 
 enum class SocketType {
 	INVALID = -1,

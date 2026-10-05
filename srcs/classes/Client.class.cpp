@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 05:05:27 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 18:50:27 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,13 @@
 #include <queue>
 
 Client::Client(int fd, const sockaddr_in& addr, const ServerConfig* server)
-	: _fd(fd), _inputReadProgress(0), _outputWriteProgress(0), _addr(addr), _server(server), _pendingDisconnect(false)
+	:	_fd(fd),
+		_inputReadProgress(0),
+		_outputWriteProgress(0),
+		_addr(addr),
+		_server(server),
+		_pendingDisconnect(false),
+		_lastActivity(Clock::now())
 {
 	std::clog << "[Client] constructor called" << std::endl; // FIXME: for debugging, remove later
 
@@ -36,6 +42,7 @@ Client::Client(Client&& other) noexcept
 		_addr(other._addr),
 		_server(other._server),
 		_pendingDisconnect(other._pendingDisconnect),
+		_lastActivity(other._lastActivity),
 		_requestParser(std::move(other._requestParser)),
 		_httpRequest(std::move(other._httpRequest))
 {
@@ -59,6 +66,7 @@ Client& Client::operator=(Client&& other) noexcept {
 		_addr = other._addr;
 		_server = other._server;
 		_pendingDisconnect = other._pendingDisconnect;
+		_lastActivity = other._lastActivity;
 		_requestParser = std::move(other._requestParser);
 		_httpRequest = std::move(other._httpRequest);
 
@@ -91,6 +99,22 @@ const std::string& Client::getOutBuf(void) const {
 
 size_t Client::getOutProgress(void) const {
 	return this->_outputWriteProgress;
+}
+
+bool Client::hasPendingOutput(void) const {
+	return !this->_outputBuffer.empty() && this->_outputWriteProgress < this->_outputBuffer.size();
+}
+
+bool Client::queueEmpty(void) const {
+	return this->_responseQueue.empty();
+}
+
+Clock::time_point Client::getLastActivity(void) const {
+	return this->_lastActivity;
+}
+
+bool Client::shouldDisconnect(void) const {
+	return this->_pendingDisconnect;
 }
 
 void Client::advanceOutProgress(ssize_t bytes) {
@@ -127,16 +151,12 @@ void Client::flushReadyResponses(void) {
 	}
 }
 
-bool Client::hasPendingOutput(void) const {
-	return !this->_outputBuffer.empty() && this->_outputWriteProgress < this->_outputBuffer.size();
-}
-
 void Client::markForDisconnect(void) {
 	this->_pendingDisconnect = true;
 }
 
-bool Client::shouldDisconnect(void) const {
-	return this->_pendingDisconnect;
+void Client::updateActivity(void) {
+	this->_lastActivity = Clock::now();
 }
 
 std::queue<RequestResult> Client::processInput(void) {

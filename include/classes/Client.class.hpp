@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:06 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 05:06:01 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 18:07:15 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@
 #include <list>
 #include <string>
 #include <queue>
+
+using Clock = std::chrono::steady_clock;
 
 struct RequestResult;
 struct ResponseSlot;
@@ -35,6 +37,10 @@ class Client {
 		const std::string&	getInBuf(void) const;
 		const std::string&	getOutBuf(void) const;
 		size_t				getOutProgress(void) const;
+		Clock::time_point	getLastActivity(void) const;
+		bool				hasPendingOutput(void) const;
+		bool				queueEmpty(void) const;
+		bool				shouldDisconnect(void) const;
 
 		void						advanceOutProgress(ssize_t bytes);
 		void						appendToInBuf(const char* input, size_t size); // FIXME: not needed at all?
@@ -42,10 +48,9 @@ class Client {
 		void						clearInBuf(void);
 		void						clearOutBuf(void);
 		void						flushReadyResponses(void);
-		bool						hasPendingOutput(void) const;
 		void						markForDisconnect(void);
 		std::queue<RequestResult>	processInput(void);
-		bool						shouldDisconnect(void) const;
+		void						updateActivity(void);
 
 
 	private:
@@ -60,6 +65,7 @@ class Client {
 		sockaddr_in				_addr;
 		const ServerConfig*		_server;
 		bool					_pendingDisconnect;
+		Clock::time_point		_lastActivity;
 
 		/* HTTP management */
 		RequestParser			_requestParser;

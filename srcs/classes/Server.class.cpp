@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/03 23:31:27 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 18:53:52 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,16 +38,24 @@ Server::~Server(void) {
 void Server::run(void) {
 	_setupListeners();
 
-	while (!g_shutdownRequested) {
-		std::cout << "listening" << std::endl;
+	_lastIdleCheck = Clock::now();
 
-		int ready = poll(_pollfdArr.data(), _pollfdArr.size(), FOREVER);
+	while (!g_shutdownRequested) {
+		std::cout << "listening ..." << std::endl;
+
+		int ready = poll(_pollfdArr.data(), _pollfdArr.size(), POLL_TIMEOUT_MS);
 		if (ready == -1) {
 			if (errno == EINTR)
 				continue;
 
 			perror("poll");
 			throw std::runtime_error("poll() failed");
+		}
+
+		const Clock::time_point now = Clock::now();
+		if (now - _lastIdleCheck >= IDLE_CHECK_INTERVAL) {
+			_checkIdleClients(now);
+			_lastIdleCheck = now;
 		}
 
 		for (size_t i = 0; i < _pollfdArr.size() && ready > 0; ++i) {
@@ -62,6 +70,26 @@ void Server::run(void) {
 	}
 
 	std::cout << "\nServer shutting down ..." << std::endl;
+}
+
+void Server::_checkIdleClients(const Clock::time_point now) {
+	for (auto it = _fdCtx.begin(); it != _fdCtx.end(); ++it) {
+		if (it->second.type != SocketType::CLIENT)
+			continue;
+
+		Client& client = it->second.client.value();
+
+		if (now - client.getLastActivity() < CLIENT_IDLE_TIMEOUT)
+			continue;
+
+		client.markForDisconnect();
+		
+		size_t clientIdx = _findPollEntryIdxByFd(client.getFd());
+		_pollfdArr[clientIdx].events &= ~POLLIN;
+
+		if (client.queueEmpty())
+			_pollfdArr[clientIdx].events |= POLLOUT;
+	}
 }
 
 void Server::_handleSocketEvent(size_t& idx) {

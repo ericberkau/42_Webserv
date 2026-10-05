@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:13:08 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 06:02:14 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 18:30:18 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,10 +123,19 @@ void Server::_handleIncomingData(size_t& idx) {
 
 	if (currClient.shouldDisconnect())
 		_pollfdArr[idx].events &= ~POLLIN;
+
+	currClient.updateActivity();
 }
 
 void Server::_handleOutgoingData(size_t& idx) {
 	Client& currClient = _fdCtx.at(_pollfdArr[idx].fd).client.value();
+
+	if (!currClient.hasPendingOutput()) {
+		if (currClient.shouldDisconnect() && currClient.queueEmpty())
+			_disconnectFd(idx);
+
+		return;
+	}
 
 	const size_t bytesRemaining = currClient.getOutBuf().size() - currClient.getOutProgress();
 	const size_t nBytesToWrite = (bytesRemaining > MSG_SIZE ? MSG_SIZE : bytesRemaining);
@@ -149,7 +158,7 @@ void Server::_handleOutgoingData(size_t& idx) {
 	currClient.advanceOutProgress(sentBytes);
 
 	if (!currClient.hasPendingOutput()) {
-		if (currClient.shouldDisconnect()) {
+		if (currClient.shouldDisconnect() && currClient.queueEmpty()) {
 			_disconnectFd(idx);
 			return;
 		}
@@ -157,4 +166,6 @@ void Server::_handleOutgoingData(size_t& idx) {
 		currClient.clearOutBuf();
 		_pollfdArr[idx].events &= ~POLLOUT;
 	}
+
+	currClient.updateActivity();
 }
