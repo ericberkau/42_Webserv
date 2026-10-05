@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:13:08 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/03 23:26:09 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 04:59:10 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,17 +101,22 @@ void Server::_handleIncomingData(size_t& idx) {
 	while (!reqResults.empty()) {
 		RequestResult& singleResult = reqResults.front();
 		
-		if (std::holds_alternative<std::string>(singleResult.result))
-			currClient.appendToOutBuf(std::get<std::string>(singleResult.result)); // FIXME: consider adding a transaction queue to keep proper request<->response order grouping
+		if (std::holds_alternative<std::string>(singleResult.result)) {
+			singleResult.responseSlot->response = std::move(std::get<std::string>(singleResult.result));
+			singleResult.responseSlot->ready = true;
+		}
 		else {
 			CgiContext& cgi = std::get<CgiContext>(singleResult.result);
 
 			cgi.clientFd = currClient.getFd();
+			cgi.responseSlot = singleResult.responseSlot;
+
 			_registerCgi(cgi);
 		}
 
 		reqResults.pop();
 	}
+	currClient.flushReadyResponses();
 
 	if (currClient.hasPendingOutput())
 		_pollfdArr[idx].events |= POLLOUT;

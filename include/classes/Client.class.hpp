@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:06 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/25 22:11:34 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 05:06:01 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,12 @@
 #include "classes/RequestParser.class.hpp"
 #include "classes/HttpRequestContainer.class.hpp"
 #include <arpa/inet.h>
+#include <list>
 #include <string>
 #include <queue>
 
 struct RequestResult;
+struct ResponseSlot;
 
 class Client {
 
@@ -39,6 +41,7 @@ class Client {
 		void						appendToOutBuf(const std::string& input); // TODO: private?
 		void						clearInBuf(void);
 		void						clearOutBuf(void);
+		void						flushReadyResponses(void);
 		bool						hasPendingOutput(void) const;
 		void						markForDisconnect(void);
 		std::queue<RequestResult>	processInput(void);
@@ -48,21 +51,23 @@ class Client {
 	private:
 
 		/* client state */
-		int					_fd;
-		std::string			_inputBuffer; // TODO: limit size later
-		size_t				_inputReadProgress; // FIXME: not needed at all?
-		std::string			_outputBuffer;
-		size_t				_outputWriteProgress;
-		sockaddr_in			_addr;
-		const ServerConfig*	_server;
-		bool				_pendingDisconnect;
+		int						_fd;
+		std::string				_inputBuffer; // TODO: limit size later
+		size_t					_inputReadProgress; // FIXME: not needed at all?
+		std::string				_outputBuffer;
+		size_t					_outputWriteProgress;
+		std::list<ResponseSlot>	_responseQueue;
+		sockaddr_in				_addr;
+		const ServerConfig*		_server;
+		bool					_pendingDisconnect;
 
 		/* HTTP management */
 		RequestParser			_requestParser;
 		HttpRequestContainer	_httpRequest;
 
-		RequestResult	_handleRequest(void);
-		void			_resetRequestState(void);
+		RequestResult						_handleRequest(void);
+		std::list<ResponseSlot>::iterator	_reserveResponseSlot(void);
+		void								_resetRequestState(void);
 
 		/* diallow copying */
 		Client(const Client&) = delete;

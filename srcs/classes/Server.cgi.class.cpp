@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:14:29 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/03 23:31:42 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 04:59:29 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,15 +103,17 @@ void Server::_handleCgiOutput(CgiContext& cgi, size_t& idx) {
 	}
 
 	if (bytes == 0) {
-		owningClient.appendToOutBuf(
-			RequestHandler::buildResponseFromCgiOutput(cgi.output)
-		);
+		cgi.responseSlot->response = RequestHandler::buildResponseFromCgiOutput(cgi.output);
+		cgi.responseSlot->ready = true;
+
+		owningClient.flushReadyResponses();
 
 		size_t clientIdx = _findPollEntryIdxByFd(cgi.clientFd);
 		if (clientIdx == _pollfdArr.size())
 			throw std::logic_error("owning client fd not found");
 
-		_pollfdArr[clientIdx].events |= POLLOUT;
+		if (owningClient.hasPendingOutput())
+			_pollfdArr[clientIdx].events |= POLLOUT;
 
 		if (waitpid(cgi.pid, NULL, WNOHANG) == 0) {
 			kill(cgi.pid, SIGKILL);

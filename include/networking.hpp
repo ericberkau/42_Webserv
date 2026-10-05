@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 22:44:52 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/03 23:29:49 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 04:58:23 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 #include "classes/Client.class.hpp"
 #include "config.hpp"
+#include <list>
 #include <optional>
 #include <poll.h>
 #include <unordered_map>
@@ -40,10 +41,17 @@ struct CgiContext {
 	size_t		writeProgress;
 	std::string	input;
 	std::string	output;
+	std::list<ResponseSlot>::iterator	responseSlot;
+};
+
+struct ResponseSlot {
+	bool		ready = false;
+	std::string	response;
 };
 
 struct RequestResult {
 	std::variant<std::string, CgiContext>	result;
+	std::list<ResponseSlot>::iterator		responseSlot;
 
 	/* constructors */
 	/* for immediate response */

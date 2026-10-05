@@ -6,13 +6,14 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/26 01:17:03 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 05:05:27 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/Client.class.hpp"
 #include "classes/RequestHandler.class.hpp"
 #include "classes/ResponseBuilder.class.hpp"
+#include "signals.hpp"
 #include <iostream>
 #include <unistd.h>
 #include <queue>
@@ -115,6 +116,17 @@ void Client::clearOutBuf(void) {
 	_outputWriteProgress = 0;
 }
 
+void Client::flushReadyResponses(void) {
+	while (!g_shutdownRequested &&
+		!_responseQueue.empty() &&
+		_responseQueue.front().ready)
+	{
+		appendToOutBuf(std::move(_responseQueue.front().response));
+
+		_responseQueue.pop_front();
+	}
+}
+
 bool Client::hasPendingOutput(void) const {
 	return !this->_outputBuffer.empty() && this->_outputWriteProgress < this->_outputBuffer.size();
 }
@@ -140,10 +152,14 @@ std::queue<RequestResult> Client::processInput(void) {
 		}
 	}
 	catch (const HttpParseException& e) {
+		std::list<ResponseSlot>::iterator slot = _reserveResponseSlot();
+	
 		ResponseBuilder rb;
 
 		rb.generateCustomErrorPage(e.getStatusCode(), *_server);
-		appendToOutBuf(rb.buildString());
+
+		slot->response = rb.buildString();
+		slot->ready = true;
 
 		_resetRequestState();
 		_requestParser.discardBuffer();
@@ -155,9 +171,12 @@ std::queue<RequestResult> Client::processInput(void) {
 }
 
 RequestResult Client::_handleRequest(void) {
+	std::list<ResponseSlot>::iterator slot = _reserveResponseSlot();
+
 	RequestHandler requestHandler(_server);
 
 	RequestResult result = requestHandler.processRequest(_httpRequest);
+	result.responseSlot = slot;
 
 	_resetRequestState();
 
@@ -167,4 +186,8 @@ RequestResult Client::_handleRequest(void) {
 void Client::_resetRequestState(void) {
 	_requestParser.reset();
 	_httpRequest.clear();
+}
+
+std::list<ResponseSlot>::iterator Client::_reserveResponseSlot(void) {
+	return _responseQueue.emplace(_responseQueue.end());
 }
