@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:14:29 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 21:03:59 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 21:37:14 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 // #include <variant>
 
 void Server::_registerCgi(CgiContext&& cgiInfo) {
-	CgiContext cgiPreserve(cgiInfo, false);
+	const CgiContext cgiPreserve(cgiInfo, false);
 	
 	try {
 		CgiContext cgiEmptyBuffers(cgiInfo, false);
@@ -31,11 +31,32 @@ void Server::_registerCgi(CgiContext&& cgiInfo) {
 		_registerCgiPipe(std::move(cgiInfo), POLLOUT);
 		_registerCgiPipe(std::move(cgiEmptyBuffers), POLLIN);
 	} catch (const std::logic_error&) {
+		_actOnFailedCgiRegistration(cgiPreserve);
 		_cleanupCompleteCgi(cgiPreserve);
 		throw;
 	} catch (...) {
+		_actOnFailedCgiRegistration(cgiPreserve);
 		_cleanupCompleteCgi(cgiPreserve);
-		std::cerr << "Runtime warning: failed to register CGI pipe FD context -> killed CGI process" << std::endl; // FIXME: maybe send error 500 to client and disconnect?
+		std::cerr << "Runtime warning: failed to register CGI pipe FD context -> killed CGI process" << std::endl;
+	}
+}
+
+void Server::_actOnFailedCgiRegistration(const CgiContext& cgi) {
+	ResponseBuilder rb;
+	rb.generateDefaultErrorPage(500);
+
+	cgi.responseSlot->response = rb.buildString();
+	cgi.responseSlot->ready = true;
+
+	Client& owningClient = _fdCtx.at(cgi.clientFd).client.value();
+	owningClient.flushReadyResponses();
+
+	if (owningClient.hasPendingOutput()) {
+		size_t clientEntryIdx = _findPollEntryIdxByFd(cgi.clientFd);
+		if (clientEntryIdx == _pollfdArr.size())
+			throw std::logic_error("owning client fd not found");
+
+		_pollfdArr[clientEntryIdx].events |= POLLOUT;
 	}
 }
 
@@ -94,8 +115,8 @@ void Server::_handleCgiOutput(CgiContext& cgi, size_t& idx) {
 	}
 	Client& owningClient = it->second.client.value();
 
-	size_t clientIdx = _findPollEntryIdxByFd(cgi.clientFd);
-	if (clientIdx == _pollfdArr.size())
+	size_t clientEntryIdx = _findPollEntryIdxByFd(cgi.clientFd);
+	if (clientEntryIdx == _pollfdArr.size())
 		throw std::logic_error("owning client fd not found");
 
 	if (cgi.aborted) {
@@ -105,7 +126,7 @@ void Server::_handleCgiOutput(CgiContext& cgi, size_t& idx) {
 		owningClient.flushReadyResponses();
 
 		if (owningClient.hasPendingOutput())
-			_pollfdArr[clientIdx].events |= POLLOUT;
+			_pollfdArr[clientEntryIdx].events |= POLLOUT;
 
 		_cleanupCompleteCgi(cgi);
 		return;
@@ -130,7 +151,7 @@ void Server::_handleCgiOutput(CgiContext& cgi, size_t& idx) {
 		owningClient.flushReadyResponses();
 
 		if (owningClient.hasPendingOutput())
-			_pollfdArr[clientIdx].events |= POLLOUT;
+			_pollfdArr[clientEntryIdx].events |= POLLOUT;
 
 		if (waitpid(cgi.pid, NULL, WNOHANG) == 0) {
 			kill(cgi.pid, SIGKILL);

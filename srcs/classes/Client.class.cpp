@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 18:50:27 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 21:10:03 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,7 +175,6 @@ std::queue<RequestResult> Client::processInput(void) {
 		std::list<ResponseSlot>::iterator slot = _reserveResponseSlot();
 	
 		ResponseBuilder rb;
-
 		rb.generateCustomErrorPage(e.getStatusCode(), *_server);
 
 		slot->response = rb.buildString();

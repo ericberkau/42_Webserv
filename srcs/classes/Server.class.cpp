@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 21:03:19 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 21:20:30 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,14 +99,14 @@ void Server::_handleTimeouts(void) {
 void Server::_handleClientTimeout(Client& client) {
 	client.markForDisconnect();
 	
-	size_t clientIdx = _findPollEntryIdxByFd(client.getFd());
-	if (clientIdx == _pollfdArr.size())
+	size_t clientEntryIdx = _findPollEntryIdxByFd(client.getFd());
+	if (clientEntryIdx == _pollfdArr.size())
 		throw std::logic_error("timed-out client fd not found");
 
-	_pollfdArr[clientIdx].events &= ~POLLIN;
+	_pollfdArr[clientEntryIdx].events &= ~POLLIN;
 
 	if (client.queueEmpty())
-		_pollfdArr[clientIdx].events |= POLLOUT;
+		_pollfdArr[clientEntryIdx].events |= POLLOUT;
 }
 
 void Server::_checkIdleClients(const Clock::time_point now) {
@@ -121,11 +121,11 @@ void Server::_checkIdleClients(const Clock::time_point now) {
 
 		client.markForDisconnect();
 		
-		size_t clientIdx = _findPollEntryIdxByFd(client.getFd());
-		_pollfdArr[clientIdx].events &= ~POLLIN;
+		size_t clientEntryIdx = _findPollEntryIdxByFd(client.getFd());
+		_pollfdArr[clientEntryIdx].events &= ~POLLIN;
 
 		if (client.queueEmpty())
-			_pollfdArr[clientIdx].events |= POLLOUT;
+			_pollfdArr[clientEntryIdx].events |= POLLOUT;
 	}
 }
 

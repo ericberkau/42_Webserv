@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:10 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 21:01:32 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/05 21:43:24 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ class Server {
 		void	_handleTimeouts(void);
 		
 		/* helpers and cleanup */
+		void	_actOnFailedCgiRegistration(const CgiContext& cgi);
 		void	_checkIdleClients(const Clock::time_point now);
 		void	_cleanupCompleteCgi(const CgiContext& cgiInfo);
 		void	_disconnectFd(size_t& idx);
