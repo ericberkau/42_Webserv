@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 21:10:03 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/06 23:09:00 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,7 +183,8 @@ std::queue<RequestResult> Client::processInput(void) {
 		_resetRequestState();
 		_requestParser.discardBuffer();
 		clearInBuf();
-		markForDisconnect();
+		if (e.isFatal())
+			markForDisconnect();
 	}
 
 	return results;

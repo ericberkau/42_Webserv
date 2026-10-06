@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.class.hpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:56:06 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/27 19:17:37 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/06 22:32:41 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@ class HttpParseException : public std::exception
 		virtual				~HttpParseException() throw();
 		virtual const char*	what() const throw();
 		
-		int	getStatusCode() const;
+		int		getStatusCode() const;
+		bool	isFatal() const;
 		
 	private:
 	

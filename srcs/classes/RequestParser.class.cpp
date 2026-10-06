@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.class.cpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:16 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/06 18:05:45 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/06 22:41:50 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,18 @@ const char* HttpParseException::what() const throw()
 int HttpParseException::getStatusCode() const
 {
 	return _statusCode;
+}
+
+bool HttpParseException::isFatal() const
+{
+	return (
+		_statusCode == 400 ||
+		_statusCode == 411 ||
+		_statusCode == 413 ||
+		_statusCode == 414 ||
+		_statusCode == 431
+		// || _statusCode == 504
+	);
 }
 
 RequestParser::RequestParser() : _state(PARSE_REQUEST_LINE), _expectedBodyBytes(0), _chunkSizeParsed(false) {}
