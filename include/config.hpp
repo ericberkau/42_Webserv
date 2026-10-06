@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:11:25 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/08 15:05:50 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/07 01:53:22 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ struct LocationConfig {
 	std::string root;
 	std::string	index;
 	bool		autoIndex;
+	size_t		clientMaxBodySize;
 
 	std::set<HttpMethod>	allowedMethods;
 
@@ -48,7 +49,8 @@ struct LocationConfig {
 		:	autoIndex(false),
 			uploadEnabled(false),
 			hasRedirect(false),
-			redirectStatusCode(0)
+			redirectStatusCode(0),
+			clientMaxBodySize(0)
 	{
 		allowedMethods.insert(HttpMethod::GET); // FIXME: allow default method(s)? discuss
 	}
