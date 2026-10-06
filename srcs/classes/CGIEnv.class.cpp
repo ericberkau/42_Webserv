@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGIEnv.class.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 12:31:01 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/09/25 02:35:33 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/06 20:07:39 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ char** CGIEnv::buildEnvp() const
 
 	size_t i = 0;
 
-	for (std::map<std::string, std::string>::const_iterator it = _env.begin();
+	for (auto it = _env.begin();
 		it != _env.end();
 		++it)
 	{
