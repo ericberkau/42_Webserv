@@ -5,7 +5,7 @@ PORT = 8080
 
 requests = {
     "GET CGI": (
-        "GET /cgi-bin/cgi_testscript.py?name=world HTTP/1.1\r\n"
+        "GET /cgi-bin/sleepy.py?name=world HTTP/1.1\r\n"
         "Host: localhost\r\n"
         "Connection: keep-alive\r\n"
         "\r\n"
@@ -48,7 +48,7 @@ def recv_response(sock):
 
 
 with socket.create_connection((HOST, PORT)) as sock:
-    sock.settimeout(2.0)
+    sock.settimeout(7.0)
 
     print(f"Connected to {HOST}:{PORT}")
 
