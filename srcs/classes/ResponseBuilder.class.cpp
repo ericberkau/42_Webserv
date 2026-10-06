@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:26 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/03 18:47:08 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/06 18:06:19 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,8 +123,7 @@ void ResponseBuilder::generateCustomErrorPage(int code, const ServerConfig& conf
 			}
 		}
 	}
-	// If the file path is a directory, missing, or corrupt, 
-	// generate hardcoded string fallback page
+	// If the file path is a directory, missing, or corrupt, generate hardcoded string fallback page
 	generateDefaultErrorPage(code);
 }
 
@@ -144,7 +143,7 @@ std::string ResponseBuilder::buildString() const
 	}
 	// Mandatory Blank Line marking the end of headers
 	packet << "\r\n";
-	// The Payload Body (if any exists)
+	// Payload Body (if any exists)
 	packet << _body;
 	return packet.str();
 }

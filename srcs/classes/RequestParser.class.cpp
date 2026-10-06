@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:16 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/02 12:59:07 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/06 18:05:45 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,6 @@ int HttpParseException::getStatusCode() const
 
 RequestParser::RequestParser() : _state(PARSE_REQUEST_LINE), _expectedBodyBytes(0), _chunkSizeParsed(false) {}
 
-// Helpers
-
 // HTTP header values can have leading/trailing whitespace around the
 // colon, Ex. "Host:	example.com". We trim spaces and tabs
 static std::string trim(const std::string& s)
@@ -44,8 +42,6 @@ static std::string trim(const std::string& s)
 	return s.substr(start, end - start + 1); // 2nd arg = length
 }
 
-// Splits a line on the first occurrence of a delimiter character.
-// Used for splitting "Key: Value" on the first ':'.
 static bool splitOnce(const std::string& s, char delim, std::string& left, std::string& right)
 {
 	size_t pos = s.find(delim);
@@ -58,10 +54,6 @@ static bool splitOnce(const std::string& s, char delim, std::string& left, std::
 
 bool RequestParser::_isSupportedMethod(const std::string& method)
 {
-	// Subject requires at least GET, POST, DELETE
-	// We still need to RECOGNIZE other valid HTTP methods (so we can
-	// return 405 Method Not Allowed instead of 400 Bad Request), but
-	// we only fully support these three
 	return method == "GET" || method == "POST" || method == "DELETE";
 }
 
@@ -224,7 +216,7 @@ void RequestParser::discardBuffer()
 	_buffer.clear();
 }
 
-// helper function: Safe String-To-Size Integer Converter (avoiding std::stoi coz it throws uncaught 
+// helper function: String-To-Size Integer Converter (avoiding std::stoi coz it throws uncaught 
 // C++ exceptions on text and doesn't handle unsigned size_t safely for packet boundaries)
 
 static size_t parseContentLength(const std::string& s)
@@ -239,7 +231,7 @@ static size_t parseContentLength(const std::string& s)
 			throw HttpParseException(400, "Bad Request: Invalid character in Content-Length");
 		
 		size_t next = result * 10 + (s[i] - '0');
-		// Simple overflow guard
+		// overflow guard
 		if (next < result)
 			throw HttpParseException(400, "Bad Request: Content-Length integer overflow");
 		result = next;
@@ -247,7 +239,7 @@ static size_t parseContentLength(const std::string& s)
 	return result;
 }
 
-// helper func.: Safe Hexadecimal-To-Size Converter (For Chunked Mode) (Chunk sizes are sent as hex values (like A for 10 bytes))
+// helper func.: Hexadecimal-To-Size Converter (For Chunked Mode) (Chunk sizes are sent as hex values (like A for 10 bytes))
 static size_t parseHexSize(const std::string& s)
 {
 	if (s.empty())

@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:03:59 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/24 14:32:37 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/06 18:08:33 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,6 @@ void HttpRequestContainer::addHeader(const std::string& key, const std::string& 
 	std::string lowerKey = ft_toLower(key); 
 		
 	// If the header already exists append the new value with a comma
-	// EXCEPT for Set-Cookie headers which must remain separate - do we have to handle this too??? 
 	if (_headers.find(lowerKey) != _headers.end())
 		_headers[lowerKey] += ", " + value;
 	else
