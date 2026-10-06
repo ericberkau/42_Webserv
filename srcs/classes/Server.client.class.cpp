@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.client.class.cpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:13:08 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 18:30:18 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/06 20:54:35 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,8 +35,9 @@ void Server::_handlePendingConnections(int listeningSocket) {
 			throw std::runtime_error("accept() failed");
 		}
 
-		const int currentFlags = fcntl(newClientFd, F_GETFL); // TODO: check return value for fail
-		if (currentFlags == -1 || fcntl(newClientFd, F_SETFL, currentFlags | O_NONBLOCK) == -1) {
+		if (fcntl(newClientFd, F_SETFL, O_NONBLOCK) == -1 ||
+			fcntl(newClientFd, F_SETFD, FD_CLOEXEC) == -1) 
+		{
 			close(newClientFd);
 			perror("fcntl");
 			throw std::runtime_error("fcntl() failed to configure client socket");

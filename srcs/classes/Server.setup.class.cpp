@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.setup.class.cpp                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:11:44 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/03 23:32:04 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/06 20:59:35 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,8 +69,9 @@ int Server::_setupListeningSocket(const ListenDirective& listenCfg) {
 	const int enableSetting = true;
 	setsockopt(serverFd, SOL_SOCKET, SO_REUSEADDR, &enableSetting, sizeof(enableSetting)); // TODO: check return value
 
-	const int currentFlags = fcntl(serverFd, F_GETFL);
-	if (currentFlags == -1 || fcntl(serverFd, F_SETFL, currentFlags | O_NONBLOCK) == -1) {
+	if (fcntl(serverFd, F_SETFL, O_NONBLOCK) == -1 ||
+		fcntl(serverFd, F_SETFD, FD_CLOEXEC) == -1)
+	{
 		close(serverFd);
 		perror("fcntl");
 		throw std::runtime_error("fcntl() failed to configure server socket");
