@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:14:29 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 21:37:14 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/06 19:46:00 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,9 +120,12 @@ void Server::_handleCgiOutput(CgiContext& cgi, size_t& idx) {
 		throw std::logic_error("owning client fd not found");
 
 	if (cgi.aborted) {
-		cgi.responseSlot->response = RequestHandler::buildResponseFromCgiOutput(""); // FIXME: send "504 Gateway Timeout" instead of hardcoded "200 OK"
+		ResponseBuilder rb;
+		rb.generateDefaultErrorPage(504);
+
+		cgi.responseSlot->response = rb.buildString(); // FIXME: send "504 Gateway Timeout" instead of hardcoded "200 OK"
 		cgi.responseSlot->ready = true;
-		
+
 		owningClient.flushReadyResponses();
 
 		if (owningClient.hasPendingOutput())
