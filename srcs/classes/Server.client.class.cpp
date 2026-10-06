@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.client.class.cpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:13:08 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/06 20:54:35 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/10/06 23:07:57 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,6 +147,8 @@ void Server::_handleOutgoingData(size_t& idx) {
 					nBytesToWrite,
 					MSG_NOSIGNAL
 				);
+
+	std::cout << "Response sent to client " << currClient.getFd() << " -> " << currClient.getOutBuf() << std::endl; // FIXME: for debugging, remove later
 
 	if (sentBytes == -1) {
 		perror("send");
