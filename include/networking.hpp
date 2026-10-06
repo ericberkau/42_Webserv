@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 22:44:52 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 20:48:17 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/06 20:05:23 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ constexpr size_t				MSG_SIZE = 4096;
 constexpr int					POLL_TIMEOUT_MS = 10000;
 constexpr std::chrono::seconds	TIMEOUT_CHECK_INTERVAL(5);
 constexpr std::chrono::seconds	CGI_TIMEOUT(5);
-constexpr std::chrono::seconds	CLIENT_IDLE_TIMEOUT(30);
+constexpr std::chrono::seconds	CLIENT_IDLE_TIMEOUT(75);
 
 enum class SocketType {
 	INVALID = -1,
