@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/04 16:33:29 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/06 23:12:15 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,7 +153,7 @@ std::string RequestHandler::_handleGet(const std::string& physicalPath, const Lo
 		// if location is NULL, autoIndex defaults to false
 		bool isAutoindexEnabled = location ? location->autoIndex : false;
 		if (!isAutoindexEnabled)
-			throw std::runtime_error("403"); // If autoindex is turned off and we have no valid index file path, deny access
+			throw std::runtime_error("404"); // If autoindex is turned off and we have no valid index file path, deny access
 
 		// Opening directory folder stream
 		DIR* dir = opendir(physicalPath.c_str());

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.class.cpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:16 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/06 22:41:50 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/07 01:01:02 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -317,6 +317,9 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 			}
 		}
 		
+		if ((_state == PARSE_BODY) && (_buffer.size() > config->clientMaxBodySize))
+			throw HttpParseException(413, "Payload Too Large");
+
 		if (_state == PARSE_BODY)
 		{
 			std::string transferEncoding = request.getHeader("transfer-encoding");
@@ -375,22 +378,16 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 						// We need expected_bytes PLUS the 2 trailing \r\n characters attached to every chunk payload
 						if (_buffer.size() < _expectedBodyBytes + 2)
 							return; // Stream data chunk incomplete, return control to socket poll loop
-
-						// Extract clean chunk bytes data (ignoring the padding CRLF ending)
-						std::string chunkData = _buffer.substr(0, _expectedBodyBytes);
 						
 						if (_buffer.substr(_expectedBodyBytes, 2) != "\r\n")
 							throw HttpParseException(400, "Bad Request: Missing CRLF at end of chunk payload");
 
 						// Append data chunk to body container accumulating payload totals
-						request.setBody(request.getBody() + chunkData);
+						request.setBody(request.getBody() + _buffer.substr(0, _expectedBodyBytes));
 						
-						// Enforce Max Body Limit (Webserv client_max_body_size requirement)
-						// DON'T FORGET TO replace 50000000 with the variable from the config structs file!
 						if (request.getBody().size() > config->clientMaxBodySize)
 							throw HttpParseException(413, "Payload Too Large");
 
-						// Wipe out processed data segment from system read cache
 						_buffer.erase(0, _expectedBodyBytes + 2);
 						
 						// Toggle flag back to prepare loop parsing for next structural chunk line
@@ -404,14 +401,16 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 				size_t contentLength = parseContentLength(contentLengthStr);
 
 				// Enforce Max Body Limit up front (413 Payload Too Large) before consuming bytes
-				if (contentLength > config->clientMaxBodySize) //Map to configuration rules later
+				if (contentLength > config->clientMaxBodySize)
 					throw HttpParseException(413, "Payload Too Large");
 
 				// Check if the current cache holds the requested frame bytes fully
 				if (_buffer.size() < contentLength)
 					return; // Incomplete payload frame block, yield control back to recv()
-
-				// Populate request storage safely and clear the stream sequence
+					
+				if (contentLength < _buffer.size())
+					throw HttpParseException(413, "Payload Too Large");
+	
 				request.setBody(_buffer.substr(0, contentLength));
 				_buffer.erase(0, contentLength);
 				_state = PARSE_COMPLETE;
