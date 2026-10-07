@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:16 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/07 01:01:02 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/07 02:08:33 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,15 +110,7 @@ void RequestParser::_parseRequestLine(const std::string& line, HttpRequestContai
 		if (_isKnownHttpMethod(method))
 			throw HttpParseException(405, "Method Not Allowed");
 
-		// If it's completely malformed (contains lowercase letters or invalid chars)
-		for (char c : method)
-		{
-			if (!std::isupper(static_cast<unsigned char>(c)))
-				throw HttpParseException(400, "Bad Request: invalid method token");
-		}
-
-		// It's all-caps but completely random (e.g., "MYCUSTOMMETHOD", "ET")
-		throw HttpParseException(501, "Not Implemented"); 
+		throw HttpParseException(400, "Bad Request"); 
 	}
 
 	if (uri.empty())
