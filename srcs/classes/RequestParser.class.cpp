@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:16 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/07 02:08:33 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/07 20:31:09 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -308,9 +308,6 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 					_parseHeaderLine(line, request);
 			}
 		}
-		
-		if ((_state == PARSE_BODY) && (_buffer.size() > config->clientMaxBodySize))
-			throw HttpParseException(413, "Payload Too Large");
 
 		if (_state == PARSE_BODY)
 		{
@@ -399,10 +396,7 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 				// Check if the current cache holds the requested frame bytes fully
 				if (_buffer.size() < contentLength)
 					return; // Incomplete payload frame block, yield control back to recv()
-					
-				if (contentLength < _buffer.size())
-					throw HttpParseException(413, "Payload Too Large");
-	
+
 				request.setBody(_buffer.substr(0, contentLength));
 				_buffer.erase(0, contentLength);
 				_state = PARSE_COMPLETE;
