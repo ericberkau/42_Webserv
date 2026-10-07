@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/27 23:12:53 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/27 23:16:24 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/07 16:56:52 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,17 @@ bool containsOnlyDigits(const std::string& str) {
 			return false;
 	}
 	return true;
+}
+
+size_t parseSizeValue(const Token& token) {
+	if (!containsOnlyDigits(token.lexeme))
+		error(token, "size must be a positive integer");
+
+	try {
+		return std::stoull(token.lexeme);
+	} catch (...) {
+		error(token, "invalid size value: " + token.lexeme);
+	}
 }
 
 int parseStatusCode(const Token& codeToken, int minCode, int maxCode) {

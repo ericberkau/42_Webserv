@@ -6,12 +6,11 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/27 22:39:18 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/06 19:19:35 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/07 17:55:25 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/Parser.class.hpp"
-#include "classes/parserUtils.hpp"
 
 LocationConfig Parser::_parseLocation(void) {
 	_advance();
@@ -46,6 +45,8 @@ void Parser::_parseLocationDirective(LocationConfig& location) {
 		_parsePathSetting(location.index);
 	else if (directive.lexeme == "autoindex")
 		_parseBoolSetting(location.autoIndex);
+	else if (directive.lexeme == "client_max_body_size")
+		_parseClientMaxBodySize(location);
 	else if (directive.lexeme == "allow_methods")
 		_parseAllowMethods(location);
 	else if (directive.lexeme == "return")

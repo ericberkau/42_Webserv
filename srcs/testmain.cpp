@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:07:00 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/08 20:57:55 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/07 17:52:00 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <string>
 
 static std::string methodToString(HttpMethod method)
 {
@@ -102,6 +103,17 @@ static void printLocation(const LocationConfig& loc) {
 	std::cout
 		<< "  autoindex: "
 		<< (loc.autoIndex ? "on" : "off")
+		<< '\n';
+
+	std::cout
+		<< "  client_max_body_size: "
+		<< (!loc.clientMaxBodySize.has_value()
+				? ""
+				: (loc.clientMaxBodySize.value() == 0
+					? "unlimited"
+					: std::to_string(loc.clientMaxBodySize.value())
+				)
+			)
 		<< '\n';
 
 	std::cout

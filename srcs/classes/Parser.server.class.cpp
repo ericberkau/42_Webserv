@@ -6,12 +6,11 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/27 22:50:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/08 15:08:12 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/07 17:56:56 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/Parser.class.hpp"
-#include "classes/parserUtils.hpp"
 
 ServerConfig Parser::_parseServer(void) {
 	_expect("server", "expected 'server'"); // FIXME: might change, if _parseConfig() gets an if-elseif chain to account for 'events' as well
@@ -106,36 +105,6 @@ void Parser::_parseListen(ServerConfig& server) {
 		error(addressToken, "duplicate listen address: " + addressToken.lexeme);
 
 	server.listen.push_back(newListen);
-}
-
-static
-size_t parseSizeValue(const Token& token) {
-	if (!containsOnlyDigits(token.lexeme))
-		error(token, "max body size must be a positive integer");
-
-	try {
-		return std::stoull(token.lexeme);
-	} catch (...) {
-		error(token, "invalid body size value: " + token.lexeme);
-	}
-}
-
-void Parser::_parseClientMaxBodySize(ServerConfig& server) {
-		_advance();
-
-	_expect(TokenType::WORD, "expected size value after 'client_max_body_size'");
-	const Token& sizeToken = _current();
-	_advance();
-
-	_expect(TokenType::SEMICOLON, "expected ';' after client_max_body_size value");
-	_advance();
-
-	const size_t size = parseSizeValue(sizeToken);
-
-	if (size == 0 || size > 1024 * 1024 * 10)
-			error(sizeToken, "size exceeds limits (0 < size <= 10 MiB)"); // FIXME: 10 MiB as upper client body limit?
-
-	server.clientMaxBodySize = size;
 }
 
 void Parser::_parseErrorPage(ServerConfig& server) {
