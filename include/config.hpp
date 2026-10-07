@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:11:25 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/07 17:38:54 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/07 18:53:01 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,44 +31,37 @@ struct LocationConfig {
 	std::string				path;
 	std::string 			root;
 	std::string				index;
-	bool					autoIndex;
-	std::optional<size_t>	clientMaxBodySize;
+	bool					autoIndex = false;
+	std::optional<size_t>	clientMaxBodySize = std::nullopt;
 	std::set<HttpMethod>	allowedMethods;
 
-	bool		uploadEnabled;
+	bool		uploadEnabled = false;
 	std::string	uploadPath;
 
-	bool		hasRedirect;
-	int			redirectStatusCode;
+	bool		hasRedirect = false;
+	int			redirectStatusCode = 0;
 	std::string	redirectTarget;
 
 	std::map<std::string, std::string>	cgiHandlers;
-	
+
+
 	/* default inits */
-	LocationConfig(void)
-		:	autoIndex(false),
-			clientMaxBodySize(std::nullopt),
-			uploadEnabled(false),
-			hasRedirect(false),
-			redirectStatusCode(0)
-	{
+	LocationConfig(void) {
 		allowedMethods.insert(HttpMethod::GET); // FIXME: allow default method(s)? discuss
 	}
 };
 
 struct ListenDirective {
 	std::string	host;
-	uint16_t	port;
+	uint16_t	port = 0;
 };
 
 struct ServerConfig {
 	std::vector<ListenDirective>	listen;
-	size_t							clientMaxBodySize;
+	size_t							clientMaxBodySize = 1024 * 1024; // default body size: 1 MiB
 	std::string						root;
 	std::vector<LocationConfig>		locations;
 	std::map<int, std::string>		errorPages;
-
-	ServerConfig(void) : clientMaxBodySize(1024 * 1024) {} // default body size: 1 MiB
 };
 
 struct Config {

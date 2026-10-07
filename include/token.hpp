@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/27 23:10:32 by eberkau           #+#    #+#             */
-/*   Updated: 2026/07/27 23:15:43 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/07 18:44:42 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,8 @@ enum class TokenType {
 };
 
 struct Token {
-	TokenType	type;
+	TokenType	type = TokenType::END;
 	std::string	lexeme;
-	size_t		line;
-	size_t		column;
+	size_t		line = 0;
+	size_t		column = 0;
 };

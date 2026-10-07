@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 22:44:52 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/06 20:05:23 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/07 18:43:54 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,28 +36,25 @@ enum class SocketType {
 };
 
 struct CgiContext {
-	pid_t				pid;
-	int					readPipeFd;
-	int					writePipeFd;
-	int					clientFd;
-	size_t				writeProgress;
-	std::string			input;
-	std::string			output;
-	Clock::time_point	startTime;
-	bool				aborted;
+	pid_t	pid = -1;
+	int		clientFd = -1;
+
+	int		readPipeFd = -1;
+	int		writePipeFd = -1;
+	size_t	writeProgress = 0;
+
+	std::string	input;
+	std::string	output;
+
+	Clock::time_point	startTime = Clock::now();
+	bool				aborted = false;
+
 	std::list<ResponseSlot>::iterator	responseSlot;
+
 
 	/* constructors */
 	/* default */
-	CgiContext(void)
-		:	pid(-1),
-			readPipeFd(-1),
-			writePipeFd(-1),
-			clientFd(-1),
-			writeProgress(0),
-			startTime(Clock::now()),
-			aborted(false)
-	{}
+	CgiContext(void) {}
 
 	/* variable copy constructor (copy buffers -> yes/no) */
 	explicit CgiContext(const CgiContext& other, bool copyBuffers)
@@ -86,6 +83,7 @@ struct RequestResult {
 	std::variant<std::string, CgiContext>	result;
 	std::list<ResponseSlot>::iterator		responseSlot;
 
+
 	/* constructors */
 	/* for immediate response */
 	explicit RequestResult(std::string&& response)
@@ -99,19 +97,17 @@ struct RequestResult {
 };
 
 struct FdContext {
-	SocketType					type;
-	const ServerConfig*			server;
-	std::optional<Client>		client;
-	std::optional<CgiContext>	cgi;
+	SocketType					type = SocketType::INVALID;
+	const ServerConfig*			server = nullptr;
+	std::optional<Client>		client = std::nullopt;
+	std::optional<CgiContext>	cgi = std::nullopt;
 
 
 	/* constructors */
 	/* for listerner */
 	explicit FdContext(const ServerConfig* serverConfig)
 		:	type(SocketType::LISTENER),
-			server(serverConfig),
-			client(std::nullopt),
-			cgi(std::nullopt)
+			server(serverConfig)
 	{
 		if (serverConfig == nullptr)
 			throw std::logic_error("server must not be empty in FD context");
@@ -124,8 +120,7 @@ struct FdContext {
 	)
 		:	type(SocketType::CLIENT),
 			server(serverConfig),
-			client(std::move(_client)),
-			cgi(std::nullopt)
+			client(std::move(_client))
 	{
 		if (serverConfig == nullptr)
 			throw std::logic_error("server must not be empty in FD context");
@@ -134,8 +129,6 @@ struct FdContext {
 	/* for CGI pipe */
 	explicit FdContext(CgiContext&& _cgi)
 		:	type(SocketType::CGI_PIPE),
-			server(nullptr),
-			client(std::nullopt),
 			cgi(std::move(_cgi))
 	{}
 };
