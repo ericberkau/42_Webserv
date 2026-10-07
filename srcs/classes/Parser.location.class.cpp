@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/27 22:39:18 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/07 17:55:25 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/07 18:57:46 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,7 @@ HttpMethod parseHttpMethod(const Token& token) {
 }
 
 void Parser::_parseAllowMethods(LocationConfig& location) {
-		location.allowedMethods.clear(); // override constructor default
+	location.allowedMethods.clear(); // override constructor default
 	_advance();
 
 	if (_check(TokenType::SEMICOLON))

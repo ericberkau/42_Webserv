@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:35:46 by eberkau           #+#    #+#             */
-/*   Updated: 2026/08/27 23:44:24 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/07 18:47:05 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ Config Parser::_parseConfig(void) {
 	Config config;
 	
 	while (!_atEnd())
-	config.servers.push_back(_parseServer());
+		config.servers.push_back(_parseServer());
 	
 	// TODO: add config verification?
 	return config;

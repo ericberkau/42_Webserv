@@ -6,19 +6,19 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:11:25 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/07 18:53:01 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/07 18:56:50 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include <string>
-#include <vector>
+#include <cstdint>
 #include <map>
 #include <netdb.h>
-#include <cstdint>
-#include <set>
 #include <optional>
+#include <set>
+#include <string>
+#include <vector>
 
 enum class HttpMethod {
 	INVALID = -1,
