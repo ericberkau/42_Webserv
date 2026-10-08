@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequestContainer.class.cpp                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:03:59 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/08 02:07:38 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/08 05:33:55 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,11 @@ const std::map<std::string, std::string>& HttpRequestContainer::getHeaders() con
 {
 	return _headers;
 }
+
+// void HttpRequestContainer::appendBody(const std::string& data)
+// {
+// 	_body += data;
+// }
 
 void HttpRequestContainer::clear()
 {

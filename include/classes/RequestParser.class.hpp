@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.class.hpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:56:06 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/06 22:32:41 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/08 05:36:04 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,8 @@ class RequestParser
 		std::string		_buffer;
 		size_t			_expectedBodyBytes; // Stores Content-Length or current chunk size
 		bool			_chunkSizeParsed; // Tracks if we are waiting for a chunk size line or chunk data bytes
+		size_t			_maxBodySize;
+		size_t			_headerBytes;
 		
 		void	_parseRequestLine(const std::string& line, HttpRequestContainer& request); // Splits "METHOD URI VERSION" and validates each piece
 		bool	_isValidHeaderKeyChar(unsigned char c);

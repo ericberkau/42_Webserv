@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/06 23:12:15 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/08 05:56:24 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,36 +15,83 @@
 RequestHandler::RequestHandler(const ServerConfig* config) : _config(config) {}
 RequestHandler::~RequestHandler() {}
 
-// Matching the Location Block (Prefix Matching)
-const LocationConfig* RequestHandler::_matchLocation(const std::string& uri) const
+static bool isExtensionLocation(const LocationConfig& loc)
+{
+	return !loc.path.empty() && loc.path[0] == '*'; // e.g. "*.bla"
+}
+
+// longest prefix match (your old logic, just using a config argument)
+static const LocationConfig* matchPrefixLocation(const ServerConfig& config, const std::string& uri)
 {
 	const LocationConfig* bestMatch = NULL;
 	size_t longestMatchLength = 0;
 
-	for (size_t i = 0; i < _config->locations.size(); ++i)
+	for (size_t i = 0; i < config.locations.size(); ++i)
 	{
-		const LocationConfig& loc = _config->locations[i];
+		const LocationConfig& loc = config.locations[i];
 
-		// must start with the location path
-		if (uri.rfind(loc.path, 0) != 0)
+		if (isExtensionLocation(loc) || uri.rfind(loc.path, 0) != 0)
 			continue;
 
-		// match must end on a path boundary
 		bool boundary = loc.path.empty()
-			|| loc.path.back() == '/' // "/images/" already ends at a boundary
-			|| uri.size() == loc.path.size() // exact match: "/images"
-			|| uri[loc.path.size()] == '/'; // "/images/logo.jpg"
+			|| loc.path.back() == '/'
+			|| uri.size() == loc.path.size()
+			|| uri[loc.path.size()] == '/';
 
-		if (!boundary)
-			continue;
-
-		if (loc.path.size() > longestMatchLength)
+		if (boundary && loc.path.size() > longestMatchLength)
 		{
 			longestMatchLength = loc.path.size();
 			bestMatch = &loc;
 		}
 	}
-	return bestMatch; // returns NULL if no location blocks match, falling back to server default root
+	return bestMatch;
+}
+
+static const LocationConfig* matchExtensionLocation(const ServerConfig& config, const std::string& uri, HttpMethod method)
+{
+	const LocationConfig* best = NULL;
+	size_t bestLen = 0;
+
+	for (size_t i = 0; i < config.locations.size(); ++i)
+	{
+		const LocationConfig& loc = config.locations[i];
+		if (!isExtensionLocation(loc))
+			continue;
+
+		// an extension location only claims requests whose method it allows
+		if (!loc.allowedMethods.empty() && loc.allowedMethods.find(method) == loc.allowedMethods.end())
+			continue;
+
+		std::string suffix = loc.path.substr(1);
+		if (uri.size() >= suffix.size()
+			&& uri.compare(uri.size() - suffix.size(), suffix.size(), suffix) == 0
+			&& suffix.size() > bestLen)
+		{
+			best = &loc;
+			bestLen = suffix.size();
+		}
+	}
+	return best;
+}
+
+// extension location prioritised over any prefix location
+const LocationConfig* RequestHandler::matchLocation(const ServerConfig& config, const std::string& uri, HttpMethod method)
+{
+	const LocationConfig* ext = matchExtensionLocation(config, uri, method);
+	return ext ? ext : matchPrefixLocation(config, uri);
+}
+
+const LocationConfig* RequestHandler::_matchLocation(const std::string& uri, HttpMethod method) const
+{
+	return matchLocation(*_config, uri, method);
+}
+
+// location value if set, otherwise  server value
+size_t RequestHandler::bodyLimitFor(const ServerConfig& config, const LocationConfig* location)
+{
+	if (location)
+		return location->clientMaxBodySize.value_or(config.clientMaxBodySize);
+	return config.clientMaxBodySize;
 }
 
 bool RequestHandler::_isCgiRequest(const std::string& physicalPath, const LocationConfig* location) const
@@ -77,13 +124,18 @@ void RequestHandler::_verifyMethodAllowed(const HttpMethod& method, const Locati
 
 std::string RequestHandler::_translateToPhysicalPath(const std::string& uri, const LocationConfig* location) const
 {
+	// extension location says how to handle a file; the directory location says where it lives
+	if (location && isExtensionLocation(*location) && location->root.empty())
+		location = matchPrefixLocation(*_config, uri);
+		
 	std::string baseRoot = "html";
 	bool stripPrefix = false;
 
 	if (location && !location->root.empty())
 	{
 		baseRoot = location->root;
-		stripPrefix = true;
+		// stripPrefix = true;
+		stripPrefix = !isExtensionLocation(*location); // "*.bla" is not a URL prefix
 	}
 	else if (!_config->root.empty())
 		baseRoot = _config->root;
@@ -228,8 +280,25 @@ static std::string generateUploadName()
 
 std::string RequestHandler::_handlePost(const HttpRequestContainer& request, const LocationConfig* location)
 {
-	if (!location || !location->uploadEnabled)
+	// if (!location || !location->uploadEnabled)
+	// 	throw std::runtime_error("403");
+
+	if (!location)
 		throw std::runtime_error("403");
+
+	if (!location->uploadEnabled)
+	{
+		// POST is allowed here (method check passed), but no upload storage is configured:
+		// accept the request and discard the body
+		std::string bodyMessage = "<h1>POST Received</h1>";
+		std::stringstream lengthStream;
+		lengthStream << bodyMessage.size();
+
+		return "HTTP/1.1 200 OK\r\n"
+			"Content-Length: " + lengthStream.str() + "\r\n"
+			"Content-Type: text/html\r\n"
+			"\r\n" + bodyMessage;
+	}
 
 	struct stat st;
 	if (stat(location->uploadPath.c_str(), &st) != 0 || !S_ISDIR(st.st_mode))
@@ -306,6 +375,12 @@ std::string RequestHandler::buildResponseFromCgiOutput(const std::string& cgiOut
 {
 	ResponseBuilder response;
 
+	if (cgiOutput.empty()) // handler produced nothing: crashed, missing script ???
+	{
+		response.generateDefaultErrorPage(500);
+		return response.buildString();
+	}
+
 	size_t headerEnd = cgiOutput.find("\r\n\r\n");
 	size_t sepLen = 4;
 	if (headerEnd == std::string::npos)
@@ -360,11 +435,27 @@ static std::string toUpperWithUnderscores(const std::string& key)
 	return result;
 }
 
-CgiContext RequestHandler::_handleCgi(const std::string& physicalPath, const HttpRequestContainer& request)
+CgiContext RequestHandler::_handleCgi(const std::string& physicalPath, const HttpRequestContainer& request, const LocationConfig* location)
 {
-	struct stat pathStat;
-	if (stat(physicalPath.c_str(), &pathStat) != 0 || S_ISDIR(pathStat.st_mode))
-		throw std::runtime_error("404");
+	// which program handles this file type?
+	size_t dot = physicalPath.find_last_of('.');
+	if (!location || dot == std::string::npos)
+		throw std::runtime_error("500");
+
+	std::map<std::string, std::string>::const_iterator it =
+		location->cgiHandlers.find(physicalPath.substr(dot));
+	if (it == location->cgiHandlers.end())
+		throw std::runtime_error("500");
+	const std::string& handler = it->second;
+
+	// // requested file must exist
+	// struct stat pathStat;
+	// if (stat(physicalPath.c_str(), &pathStat) != 0 || S_ISDIR(pathStat.st_mode))
+	// 	throw std::runtime_error("404");
+
+	// configured handler must be runnable, otherwise server misconfiguration?
+	if (access(handler.c_str(), X_OK) != 0)
+		throw std::runtime_error("500");
 
 	CGIExecutor executor;
 	CGIEnv& env = executor.getEnv();
@@ -377,9 +468,16 @@ CgiContext RequestHandler::_handleCgi(const std::string& physicalPath, const Htt
 	env.set("GATEWAY_INTERFACE", "CGI/1.1");
 	env.set("REDIRECT_STATUS", "200");
 
-	std::string contentLength = request.getHeader("content-length");
-	if (!contentLength.empty())
-		env.set("CONTENT_LENGTH", contentLength);
+	std::string requestUri = request.getUri();
+	
+	if (!request.getQueryString().empty())
+		requestUri += "?" + request.getQueryString();
+
+	env.set("REQUEST_URI", requestUri);
+	env.set("PATH_INFO", request.getUri());
+
+	if (!request.getHeader("content-length").empty() || !request.getHeader("transfer-encoding").empty())
+		env.set("CONTENT_LENGTH", std::to_string(request.getBody().size()));
 
 	std::string contentType = request.getHeader("content-type");
 	if (!contentType.empty())
@@ -387,15 +485,16 @@ CgiContext RequestHandler::_handleCgi(const std::string& physicalPath, const Htt
 
 	for (const auto& [key, value] : request.getHeaders())
 	{
-		if (key == "content-length" || key == "content-type")
-			continue; // already handled above without the HTTP_ prefix
+		// already handled above, or no longer true (CGI gets an unchunked body)
+		if (key == "content-length" || key == "content-type" || key == "transfer-encoding")
+			continue;
 		env.set("HTTP_" + toUpperWithUnderscores(key), value);
 	}
 
 	CgiContext cgiInfo;
 	try
 	{
-		cgiInfo = executor.start(physicalPath);
+		cgiInfo = executor.start(handler); //TODO: incomplete
 		cgiInfo.input = request.getBody();
 	} 
 	catch (const std::exception&)
@@ -436,7 +535,7 @@ RequestResult RequestHandler::processRequest(const HttpRequestContainer& request
 	try
 	{
 		// Find configuration block matches
-		const LocationConfig* matchedLoc = _matchLocation(request.getUri());
+		const LocationConfig* matchedLoc = _matchLocation(request.getUri(), request.getMethod());
 
 		if (matchedLoc && matchedLoc->hasRedirect)
 			return RequestResult(_handleRedirect(matchedLoc));
@@ -448,7 +547,7 @@ RequestResult RequestHandler::processRequest(const HttpRequestContainer& request
 		std::string physicalPath = _translateToPhysicalPath(request.getUri(), matchedLoc);
 
 		if (_isCgiRequest(physicalPath, matchedLoc))
-			return RequestResult(_handleCgi(physicalPath, request));
+			return RequestResult(_handleCgi(physicalPath, request, matchedLoc));
 		else if (request.getMethod() == HttpMethod::GET)
 			return RequestResult(_handleGet(physicalPath, matchedLoc, request.getUri()));
 		else if (request.getMethod() == HttpMethod::POST)

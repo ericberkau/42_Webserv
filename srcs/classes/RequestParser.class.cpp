@@ -3,16 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.class.cpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:16 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/08 02:24:04 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/08 05:58:20 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/RequestParser.class.hpp"
 #include <sstream>
 #include "classes/StringUtils.hpp"
+#include "classes/RequestHandler.class.hpp"
+
+static const size_t MAX_LINE_LENGTH = 8192; // longest single request/header/chunk-size line
+static const size_t MAX_HEADER_BYTES = 32768; // all header lines together
 
 HttpParseException::HttpParseException(int statusCode, const std::string& reason)
 	: _statusCode(statusCode), _reason(reason) {}
@@ -41,7 +45,7 @@ bool HttpParseException::isFatal() const
 	);
 }
 
-RequestParser::RequestParser() : _state(PARSE_REQUEST_LINE), _expectedBodyBytes(0), _chunkSizeParsed(false) {}
+RequestParser::RequestParser() : _state(PARSE_REQUEST_LINE), _expectedBodyBytes(0), _chunkSizeParsed(false), _maxBodySize(0), _headerBytes(0) {}
 
 // HTTP header values can have leading/trailing whitespace around the
 // colon, Ex. "Host:	example.com". We trim spaces and tabs
@@ -212,6 +216,8 @@ void RequestParser::reset()
 	_state = PARSE_REQUEST_LINE;
 	_expectedBodyBytes = 0;
 	_chunkSizeParsed = false;
+	_maxBodySize = 0;
+	_headerBytes = 0;
 	// _buffer.clear();
 }
 
@@ -278,13 +284,21 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 	{
 		if (_state == PARSE_REQUEST_LINE || _state == PARSE_HEADERS)
 		{
-			if ((_state == PARSE_REQUEST_LINE || _state == PARSE_HEADERS) && _buffer.size() > 8192)
-				throw HttpParseException(431, "Request Header Fields Too Large");
-
 			// Look for the standard network line break (\r\n)
 			size_t lineEnd = _buffer.find("\r\n");
 			if (lineEnd == std::string::npos)
+			{
+				if (_buffer.size() > MAX_LINE_LENGTH)
+					throw HttpParseException(431, "Request Header Fields Too Large");
 				return; // Incomplete line, stop and wait for more network read ticks
+			}
+
+			if (lineEnd > MAX_LINE_LENGTH)
+				throw HttpParseException(431, "Request Header Fields Too Large");
+
+			_headerBytes += lineEnd + 2;
+			if (_headerBytes > MAX_HEADER_BYTES)
+				throw HttpParseException(431, "Request Header Fields Too Large");
 
 			std::string line = _buffer.substr(0, lineEnd);
 			_buffer.erase(0, lineEnd + 2); // remove the processed line off our buffer cache
@@ -302,6 +316,7 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 					// HTTP/1.1 Mandate: Check for the required Host header
 					if (request.getHeader("host").empty())
 						throw HttpParseException(400, "Bad Request: Missing mandatory Host header");
+					_maxBodySize = RequestHandler::bodyLimitFor(*config, RequestHandler::matchLocation(*config, request.getUri(), request.getMethod()));
 					_state = PARSE_BODY; // Do not break; immediately fall through to try parsing the body out of remaining buffer
 				}
 				else
@@ -330,7 +345,11 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 					{
 						size_t lineEnd = _buffer.find("\r\n");
 						if (lineEnd == std::string::npos)
+						{
+							if (_buffer.size() > MAX_LINE_LENGTH)
+								throw HttpParseException(400, "Bad Request: chunk size line too long");
 							return; // Wait for full hex line to arrive over the socket
+						}
 
 						std::string sizeLine = _buffer.substr(0, lineEnd);
 						_buffer.erase(0, lineEnd + 2);
@@ -342,7 +361,7 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 						
 						sizeLine = trim(sizeLine);
 						_expectedBodyBytes = parseHexSize(sizeLine);
-						if (_expectedBodyBytes > config->clientMaxBodySize - request.getBody().size())
+						if (_expectedBodyBytes > _maxBodySize - request.getBody().size())
 							throw HttpParseException(413, "Payload Too Large");
 						_chunkSizeParsed = true;
 					}
@@ -377,8 +396,9 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 						newBody.assign(request.getBody());
 						newBody.append(_buffer, 0, _expectedBodyBytes);
 						request.setBody(std::move(newBody));
+						// request.appendBody(_buffer.substr(0, _expectedBodyBytes));
 						
-						if (request.getBody().size() > config->clientMaxBodySize)
+						if (request.getBody().size() > _maxBodySize)
 							throw HttpParseException(413, "Payload Too Large");
 
 						_buffer.erase(0, _expectedBodyBytes + 2);
@@ -394,7 +414,7 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 				size_t contentLength = parseContentLength(contentLengthStr);
 
 				// Enforce Max Body Limit up front (413 Payload Too Large) before consuming bytes
-				if (contentLength > config->clientMaxBodySize)
+				if (contentLength > _maxBodySize)
 					throw HttpParseException(413, "Payload Too Large");
 
 				// Check if the current cache holds the requested frame bytes fully

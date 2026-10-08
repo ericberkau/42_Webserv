@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequestContainer.class.hpp                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:54:11 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/08 02:07:28 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/08 05:33:24 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ class HttpRequestContainer
 		// acc. to RFC, so we normalize keys to lowercase when storing them
 		std::string									getHeader(const std::string& key) const;
 		const std::map<std::string, std::string>&	getHeaders() const;
+		// void										appendBody(const std::string& data);
 
 		void	clear();
 
