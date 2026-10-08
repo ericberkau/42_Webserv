@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequestContainer.class.cpp                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:03:59 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/06 18:08:33 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/08 02:07:38 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,9 +30,9 @@ void HttpRequestContainer::setVersion(const std::string& version)
 {
 	_version = version;
 }
-void HttpRequestContainer::setBody(const std::string& body)
+void HttpRequestContainer::setBody(std::string body)
 {
-	_body = body;
+	_body = std::move(body);
 }
 
 void HttpRequestContainer::setQueryString(const std::string& query)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.class.cpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:16 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/07 20:31:09 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/08 02:24:04 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -372,7 +372,11 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 							throw HttpParseException(400, "Bad Request: Missing CRLF at end of chunk payload");
 
 						// Append data chunk to body container accumulating payload totals
-						request.setBody(request.getBody() + _buffer.substr(0, _expectedBodyBytes));
+						std::string newBody;
+						newBody.reserve(request.getBody().size() + _expectedBodyBytes);
+						newBody.assign(request.getBody());
+						newBody.append(_buffer, 0, _expectedBodyBytes);
+						request.setBody(std::move(newBody));
 						
 						if (request.getBody().size() > config->clientMaxBodySize)
 							throw HttpParseException(413, "Payload Too Large");
