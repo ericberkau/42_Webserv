@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/08 05:56:24 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/08 19:22:10 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -494,7 +494,7 @@ CgiContext RequestHandler::_handleCgi(const std::string& physicalPath, const Htt
 	CgiContext cgiInfo;
 	try
 	{
-		cgiInfo = executor.start(handler); //TODO: incomplete
+		cgiInfo = executor.start(physicalPath, handler);
 		cgiInfo.input = request.getBody();
 	} 
 	catch (const std::exception&)

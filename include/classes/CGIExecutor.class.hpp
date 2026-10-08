@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGIExecutor.class.hpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 12:30:19 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/10/02 22:36:47 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/10/08 07:00:27 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,12 +30,12 @@ class CGIExecutor
 
 		CGIEnv&		getEnv();
 
-		CgiContext	start(const std::string& scriptPath);
+		CgiContext	start(const std::string& scriptPath, const std::string& handlerPath);
 
 
 	private:
 
-		void	_handleChild(int* stdinPipeFd, int* stdoutPipeFd, const std::string& scriptPath);
+		void	_handleChild(int* stdinPipeFd, int* stdoutPipeFd, const std::string& scriptPath, const std::string& handlerPath);
 
 		CGIEnv	_env;
 

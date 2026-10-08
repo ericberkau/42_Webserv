@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGIExecutor.class.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 13:00:52 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/10/06 20:16:09 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/10/08 07:36:48 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ CGIEnv& CGIExecutor::getEnv()
 	return _env;
 }
 
-CgiContext CGIExecutor::start(const std::string& scriptPath)
+CgiContext CGIExecutor::start(const std::string& scriptPath, const std::string& handlerPath)
 {
 	int stdinPipeFd[2];
 	int stdoutPipeFd[2];
@@ -42,7 +42,7 @@ CgiContext CGIExecutor::start(const std::string& scriptPath)
 	}
 
 	if (pid == 0)
-		_handleChild(stdinPipeFd, stdoutPipeFd, scriptPath);
+		_handleChild(stdinPipeFd, stdoutPipeFd, scriptPath, handlerPath);
 
 	close(stdinPipeFd[0]);
 	close(stdoutPipeFd[1]);
@@ -55,7 +55,7 @@ CgiContext CGIExecutor::start(const std::string& scriptPath)
 	return cgiInfo;
 }
 
-void CGIExecutor::_handleChild(int* stdinPipeFd, int* stdoutPipeFd, const std::string& scriptPath)
+void CGIExecutor::_handleChild(int* stdinPipeFd, int* stdoutPipeFd, const std::string& scriptPath, const std::string& handlerPath)
 {
 	close(stdinPipeFd[1]);
 	close(stdoutPipeFd[0]);
@@ -79,9 +79,15 @@ void CGIExecutor::_handleChild(int* stdinPipeFd, int* stdoutPipeFd, const std::s
 
 	char** envp = _env.buildEnvp();
 
-	char* argv[] = {const_cast<char*>(scriptPath.c_str()), NULL};
+	// char* argv[] = {const_cast<char*>(scriptPath.c_str()), NULL};
 
-	execve(argv[0], argv, envp);
+	char* argv[] = {
+		const_cast<char*>(handlerPath.c_str()),
+		const_cast<char*>(scriptPath.c_str()),
+		NULL
+	}; // runs: /usr/bin/python3 hello.py
+	
+	execve(handlerPath.c_str(), argv, envp);
 
 	CGIEnv::freeEnvp(envp);
 
