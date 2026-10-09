@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.class.cpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:16 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/09 20:30:01 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/10 00:49:37 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -277,161 +277,190 @@ static size_t parseHexSize(const std::string& s)
 
 void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request, const ServerConfig* config)
 {
-	_buffer += chunk; // Save the newly arrived data bytes to persistent cache
+	try
+	{
+		_buffer += chunk; // Save the newly arrived data bytes to persistent cache
 
-	// Keep processing as long as there are full lines or readable blocks in the buffer
+		// Keep processing as long as there are full lines or readable blocks in the buffer
+		while (true)
+		{
+			if (_state == PARSE_REQUEST_LINE || _state == PARSE_HEADERS)
+				_parseRequestHeader(request, config);
+
+			if (_state == PARSE_BODY)
+				_parseBody(request);
+
+			if (_state == PARSE_COMPLETE || _buffer.empty())
+				break;
+		}
+			
+	}
+	catch (const NeedMoreInput&)
+	{
+		return;
+	}
+}
+
+void RequestParser::_parseRequestHeader(HttpRequestContainer& request, const ServerConfig* config)
+{
+	// Look for the standard network line break (\r\n)
+	size_t lineEnd = _buffer.find("\r\n");
+	if (lineEnd == std::string::npos)
+	{
+		if (_buffer.size() > MAX_LINE_LENGTH)
+			throw HttpParseException(431); // Request Header Fields Too Large
+		throw NeedMoreInput{}; // Incomplete line, stop and wait for more network read ticks
+	}
+
+	if (lineEnd > MAX_LINE_LENGTH)
+		throw HttpParseException(431);
+
+	_headerBytes += lineEnd + 2;
+	if (_headerBytes > MAX_HEADER_BYTES)
+		throw HttpParseException(431);
+
+	std::string line = _buffer.substr(0, lineEnd);
+	_buffer.erase(0, lineEnd + 2); // remove the processed line off our buffer cache
+
+	if (_state == PARSE_REQUEST_LINE)
+	{
+		_parseRequestLine(line, request);
+		_state = PARSE_HEADERS;
+	}
+	else if (_state == PARSE_HEADERS)
+	{
+		// If we hit an empty line, the headers block is over
+		if (line.empty())
+		{
+			// HTTP/1.1 Mandate: Check for the required Host header
+			if (request.getHeader("host").empty())
+				throw HttpParseException(400); // Bad Request: Missing mandatory Host header
+			_maxBodySize = RequestHandler::bodyLimitFor(*config, RequestHandler::matchLocation(*config, request.getUri(), request.getMethod()));
+			_state = PARSE_BODY; // Do not break; immediately fall through to try parsing the body out of remaining buffer
+		}
+		else
+			_parseHeaderLine(line, request);
+	}
+}
+
+void RequestParser::_parseBody(HttpRequestContainer& request)
+{
+	std::string transferEncoding = request.getHeader("transfer-encoding");
+	std::string contentLengthStr = request.getHeader("content-length");
+	HttpMethod method = request.getMethod();
+
+	// If it's a POST request and BOTH size headers are missing, reject it
+	if (method == HttpMethod::POST && transferEncoding.empty() && contentLengthStr.empty())
+		throw HttpParseException(411); // Length Required
+
+	// CASE 1: If 'Transfer-Encoding: chunked' is there in the header
+	if (transferEncoding.find("chunked") != std::string::npos)
+		_parseChunked(request);
+	// CASE 2: If 'Content-Length' exists in the header
+	else if (!contentLengthStr.empty())
+		_parseLengthBasedBody(request, contentLengthStr);
+	// CASE 3: If neither header exists, No payload body requested (Standard GET/DELETE operations)
+	else
+		_state = PARSE_COMPLETE;
+}
+
+void RequestParser::_parseLengthBasedBody(HttpRequestContainer& request, const std::string& contentLengthStr)
+{
+	size_t contentLength = parseContentLength(contentLengthStr);
+
+	// Enforce Max Body Limit up front (413 Payload Too Large) before consuming bytes
+	if (contentLength > _maxBodySize)
+		throw HttpParseException(413);
+
+	// Check if the current cache holds the requested frame bytes fully
+	if (_buffer.size() < contentLength)
+		throw NeedMoreInput{}; // Incomplete payload frame block, yield control back to recv()
+
+	request.setBody(_buffer.substr(0, contentLength));
+	_buffer.erase(0, contentLength);
+	_state = PARSE_COMPLETE;
+}
+
+void RequestParser::_parseChunked(HttpRequestContainer& request)
+{
 	while (true)
 	{
-		if (_state == PARSE_REQUEST_LINE || _state == PARSE_HEADERS)
+		// Phase A: We need to parse the next hex chunk size line
+		if (!_chunkSizeParsed)
+			_parseChunkSize(request);
+		// Phase B: We have the size, now consume the raw chunk data payload
+		else
 		{
-			// Look for the standard network line break (\r\n)
-			size_t lineEnd = _buffer.find("\r\n");
-			if (lineEnd == std::string::npos)
-			{
-				if (_buffer.size() > MAX_LINE_LENGTH)
-					throw HttpParseException(431); // Request Header Fields Too Large
-				return; // Incomplete line, stop and wait for more network read ticks
-			}
-
-			if (lineEnd > MAX_LINE_LENGTH)
-				throw HttpParseException(431);
-
-			_headerBytes += lineEnd + 2;
-			if (_headerBytes > MAX_HEADER_BYTES)
-				throw HttpParseException(431);
-
-			std::string line = _buffer.substr(0, lineEnd);
-			_buffer.erase(0, lineEnd + 2); // remove the processed line off our buffer cache
-
-			if (_state == PARSE_REQUEST_LINE)
-			{
-				_parseRequestLine(line, request);
-				_state = PARSE_HEADERS;
-			}
-			else if (_state == PARSE_HEADERS)
-			{
-				// If we hit an empty line, the headers block is over
-				if (line.empty())
-				{
-					// HTTP/1.1 Mandate: Check for the required Host header
-					if (request.getHeader("host").empty())
-						throw HttpParseException(400); // Bad Request: Missing mandatory Host header
-					_maxBodySize = RequestHandler::bodyLimitFor(*config, RequestHandler::matchLocation(*config, request.getUri(), request.getMethod()));
-					_state = PARSE_BODY; // Do not break; immediately fall through to try parsing the body out of remaining buffer
-				}
-				else
-					_parseHeaderLine(line, request);
-			}
+			bool done = _parseChunkBody(request);
+			if (done)
+				break;
 		}
-
-		if (_state == PARSE_BODY)
-		{
-			std::string transferEncoding = request.getHeader("transfer-encoding");
-			std::string contentLengthStr = request.getHeader("content-length");
-			HttpMethod method = request.getMethod();
-
-			// If it's a POST request and BOTH size headers are missing, reject it
-			if (method == HttpMethod::POST && transferEncoding.empty() && contentLengthStr.empty())
-				throw HttpParseException(411); // Length Required
-
-			// CASE 1: If 'Transfer-Encoding: chunked' is there in the header
-			if (transferEncoding.find("chunked") != std::string::npos)
-			{
-				while (true)
-				{
-					// Phase A: We need to parse the next hex chunk size line
-					if (!_chunkSizeParsed)
-					{
-						size_t lineEnd = _buffer.find("\r\n");
-						if (lineEnd == std::string::npos)
-						{
-							if (_buffer.size() > MAX_LINE_LENGTH)
-								throw HttpParseException(400); // Bad Request: chunk size line too long
-							return; // Wait for full hex line to arrive over the socket
-						}
-
-						std::string sizeLine = _buffer.substr(0, lineEnd);
-						_buffer.erase(0, lineEnd + 2);
-
-						// Handle optional chunk extensions if present (anything after ';')
-						size_t semiColonPos = sizeLine.find(';');
-						if (semiColonPos != std::string::npos)
-							sizeLine = sizeLine.substr(0, semiColonPos);
-						
-						sizeLine = trim(sizeLine);
-						_expectedBodyBytes = parseHexSize(sizeLine);
-						if (_expectedBodyBytes > _maxBodySize - request.getBody().size())
-							throw HttpParseException(413); // Payload Too Large
-						_chunkSizeParsed = true;
-					}
-
-					// Phase B: We have the size, now consume the raw chunk data payload
-					if (_chunkSizeParsed)
-					{
-						// A chunk size of 0 implies the terminating block (0\r\n\r\n)
-						if (_expectedBodyBytes == 0)
-						{
-							// Make sure the trailing \r\n after the 0 chunk is also in our buffer
-							if (_buffer.size() < 2)
-								return; 
-							if (_buffer.substr(0, 2) != "\r\n")
-								throw HttpParseException(400); // Bad Request: Malformed chunked terminal line
-							
-							_buffer.erase(0, 2); // Discard trailing newline
-							_state = PARSE_COMPLETE;
-							break;
-						}
-
-						// We need expected_bytes PLUS the 2 trailing \r\n characters attached to every chunk payload
-						if (_buffer.size() < _expectedBodyBytes + 2)
-							return; // Stream data chunk incomplete, return control to socket poll loop
-						
-						if (_buffer.substr(_expectedBodyBytes, 2) != "\r\n")
-							throw HttpParseException(400); // Bad Request: Missing CRLF at end of chunk payload
-
-						// Append data chunk to body container accumulating payload totals
-						std::string newBody;
-						newBody.reserve(request.getBody().size() + _expectedBodyBytes);
-						newBody.assign(request.getBody());
-						newBody.append(_buffer, 0, _expectedBodyBytes);
-						request.setBody(std::move(newBody));
-						// request.appendBody(_buffer.substr(0, _expectedBodyBytes));
-						
-						if (request.getBody().size() > _maxBodySize)
-							throw HttpParseException(413); // Payload Too Large"
-
-						_buffer.erase(0, _expectedBodyBytes + 2);
-						
-						// Toggle flag back to prepare loop parsing for next structural chunk line
-						_chunkSizeParsed = false;
-					}
-				}
-			}
-			// CASE 2: If 'Content-Length' exists in the header
-			else if (!contentLengthStr.empty())
-			{
-				size_t contentLength = parseContentLength(contentLengthStr);
-
-				// Enforce Max Body Limit up front (413 Payload Too Large) before consuming bytes
-				if (contentLength > _maxBodySize)
-					throw HttpParseException(413);
-
-				// Check if the current cache holds the requested frame bytes fully
-				if (_buffer.size() < contentLength)
-					return; // Incomplete payload frame block, yield control back to recv()
-
-				request.setBody(_buffer.substr(0, contentLength));
-				_buffer.erase(0, contentLength);
-				_state = PARSE_COMPLETE;
-			}
-			// CASE 3: If neither header exists, No payload body requested (Standard GET/DELETE operations)
-			else
-			{
-				_state = PARSE_COMPLETE;
-			}
-		}
-
-		if (_state == PARSE_COMPLETE || _buffer.empty())
-			break;
 	}
+}
+
+void RequestParser::_parseChunkSize(HttpRequestContainer& request)
+{
+	size_t lineEnd = _buffer.find("\r\n");
+	if (lineEnd == std::string::npos)
+	{
+		if (_buffer.size() > MAX_LINE_LENGTH)
+			throw HttpParseException(400); // Bad Request: chunk size line too long
+		throw NeedMoreInput{}; // Wait for full hex line to arrive over the socket
+	}
+
+	std::string sizeLine = _buffer.substr(0, lineEnd);
+	_buffer.erase(0, lineEnd + 2);
+
+	// Handle optional chunk extensions if present (anything after ';')
+	size_t semiColonPos = sizeLine.find(';');
+	if (semiColonPos != std::string::npos)
+		sizeLine = sizeLine.substr(0, semiColonPos);
+
+	sizeLine = trim(sizeLine);
+	_expectedBodyBytes = parseHexSize(sizeLine);
+	if (_expectedBodyBytes > _maxBodySize - request.getBody().size())
+		throw HttpParseException(413); // Payload Too Large
+
+	_chunkSizeParsed = true;
+}
+
+bool RequestParser::_parseChunkBody(HttpRequestContainer& request)
+{
+	// A chunk size of 0 implies the terminating block (0\r\n\r\n)
+	if (_expectedBodyBytes == 0)
+	{
+		// Make sure the trailing \r\n after the 0 chunk is also in our buffer
+		if (_buffer.size() < 2)
+			throw NeedMoreInput{}; 
+		if (_buffer.substr(0, 2) != "\r\n")
+			throw HttpParseException(400); // Bad Request: Malformed chunked terminal line
+
+		_buffer.erase(0, 2); // Discard trailing newline
+		_state = PARSE_COMPLETE;
+		return true;
+	}
+
+	// We need expected_bytes PLUS the 2 trailing \r\n characters attached to every chunk payload
+	if (_buffer.size() < _expectedBodyBytes + 2)
+		throw NeedMoreInput{}; // Stream data chunk incomplete, return control to socket poll loop
+
+	if (_buffer.substr(_expectedBodyBytes, 2) != "\r\n")
+		throw HttpParseException(400); // Bad Request: Missing CRLF at end of chunk payload
+
+	// Append data chunk to body container accumulating payload totals
+	std::string newBody;
+	newBody.reserve(request.getBody().size() + _expectedBodyBytes);
+	newBody.assign(request.getBody());
+	newBody.append(_buffer, 0, _expectedBodyBytes);
+	request.setBody(std::move(newBody));
+
+	if (request.getBody().size() > _maxBodySize)
+		throw HttpParseException(413); // Payload Too Large"
+
+	_buffer.erase(0, _expectedBodyBytes + 2);
+	
+	// Toggle flag back to prepare loop parsing for next structural chunk line
+	_chunkSizeParsed = false;
+
+	return false;
 }

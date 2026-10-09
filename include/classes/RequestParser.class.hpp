@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.class.hpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:56:06 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/09 20:09:59 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/10 00:48:26 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@
 #include <stdexcept>
 #include <vector>
 #include <algorithm>
+
+struct NeedMoreInput {};
 
 class HttpParseException : public std::exception
 {
@@ -69,11 +71,19 @@ class RequestParser
 		size_t			_maxBodySize;
 		size_t			_headerBytes;
 		
-		void	_parseRequestLine(const std::string& line, HttpRequestContainer& request); // Splits "METHOD URI VERSION" and validates each piece
-		bool	_isValidHeaderKeyChar(unsigned char c);
-		void	_parseHeaderLine(const std::string& line, HttpRequestContainer& request); // Splits "Key: Value" and adds it to the request
-		bool	_isSupportedMethod(const std::string& method);
 		bool	_isKnownHttpMethod(const std::string& method);
+		bool	_isSupportedMethod(const std::string& method);
+		bool	_isValidHeaderKeyChar(unsigned char c);
+
+		void	_parseBody(HttpRequestContainer& request);
+		void	_parseChunked(HttpRequestContainer& request);
+		bool	_parseChunkBody(HttpRequestContainer& request);
+		void	_parseChunkSize(HttpRequestContainer& request);
+		void	_parseHeaderLine(const std::string& line, HttpRequestContainer& request); // Splits "Key: Value" and adds it to the request
+		void	_parseLengthBasedBody(HttpRequestContainer& request, const std::string& contentLengthStr);
+		void	_parseRequestHeader(HttpRequestContainer& request, const ServerConfig* config);
+		void	_parseRequestLine(const std::string& line, HttpRequestContainer& request); // Splits "METHOD URI VERSION" and validates each piece
+
 		
 };
 
