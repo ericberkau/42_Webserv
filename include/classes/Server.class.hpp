@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:10 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 21:43:24 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/08 21:59:38 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <set>
 #include <unordered_map>
 #include <vector>
+#include <charconv>
 
 class Server {
 

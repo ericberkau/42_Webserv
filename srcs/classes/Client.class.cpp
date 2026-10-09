@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/06 23:09:00 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/08 20:50:24 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ Client::Client(int fd, const sockaddr_in& addr, const ServerConfig* server)
 		_pendingDisconnect(false),
 		_lastActivity(Clock::now())
 {
-	std::clog << "[Client] constructor called" << std::endl; // FIXME: for debugging, remove later
+	// std::clog << "[Client] constructor called" << std::endl; // FIXME: for debugging, remove later
 
 	if (!server)
 		throw std::logic_error("Client constructed with nullptr to ServerConfig");
@@ -46,13 +46,13 @@ Client::Client(Client&& other) noexcept
 		_requestParser(std::move(other._requestParser)),
 		_httpRequest(std::move(other._httpRequest))
 {
-	std::clog << "[Client] move constructor called" << std::endl; // FIXME: for debugging, remove later
+	// std::clog << "[Client] move constructor called" << std::endl; // FIXME: for debugging, remove later
 
 	other._fd = -1;
 }
 
 Client& Client::operator=(Client&& other) noexcept {
-	std::clog << "[Client] move operator called" << std::endl; // FIXME: for debugging, remove later
+	// std::clog << "[Client] move operator called" << std::endl; // FIXME: for debugging, remove later
 
 	if (this != &other) {
 		if (_fd >= 0)
@@ -77,7 +77,7 @@ Client& Client::operator=(Client&& other) noexcept {
 }
 
 Client::~Client(void) {
-	std::clog << "[Client] destructor called on fd: " << this->_fd << std::endl; // FIXME: for debugging, remove later
+	// std::clog << "[Client] destructor called on fd: " << this->_fd << std::endl; // FIXME: for debugging, remove later
 
 	if (_fd >= 0) {
 		close(this->_fd);

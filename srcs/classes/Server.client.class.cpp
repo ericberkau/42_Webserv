@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:13:08 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/06 23:07:57 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/09 03:40:57 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,8 @@ void Server::_handlePendingConnections(int listeningSocket) {
 			throw std::runtime_error("fcntl() failed to configure client socket");
 		};
 
-		std::cout << "Client accepted" << std::endl;
+		// std::cout << "Client accepted" << std::endl; // BUG: remove?
+		write(1, "Client accepted\n", 17);
 
 		pollfd newClientPoll;
 		newClientPoll.fd = newClientFd;
@@ -75,7 +76,12 @@ void Server::_handlePendingConnections(int listeningSocket) {
 		if (!inserted)
 			throw std::logic_error("attempted to register duplicate client file descriptor");
 
-		std::cout << "Client registered: " << newClientFd << std::endl;
+		// std::cout << "Client registered: " << newClientFd << std::endl; // BUG: remove?
+		write(1, "Client registered: ", 20);
+		char buf[12];
+		auto [p, ec] = std::to_chars(buf, buf + 12, newClientFd);
+		write(1, buf, p - buf);
+		write(1, "\n", 2);
 	}
 }
 
@@ -95,7 +101,16 @@ void Server::_handleIncomingData(size_t& idx) {
 
 	currClient.appendToInBuf(msg, receivedBytes);
 
-	std::cout << "Message arrived from " << _pollfdArr[idx].fd << " -> " << currClient.getInBuf() << std::endl; // BUG: remove later
+	// std::cout << "Message arrived from " << _pollfdArr[idx].fd << " -> " << currClient.getInBuf() << std::endl; // BUG: remove later
+	// write(1, "Message arrived from ", 22);
+	// char buf[12];
+	// auto [p, ec] = std::to_chars(buf, buf + 12, _pollfdArr[idx].fd);
+	// write(1, buf, p - buf);
+	// write(1, " -> ", 5);
+	// write(1, "\n", 2);
+	// write(1, currClient.getInBuf().c_str(), currClient.getInBuf().size() + 1);
+	// write(1, "\n", 2);
+
 
 	std::queue<RequestResult> reqResults = currClient.processInput();
 
@@ -148,7 +163,15 @@ void Server::_handleOutgoingData(size_t& idx) {
 					MSG_NOSIGNAL
 				);
 
-	std::cout << "Response sent to client " << currClient.getFd() << " -> " << currClient.getOutBuf() << std::endl; // FIXME: for debugging, remove later
+	// std::cout << "Response sent to client " << currClient.getFd() << " -> " << currClient.getOutBuf() << std::endl; // BUG: for debugging, remove later
+	// write(1, "Response sent to ", 18);
+	// char buf[12];
+	// auto [p, ec] = std::to_chars(buf, buf + 12, currClient.getFd());
+	// write(1, buf, p - buf);
+	// write(1, " -> ", 5);
+	// write(1, "\n", 2);
+	// write(1, currClient.getOutBuf().c_str(), nBytesToWrite + 1);
+	// write(1, "\n", 2);
 
 	if (sentBytes == -1) {
 		perror("send");

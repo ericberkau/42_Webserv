@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 21:20:30 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/09 03:42:32 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,9 +39,12 @@ void Server::run(void) {
 	_setupListeners();
 
 	_lastTimeoutCheck = Clock::now();
+	size_t dots = 0;
 
 	while (!g_shutdownRequested) {
-		std::cout << "listening ..." << std::endl;
+		// std::cout << "listening ..." << std::endl; // BUG: remove?
+		write(1, "listening .....", 11 + (dots++ % 5));
+		write(1, "\n", 2);
 
 		int ready = poll(_pollfdArr.data(), _pollfdArr.size(), POLL_TIMEOUT_MS);
 		if (ready == -1) {
@@ -52,7 +55,7 @@ void Server::run(void) {
 			throw std::runtime_error("poll() failed");
 		}
 
-		_handleTimeouts();
+		// _handleTimeouts(); // TODO: uncomment
 
 		for (size_t i = 0; i < _pollfdArr.size() && ready > 0; ++i) {
 			if (!_pollfdArr[i].revents)
@@ -191,10 +194,10 @@ void Server::_handleCgiEvents(size_t& idx) {
 	const short revents = _pollfdArr[idx].revents;
 	CgiContext& cgi = _fdCtx.at(_pollfdArr[idx].fd).cgi.value();
 
-	printf("POLLERR: %i\nPOLLHUP: %i\n",
-		revents & POLLERR ? 1 : 0,
-		revents & POLLHUP ? 1 : 0
-	); // BUG: for debugging, remove later!
+	// printf("POLLERR: %i\nPOLLHUP: %i\n",
+	// 	revents & POLLERR ? 1 : 0,
+	// 	revents & POLLHUP ? 1 : 0
+	// ); // BUG: for debugging, remove later!
 
 	if (revents & POLLERR) {
 		_cleanupCompleteCgi(cgi);
@@ -225,6 +228,10 @@ void Server::_disconnectFd(size_t& idx) {
 	_pollfdArr.pop_back();
 	--idx;
 
-	std::cout << "FD " << fd << " disconnected" << std::endl;
+	// std::cout << "FD " << fd << " disconnected" << std::endl; // BUG: remove?
+	char buf[12];
+	auto [p, ec] = std::to_chars(buf, buf + 12, fd);
+	write(1, buf, p - buf);
+	write(1, "disconnected\n", 14);
 }
 

@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 22:44:52 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/08 01:58:34 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/09 03:14:27 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 
 constexpr int					MAX_PEND_CONNECT_QUEUE = 32;
 constexpr size_t				MSG_SIZE = 4096;
-constexpr int					POLL_TIMEOUT_MS = 10000;
+constexpr int					POLL_TIMEOUT_MS = 10000; // FIXME: align with check interval? -> would be 5s
 constexpr std::chrono::seconds	TIMEOUT_CHECK_INTERVAL(5);
 constexpr std::chrono::seconds	CGI_TIMEOUT(5);
 constexpr std::chrono::seconds	CLIENT_IDLE_TIMEOUT(75);
