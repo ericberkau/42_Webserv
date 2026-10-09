@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:16 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/08 05:58:20 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/09 20:30:01 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,15 +18,15 @@
 static const size_t MAX_LINE_LENGTH = 8192; // longest single request/header/chunk-size line
 static const size_t MAX_HEADER_BYTES = 32768; // all header lines together
 
-HttpParseException::HttpParseException(int statusCode, const std::string& reason)
-	: _statusCode(statusCode), _reason(reason) {}
+HttpParseException::HttpParseException(int statusCode)
+	: _statusCode(statusCode) {}
 
 HttpParseException::~HttpParseException() throw() {}
 
-const char* HttpParseException::what() const throw()
-{
-	return _reason.c_str();
-}
+// const char* HttpParseException::what() const throw()
+// {
+// 	return _reason.c_str();
+// }
 
 int HttpParseException::getStatusCode() const
 {
@@ -101,46 +101,46 @@ void RequestParser::_parseRequestLine(const std::string& line, HttpRequestContai
 	std::string method, uri, version;
 
 	if (!(iss >> method >> uri >> version))
-		throw HttpParseException(400, "Bad Request: malformed request line");
+		throw HttpParseException(400); // Bad Request: malformed request line
 
 	// Check there's nothing left over (Ex. extra token after version)
 	std::string extra;
 	if (iss >> extra)
-		throw HttpParseException(400, "Bad Request: malformed request line");
+		throw HttpParseException(400); // Bad Request: malformed request line
 
 	if (!_isSupportedMethod(method)) 
 	{
 		// Check if it's a valid standard HTTP method we just don't support
 		if (_isKnownHttpMethod(method))
-			throw HttpParseException(405, "Method Not Allowed");
+			throw HttpParseException(405); // Method Not Allowed
 
-		throw HttpParseException(400, "Bad Request"); 
+		throw HttpParseException(400);
 	}
 
 	if (uri.empty())
-		throw HttpParseException(400, "Bad Request: empty URI");
+		throw HttpParseException(400);
 
 	// Look for forbidden control characters/spaces
 	for (char c : uri)
 	{
 		if (!(c > 32 && c < 127))
-			throw HttpParseException(400, "Bad Request: illegal characters in URI");
+			throw HttpParseException(400); // Bad Request: illegal characters in URI
 	}
 
 	// Check for relative directory traversal backtracks ("..")
 	if (uri.find("..") != std::string::npos)
-		throw HttpParseException(400, "Bad Request: Directory traversal attempt detected");
+		throw HttpParseException(400); // Bad Request: Directory traversal attempt detected
 
 	// Validate form (Origin-form, Absolute-form)
 	if (uri[0] != '/')
 	{
 		// If it doesn't start with '/', check if it is a valid absolute URI (starts with http:// or https://)
 		if (uri.rfind("http://", 0) != 0 && uri.rfind("https://", 0) != 0)
-			throw HttpParseException(400, "Bad Request: unsupported URI format");
+			throw HttpParseException(400); // Bad Request: unsupported URI format
 	}
 
 	if (version != "HTTP/1.1" && version != "HTTP/1.0")
-		throw HttpParseException(400, "Bad Request: unsupported HTTP version");
+		throw HttpParseException(400); // Bad Request: unsupported HTTP version
 
 	std::string path = uri;
 	std::string queryString;
@@ -170,19 +170,19 @@ void RequestParser::_parseHeaderLine(const std::string& line, HttpRequestContain
 {
 	std::string key, value;
 	if (!splitOnce(line, ':', key, value))
-		throw HttpParseException(400, "Bad Request: malformed header line");
+		throw HttpParseException(400); // Bad Request: malformed header line
 	
 	if (key.empty())
-		throw HttpParseException(400, "Bad Request: empty header name");
+		throw HttpParseException(400); // Bad Request: empty header name
 	
 	if (key.back() == ' ' || key.back() == '\t')
-		throw HttpParseException(400, "Bad Request: space before colon in header");
+		throw HttpParseException(400); // Bad Request: space before colon in header
 
 	// Check header name for illegal characters
 	for (char c : key)
 	{
 		if (!_isValidHeaderKeyChar(static_cast<unsigned char>(c)))
-			throw HttpParseException(400, "Bad Request: illegal character in header name");
+			throw HttpParseException(400); // Bad Request: illegal character in header name
 	}
 
 	std::string lowerKey = ft_toLower(key);
@@ -195,13 +195,13 @@ void RequestParser::_parseHeaderLine(const std::string& line, HttpRequestContain
 		if (existing.empty())
 			request.addHeader(key, value);
 		else if (existing != value)
-			throw HttpParseException(400, "Bad Request: conflicting Content-Length values");
+			throw HttpParseException(400); // Bad Request: conflicting Content-Length values
 		// exact duplicate: existing value is already correctly stored, nothing more to do
 		return;
 	}
 
 	if (lowerKey == "host" && !request.getHeader("host").empty())
-		throw HttpParseException(400, "Bad Request: duplicate Host header");
+		throw HttpParseException(400); // Bad Request: duplicate Host header
 		
 	request.addHeader(key, value);
 }
@@ -232,18 +232,18 @@ void RequestParser::discardBuffer()
 static size_t parseContentLength(const std::string& s)
 {
 	if (s.empty())
-		throw HttpParseException(400, "Bad Request: Empty Content-Length");
+		throw HttpParseException(400); // Bad Request: Empty Content-Length
 
 	size_t result = 0;
 	for (size_t i = 0; i < s.size(); ++i)
 	{
 		if (!std::isdigit(static_cast<unsigned char>(s[i])))
-			throw HttpParseException(400, "Bad Request: Invalid character in Content-Length");
+			throw HttpParseException(400); // Bad Request: Invalid character in Content-Length
 		
 		size_t next = result * 10 + (s[i] - '0');
 		// overflow guard
 		if (next < result)
-			throw HttpParseException(400, "Bad Request: Content-Length integer overflow");
+			throw HttpParseException(400); // Bad Request: Content-Length integer overflow
 		result = next;
 	}
 	return result;
@@ -253,7 +253,7 @@ static size_t parseContentLength(const std::string& s)
 static size_t parseHexSize(const std::string& s)
 {
 	if (s.empty())
-		throw HttpParseException(400, "Bad Request: Empty chunk size");
+		throw HttpParseException(400); // Bad Request: Empty chunk size
 
 	size_t result = 0;
 	for (size_t i = 0; i < s.size(); ++i)
@@ -265,11 +265,11 @@ static size_t parseHexSize(const std::string& s)
 		else if (c >= 'a' && c <= 'f')
 			value = c - 'a' + 10;
 		else
-			throw HttpParseException(400, "Bad Request: Invalid Hex in Chunk Size");
+			throw HttpParseException(400); // Bad Request: Invalid Hex in Chunk Size
 
 		size_t next = result * 16 + value;
 		if (next < result)
-			throw HttpParseException(400, "Bad Request: Chunk size overflow");
+			throw HttpParseException(400); // Bad Request: Chunk size overflow
 		result = next;
 	}
 	return result;
@@ -289,16 +289,16 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 			if (lineEnd == std::string::npos)
 			{
 				if (_buffer.size() > MAX_LINE_LENGTH)
-					throw HttpParseException(431, "Request Header Fields Too Large");
+					throw HttpParseException(431); // Request Header Fields Too Large
 				return; // Incomplete line, stop and wait for more network read ticks
 			}
 
 			if (lineEnd > MAX_LINE_LENGTH)
-				throw HttpParseException(431, "Request Header Fields Too Large");
+				throw HttpParseException(431);
 
 			_headerBytes += lineEnd + 2;
 			if (_headerBytes > MAX_HEADER_BYTES)
-				throw HttpParseException(431, "Request Header Fields Too Large");
+				throw HttpParseException(431);
 
 			std::string line = _buffer.substr(0, lineEnd);
 			_buffer.erase(0, lineEnd + 2); // remove the processed line off our buffer cache
@@ -315,7 +315,7 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 				{
 					// HTTP/1.1 Mandate: Check for the required Host header
 					if (request.getHeader("host").empty())
-						throw HttpParseException(400, "Bad Request: Missing mandatory Host header");
+						throw HttpParseException(400); // Bad Request: Missing mandatory Host header
 					_maxBodySize = RequestHandler::bodyLimitFor(*config, RequestHandler::matchLocation(*config, request.getUri(), request.getMethod()));
 					_state = PARSE_BODY; // Do not break; immediately fall through to try parsing the body out of remaining buffer
 				}
@@ -330,10 +330,9 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 			std::string contentLengthStr = request.getHeader("content-length");
 			HttpMethod method = request.getMethod();
 
-			// HTTP Specification Requirement: 411 Length Required
 			// If it's a POST request and BOTH size headers are missing, reject it
 			if (method == HttpMethod::POST && transferEncoding.empty() && contentLengthStr.empty())
-				throw HttpParseException(411, "Length Required");
+				throw HttpParseException(411); // Length Required
 
 			// CASE 1: If 'Transfer-Encoding: chunked' is there in the header
 			if (transferEncoding.find("chunked") != std::string::npos)
@@ -347,7 +346,7 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 						if (lineEnd == std::string::npos)
 						{
 							if (_buffer.size() > MAX_LINE_LENGTH)
-								throw HttpParseException(400, "Bad Request: chunk size line too long");
+								throw HttpParseException(400); // Bad Request: chunk size line too long
 							return; // Wait for full hex line to arrive over the socket
 						}
 
@@ -362,7 +361,7 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 						sizeLine = trim(sizeLine);
 						_expectedBodyBytes = parseHexSize(sizeLine);
 						if (_expectedBodyBytes > _maxBodySize - request.getBody().size())
-							throw HttpParseException(413, "Payload Too Large");
+							throw HttpParseException(413); // Payload Too Large
 						_chunkSizeParsed = true;
 					}
 
@@ -376,7 +375,7 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 							if (_buffer.size() < 2)
 								return; 
 							if (_buffer.substr(0, 2) != "\r\n")
-								throw HttpParseException(400, "Bad Request: Malformed chunked terminal line");
+								throw HttpParseException(400); // Bad Request: Malformed chunked terminal line
 							
 							_buffer.erase(0, 2); // Discard trailing newline
 							_state = PARSE_COMPLETE;
@@ -388,7 +387,7 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 							return; // Stream data chunk incomplete, return control to socket poll loop
 						
 						if (_buffer.substr(_expectedBodyBytes, 2) != "\r\n")
-							throw HttpParseException(400, "Bad Request: Missing CRLF at end of chunk payload");
+							throw HttpParseException(400); // Bad Request: Missing CRLF at end of chunk payload
 
 						// Append data chunk to body container accumulating payload totals
 						std::string newBody;
@@ -399,7 +398,7 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 						// request.appendBody(_buffer.substr(0, _expectedBodyBytes));
 						
 						if (request.getBody().size() > _maxBodySize)
-							throw HttpParseException(413, "Payload Too Large");
+							throw HttpParseException(413); // Payload Too Large"
 
 						_buffer.erase(0, _expectedBodyBytes + 2);
 						
@@ -415,7 +414,7 @@ void RequestParser::feed(const std::string& chunk, HttpRequestContainer& request
 
 				// Enforce Max Body Limit up front (413 Payload Too Large) before consuming bytes
 				if (contentLength > _maxBodySize)
-					throw HttpParseException(413, "Payload Too Large");
+					throw HttpParseException(413);
 
 				// Check if the current cache holds the requested frame bytes fully
 				if (_buffer.size() < contentLength)

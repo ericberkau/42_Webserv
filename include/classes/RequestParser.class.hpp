@@ -6,7 +6,7 @@
 /*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:56:06 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/08 05:36:04 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/09 20:09:59 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,10 +24,10 @@ class HttpParseException : public std::exception
 {
 	public:
 	
-		HttpParseException(int statusCode, const std::string& reason);
+		HttpParseException(int statusCode);
 		
 		virtual				~HttpParseException() throw();
-		virtual const char*	what() const throw();
+		// virtual const char*	what() const throw();
 		
 		int		getStatusCode() const;
 		bool	isFatal() const;
@@ -35,8 +35,6 @@ class HttpParseException : public std::exception
 	private:
 	
 		int	_statusCode;
-		std::string	_reason;
-
 };
 
 class RequestParser
