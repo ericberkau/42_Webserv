@@ -6,7 +6,7 @@
 #    By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/05/11 14:54:40 by eberkau           #+#    #+#              #
-#    Updated: 2026/10/10 03:11:01 by eberkau          ###   ########.fr        #
+#    Updated: 2026/10/10 22:14:45 by eberkau          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -29,13 +29,16 @@ SRCS		=	$(addprefix $(SRCDIR)/, $(CXXFILES))
 OBJS		=	$(SRCS:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
 DEPS		=	$(OBJS:.o=.d)
 
-GREEN		=	\033[0;32m
 RED			=	\033[0;31m
+GREEN		=	\033[0;32m
+YELLOW      =	\033[0;33m
 BLUE		=	\033[0;34m
+MAGENTA     =	\033[0;35m
+CYAN        =	\033[0;36m
 DEFAULT		=	\033[0m
 
 # list source files here
-CXXFILES	=	testmain.cpp \
+CXXFILES	=	main.cpp \
 				classes/client/Client.class.cpp \
 				classes/config/ConfigLexer.class.cpp \
 				classes/config/ConfigParser.core.class.cpp \
@@ -46,15 +49,16 @@ CXXFILES	=	testmain.cpp \
 				classes/HTTP/RequestHandler.class.cpp \
 				classes/HTTP/RequestParser.class.cpp \
 				classes/HTTP/ResponseBuilder.class.cpp \
-				classes/HTTP/StringUtils.cpp \
 				classes/server/Server.class.cpp \
 				classes/server/Server.cgi.class.cpp \
 				classes/server/Server.client.class.cpp \
 				classes/server/Server.setup.class.cpp \
 				classes/CGI/CGIEnv.class.cpp \
 				classes/CGI/CGIExecutor.class.cpp \
+				configPrinting.cpp \
 				configValidation.cpp \
 				signals.cpp \
+				stringUtils.cpp \
 #				and_so_on.cpp
 
 
