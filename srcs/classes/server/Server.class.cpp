@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 03:00:12 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 19:33:47 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,11 +216,12 @@ void Server::_disconnectFd(size_t& idx) {
 	const int fd = _pollfdArr[idx].fd;
 	
 	_fdCtx.erase(fd);
-	close(fd);
 	
 	_pollfdArr[idx] = _pollfdArr.back();
 	_pollfdArr.pop_back();
 	--idx;
+
+	close(fd);
 
 	// std::cout << "FD " << fd << " disconnected" << std::endl; // BUG: remove?
 	char buf[12];

@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:14:29 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 03:00:23 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 19:18:26 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -184,10 +184,10 @@ void Server::_cleanupCompleteCgi(const CgiContext& cgiInfo) {
 		++i;
 	}
 
-	close(readPipe);
-	close(writePipe);
-
 	if (!aborted)
 		kill(pid, SIGKILL);
 	waitpid(pid, NULL, 0);
+
+	close(readPipe);
+	close(writePipe);
 }
