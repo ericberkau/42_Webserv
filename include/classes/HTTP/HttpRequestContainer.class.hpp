@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:54:11 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/10 02:41:39 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 20:09:43 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,6 @@ class HttpRequestContainer
 		// acc. to RFC, so we normalize keys to lowercase when storing them
 		std::string									getHeader(const std::string& key) const;
 		const std::map<std::string, std::string>&	getHeaders() const;
-		// void										appendBody(const std::string& data); // TODO: remove?
 
 		void	clear();
 

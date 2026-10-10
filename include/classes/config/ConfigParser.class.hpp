@@ -82,8 +82,5 @@ void ConfigParser::_parseClientMaxBodySize(ConfigType& targetConfig) {
 
 	const size_t size = parseSizeValue(sizeToken);
 
-	// if (size > 1024 * 1024 * 10)
-	// 		error(sizeToken, "size exceeds limit (size <= 10 MiB)"); // FIXME: 10 MiB as upper client body limit?
-
 	targetConfig.clientMaxBodySize = size;
 }

@@ -61,7 +61,5 @@ Config ConfigParser::_parseConfig(void) {
 	while (!_atEnd())
 		config.servers.push_back(_parseServer());
 	
-	// TODO: add config verification?
 	return config;
 }
-// TODO: check where duplicates are still accepted and can overwrite each other (work-in-progress)

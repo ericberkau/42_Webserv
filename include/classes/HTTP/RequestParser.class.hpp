@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:56:06 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/10 02:40:21 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 20:18:44 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,7 @@ class HttpParseException : public std::exception
 	
 		HttpParseException(int statusCode);
 		
-		virtual	~HttpParseException() throw(); // FIXME: talk about structure
-		// virtual const char*	what() const throw(); // TODO: remove?
+		virtual	~HttpParseException();
 		
 		int		getStatusCode() const;
 		bool	isFatal() const;

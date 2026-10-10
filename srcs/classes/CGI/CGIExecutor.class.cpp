@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 13:00:52 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/10/10 03:01:31 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 20:11:32 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,13 +79,11 @@ void CGIExecutor::_handleChild(int* stdinPipeFd, int* stdoutPipeFd, const std::s
 
 	char** envp = _env.buildEnvp();
 
-	// char* argv[] = {const_cast<char*>(scriptPath.c_str()), NULL};
-
 	char* argv[] = {
 		const_cast<char*>(handlerPath.c_str()),
 		const_cast<char*>(scriptPath.c_str()),
 		NULL
-	}; // runs: /usr/bin/python3 hello.py
+	};
 	
 	execve(handlerPath.c_str(), argv, envp);
 

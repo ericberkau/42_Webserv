@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:06 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 02:56:04 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 19:43:54 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,7 @@ class Client {
 		bool				shouldDisconnect(void) const;
 
 		void						advanceOutProgress(ssize_t bytes);
-		void						appendToInBuf(const char* input, size_t size); // FIXME: not needed at all?
-		void						appendToOutBuf(const std::string& input); // TODO: private?
+		void						appendToInBuf(const char* input, size_t size);
 		void						clearInBuf(void);
 		void						clearOutBuf(void);
 		void						flushReadyResponses(void);
@@ -57,14 +56,14 @@ class Client {
 	private:
 
 
+		void								_appendToOutBuf(const std::string& input);
 		RequestResult						_handleRequest(void);
 		std::list<ResponseSlot>::iterator	_reserveResponseSlot(void);
 		void								_resetRequestState(void);
 
 		/* client state */
 		int						_fd;
-		std::string				_inputBuffer; // TODO: limit size later
-		size_t					_inputReadProgress; // FIXME: not needed at all?
+		std::string				_inputBuffer;
 		std::string				_outputBuffer;
 		size_t					_outputWriteProgress;
 		std::list<ResponseSlot>	_responseQueue;

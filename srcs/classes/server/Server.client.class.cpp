@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:13:08 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 03:00:29 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 19:54:44 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,6 @@ void Server::_handlePendingConnections(int listeningSocket) {
 			throw std::runtime_error("fcntl() failed to configure client socket");
 		};
 
-		// std::cout << "Client accepted" << std::endl; // BUG: remove?
 		write(1, "Client accepted\n", 17);
 
 		pollfd newClientPoll;
@@ -70,7 +69,6 @@ void Server::_handlePendingConnections(int listeningSocket) {
 		if (!inserted)
 			throw std::logic_error("attempted to register duplicate client file descriptor");
 
-		// std::cout << "Client registered: " << newClientFd << std::endl; // BUG: remove?
 		write(1, "Client registered: ", 20);
 		char buf[12];
 		auto [p, ec] = std::to_chars(buf, buf + 12, newClientFd);
@@ -95,7 +93,6 @@ void Server::_handleIncomingData(size_t& idx) {
 
 	currClient.appendToInBuf(msg, receivedBytes);
 
-	// std::cout << "Message arrived from " << _pollfdArr[idx].fd << " -> " << currClient.getInBuf() << std::endl; // BUG: remove later
 	// write(1, "Message arrived from ", 22);
 	// char buf[12];
 	// auto [p, ec] = std::to_chars(buf, buf + 12, _pollfdArr[idx].fd);
@@ -157,7 +154,6 @@ void Server::_handleOutgoingData(size_t& idx) {
 					MSG_NOSIGNAL
 				);
 
-	// std::cout << "Response sent to client " << currClient.getFd() << " -> " << currClient.getOutBuf() << std::endl; // BUG: for debugging, remove later
 	// write(1, "Response sent to ", 18);
 	// char buf[12];
 	// auto [p, ec] = std::to_chars(buf, buf + 12, currClient.getFd());

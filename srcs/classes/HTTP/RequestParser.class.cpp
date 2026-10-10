@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:16 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/10 03:00:58 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 20:18:55 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,7 @@ static const size_t MAX_HEADER_BYTES = 32768; // all header lines together
 HttpParseException::HttpParseException(int statusCode)
 	: _statusCode(statusCode) {}
 
-HttpParseException::~HttpParseException() throw() {}
-
-// const char* HttpParseException::what() const throw()
-// {
-// 	return _reason.c_str();
-// } // TODO: remove?
+HttpParseException::~HttpParseException() {}
 
 int HttpParseException::getStatusCode() const
 {
@@ -41,7 +36,6 @@ bool HttpParseException::isFatal() const
 		_statusCode == 413 ||
 		_statusCode == 414 ||
 		_statusCode == 431
-		// || _statusCode == 504
 	);
 }
 
@@ -218,7 +212,6 @@ void RequestParser::reset()
 	_chunkSizeParsed = false;
 	_maxBodySize = 0;
 	_headerBytes = 0;
-	// _buffer.clear();
 }
 
 void RequestParser::discardBuffer()

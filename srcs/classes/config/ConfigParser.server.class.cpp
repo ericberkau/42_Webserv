@@ -13,7 +13,7 @@
 #include "classes/config/ConfigParser.class.hpp"
 
 ServerConfig ConfigParser::_parseServer(void) {
-	_expect("server", "expected 'server'"); // FIXME: might change, if _parseConfig() gets an if-elseif chain to account for 'events' as well
+	_expect("server", "expected 'server'");
 	_advance();
 	_expect(TokenType::BRACE_LEFT, "expected '{' after 'server'");
 	_advance();

@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:14:29 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 19:18:26 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 19:46:40 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,7 @@ void Server::_handleCgiOutput(CgiContext& cgi, size_t& idx) {
 		ResponseBuilder rb;
 		rb.generateDefaultErrorPage(504);
 
-		cgi.responseSlot->response = rb.buildString(); // FIXME: send "504 Gateway Timeout" instead of hardcoded "200 OK"
+		cgi.responseSlot->response = rb.buildString();
 		cgi.responseSlot->ready = true;
 
 		owningClient.flushReadyResponses();
@@ -133,9 +133,6 @@ void Server::_handleCgiOutput(CgiContext& cgi, size_t& idx) {
 	char buffer[MSG_SIZE];
 
 	ssize_t bytes = read(cgi.readPipeFd, buffer, sizeof(buffer));
-
-	// printf("bytes: %zd\n", bytes); // BUG: for debugging, remove later!
-	// printf("buffer: %s\n", buffer); // BUG: for debugging, remove later!
 
 	if (bytes > 0) {
 		cgi.output.append(buffer, bytes);

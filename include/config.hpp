@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:11:25 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/07 18:56:50 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 19:45:34 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ struct LocationConfig {
 
 	/* default inits */
 	LocationConfig(void) {
-		allowedMethods.insert(HttpMethod::GET); // FIXME: allow default method(s)? discuss
+		allowedMethods.insert(HttpMethod::GET);
 	}
 };
 

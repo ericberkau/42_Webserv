@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:03:59 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/10 03:00:47 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 20:09:50 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,11 +91,6 @@ const std::map<std::string, std::string>& HttpRequestContainer::getHeaders() con
 {
 	return _headers;
 }
-
-// void HttpRequestContainer::appendBody(const std::string& data)
-// {
-// 	_body += data;
-// }
 
 void HttpRequestContainer::clear()
 {

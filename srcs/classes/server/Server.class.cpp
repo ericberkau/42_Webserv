@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 19:33:47 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 20:19:32 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,6 @@ void Server::run(void) {
 	size_t dots = 0;
 
 	while (!g_shutdownRequested) {
-		// std::cout << "listening ..." << std::endl; // BUG: remove?
 		write(1, "listening .....", 11 + (dots++ % 5));
 		write(1, "\n", 2);
 
@@ -49,7 +48,7 @@ void Server::run(void) {
 			throw std::runtime_error("poll() failed");
 		}
 
-		// _handleTimeouts(); // TODO: uncomment
+		_handleTimeouts();
 
 		for (size_t i = 0; i < _pollfdArr.size() && ready > 0; ++i) {
 			if (!_pollfdArr[i].revents)
@@ -58,8 +57,6 @@ void Server::run(void) {
 			_handleSocketEvent(i);
 			--ready;
 		}
-
-		// updatePolloutMonitoring(pollfdArr, clients); // FIXME: maybe do the updating later when data is queued/fully written to avoid looping
 	}
 
 	std::cout << "\nServer shutting down ..." << std::endl;
@@ -85,7 +82,7 @@ void Server::_handleTimeouts(void) {
 
 			if (!cgi.aborted && now - cgi.startTime >= CGI_TIMEOUT) {
 				cgi.aborted = true;
-				kill(cgi.pid, SIGKILL);			
+				kill(cgi.pid, SIGKILL);
 			}
 		}
 	}
@@ -188,11 +185,6 @@ void Server::_handleCgiEvents(size_t& idx) {
 	const short revents = _pollfdArr[idx].revents;
 	CgiContext& cgi = _fdCtx.at(_pollfdArr[idx].fd).cgi.value();
 
-	// printf("POLLERR: %i\nPOLLHUP: %i\n",
-	// 	revents & POLLERR ? 1 : 0,
-	// 	revents & POLLHUP ? 1 : 0
-	// ); // BUG: for debugging, remove later!
-
 	if (revents & POLLERR) {
 		_cleanupCompleteCgi(cgi);
 		return;
@@ -223,10 +215,9 @@ void Server::_disconnectFd(size_t& idx) {
 
 	close(fd);
 
-	// std::cout << "FD " << fd << " disconnected" << std::endl; // BUG: remove?
+	write(1, "FD ", 4);
 	char buf[12];
 	auto [p, ec] = std::to_chars(buf, buf + 12, fd);
 	write(1, buf, p - buf);
-	write(1, "disconnected\n", 14);
+	write(1, " disconnected\n", 14);
 }
-

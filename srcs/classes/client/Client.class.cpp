@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 02:59:00 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 19:45:49 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,14 +20,13 @@
 
 Client::Client(int fd, const sockaddr_in& addr, const ServerConfig* server)
 	:	_fd(fd),
-		_inputReadProgress(0),
 		_outputWriteProgress(0),
 		_addr(addr),
 		_server(server),
 		_pendingDisconnect(false),
 		_lastActivity(Clock::now())
 {
-	// std::clog << "[Client] constructor called" << std::endl; // FIXME: for debugging, remove later
+	// std::clog << "[Client] constructor called" << std::endl;
 
 	if (!server)
 		throw std::logic_error("Client constructed with nullptr to ServerConfig");
@@ -36,7 +35,6 @@ Client::Client(int fd, const sockaddr_in& addr, const ServerConfig* server)
 Client::Client(Client&& other) noexcept
 	:	_fd(other._fd),
 		_inputBuffer(std::move(other._inputBuffer)),
-		_inputReadProgress(other._inputReadProgress), // FIXME: not needed -> remove
 		_outputBuffer(std::move(other._outputBuffer)),
 		_outputWriteProgress(other._outputWriteProgress),
 		_addr(other._addr),
@@ -46,22 +44,21 @@ Client::Client(Client&& other) noexcept
 		_requestParser(std::move(other._requestParser)),
 		_httpRequest(std::move(other._httpRequest))
 {
-	// std::clog << "[Client] move constructor called" << std::endl; // FIXME: for debugging, remove later
+	// std::clog << "[Client] move constructor called" << std::endl;
 
 	other._fd = -1;
 }
 
 Client& Client::operator=(Client&& other) noexcept {
-	// std::clog << "[Client] move operator called" << std::endl; // FIXME: for debugging, remove later
+	// std::clog << "[Client] move operator called" << std::endl;
 
 	if (this != &other) {
 		if (_fd >= 0)
-			close(this->_fd); // FIXME: potential fail -> handle?
+			close(this->_fd);
 
 		_fd = other._fd;
 		_inputBuffer = std::move(other._inputBuffer);
 		_outputBuffer = std::move(other._outputBuffer);
-		_inputReadProgress = other._inputReadProgress; // FIXME: not needed -> remove
 		_outputWriteProgress = other._outputWriteProgress;
 		_addr = other._addr;
 		_server = other._server;
@@ -77,7 +74,7 @@ Client& Client::operator=(Client&& other) noexcept {
 }
 
 Client::~Client(void) {
-	// std::clog << "[Client] destructor called on fd: " << this->_fd << std::endl; // FIXME: for debugging, remove later
+	// std::clog << "[Client] destructor called on fd: " << this->_fd << std::endl;
 
 	if (_fd >= 0) {
 		close(this->_fd);
@@ -94,7 +91,7 @@ const std::string& Client::getInBuf(void) const {
 }
 
 const std::string& Client::getOutBuf(void) const {
-	return this->_outputBuffer; // FIXME: + current writeProgr maybe?
+	return this->_outputBuffer;
 }
 
 size_t Client::getOutProgress(void) const {
@@ -123,16 +120,10 @@ void Client::advanceOutProgress(ssize_t bytes) {
 
 void Client::appendToInBuf(const char* input, size_t size) {
 	_inputBuffer.append(input, size);
-	_inputReadProgress += size;
-} // BUG: unused? -> remove
-
-void Client::appendToOutBuf(const std::string& input) {
-	_outputBuffer.append(input);
 }
 
 void Client::clearInBuf(void) {
 	_inputBuffer.clear();
-	_inputReadProgress = 0;
 }
 
 void Client::clearOutBuf(void) {
@@ -145,7 +136,7 @@ void Client::flushReadyResponses(void) {
 		!_responseQueue.empty() &&
 		_responseQueue.front().ready)
 	{
-		appendToOutBuf(std::move(_responseQueue.front().response));
+		_appendToOutBuf(std::move(_responseQueue.front().response));
 
 		_responseQueue.pop_front();
 	}
@@ -210,4 +201,8 @@ void Client::_resetRequestState(void) {
 
 std::list<ResponseSlot>::iterator Client::_reserveResponseSlot(void) {
 	return _responseQueue.emplace(_responseQueue.end());
+}
+
+void Client::_appendToOutBuf(const std::string& input) {
+	_outputBuffer.append(input);
 }

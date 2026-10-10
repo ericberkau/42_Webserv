@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:11:44 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 03:00:35 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 19:55:11 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ int Server::_setupListeningSocket(const ListenDirective& listenCfg) {
 	}
 
 	const int enableSetting = true;
-	setsockopt(serverFd, SOL_SOCKET, SO_REUSEADDR, &enableSetting, sizeof(enableSetting)); // TODO: check return value
+	setsockopt(serverFd, SOL_SOCKET, SO_REUSEADDR, &enableSetting, sizeof(enableSetting));
 
 	if (fcntl(serverFd, F_SETFL, O_NONBLOCK) == -1 ||
 		fcntl(serverFd, F_SETFD, FD_CLOEXEC) == -1)
@@ -84,7 +84,7 @@ int Server::_setupListeningSocket(const ListenDirective& listenCfg) {
 	pollfd serverPoll;
 	serverPoll.fd = serverFd;
 	serverPoll.events = POLLIN;
-	_pollfdArr.push_back(serverPoll); // FIXME: might fail, consider this in cleanup
+	_pollfdArr.push_back(serverPoll);
 
 	return serverFd;
 }

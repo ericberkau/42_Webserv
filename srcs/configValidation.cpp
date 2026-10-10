@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   configValidation.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/28 01:40:46 by eberkau           #+#    #+#             */
-/*   Updated: 2026/09/11 13:32:04 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/10 19:56:38 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,13 +49,10 @@ void validateAddressResolution(const ListenDirective& listen) {
 
 static
 void validateLocation(const LocationConfig& location) {
-	// if (location.root.empty()) // FIXME: discuss whether redirect-only locations (return/cgi) require root
-	// 	throw std::runtime_error("location '" + location.path + "' has no root directive");
-
 	if (!location.uploadPath.empty() && !location.uploadEnabled)
 		throw std::runtime_error("location '" + location.path + "' specifies upload path but upload_enable is set to 'off'");
 
-	if (location.hasRedirect && !location.cgiHandlers.empty()) // FIXME-fixed?: discuss whether desired
+	if (location.hasRedirect && !location.cgiHandlers.empty())
 		throw std::runtime_error("location '" + location.path + "' combines redirect and cgi directives (return overwrites CGI redirections)");
 }
 
