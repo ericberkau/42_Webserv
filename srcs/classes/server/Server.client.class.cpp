@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:13:08 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 19:54:44 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 22:18:53 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,6 @@ void Server::_handlePendingConnections(int listeningSocket) {
 			perror("fcntl");
 			throw std::runtime_error("fcntl() failed to configure client socket");
 		};
-
-		write(1, "Client accepted\n", 17);
 
 		pollfd newClientPoll;
 		newClientPoll.fd = newClientFd;
@@ -69,7 +67,7 @@ void Server::_handlePendingConnections(int listeningSocket) {
 		if (!inserted)
 			throw std::logic_error("attempted to register duplicate client file descriptor");
 
-		write(1, "Client registered: ", 20);
+		write(1, "\033[0;32mClient registered: \033[0m", 31);
 		char buf[12];
 		auto [p, ec] = std::to_chars(buf, buf + 12, newClientFd);
 		write(1, buf, p - buf);

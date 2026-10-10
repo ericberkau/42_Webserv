@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 20:19:32 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 22:02:18 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,8 +35,10 @@ void Server::run(void) {
 	_lastTimeoutCheck = Clock::now();
 	size_t dots = 0;
 
+	std::cout << "\033[0;34mThe server is starting, welcome!\033[0m\n" << std::endl;
+
 	while (!g_shutdownRequested) {
-		write(1, "listening .....", 11 + (dots++ % 5));
+		write(1, "\033[0;36mlistening\033[0m .....", 22 + (dots++ % 5));
 		write(1, "\n", 2);
 
 		int ready = poll(_pollfdArr.data(), _pollfdArr.size(), POLL_TIMEOUT_MS);
@@ -59,7 +61,7 @@ void Server::run(void) {
 		}
 	}
 
-	std::cout << "\nServer shutting down ..." << std::endl;
+	std::cout << "\n\n\033[0;31mServer shutting down ...\033[0m" << std::endl;
 }
 
 void Server::_handleTimeouts(void) {
@@ -215,9 +217,9 @@ void Server::_disconnectFd(size_t& idx) {
 
 	close(fd);
 
-	write(1, "FD ", 4);
+	write(1, "\033[0;31mFD\033[0m ", 15);
 	char buf[12];
 	auto [p, ec] = std::to_chars(buf, buf + 12, fd);
 	write(1, buf, p - buf);
-	write(1, " disconnected\n", 14);
+	write(1, " \033[0;31mdisconnected\033[0m\n", 26);
 }
