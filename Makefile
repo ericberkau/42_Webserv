@@ -6,7 +6,7 @@
 #    By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/05/11 14:54:40 by eberkau           #+#    #+#              #
-#    Updated: 2026/10/10 03:02:59 by eberkau          ###   ########.fr        #
+#    Updated: 2026/10/10 03:11:01 by eberkau          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -37,11 +37,11 @@ DEFAULT		=	\033[0m
 # list source files here
 CXXFILES	=	testmain.cpp \
 				classes/client/Client.class.cpp \
-				classes/config/Lexer.class.cpp \
-				classes/config/Parser.core.class.cpp \
-				classes/config/Parser.location.class.cpp \
-				classes/config/Parser.server.class.cpp \
-				classes/config/parserUtils.cpp \
+				classes/config/ConfigLexer.class.cpp \
+				classes/config/ConfigParser.core.class.cpp \
+				classes/config/ConfigParser.location.class.cpp \
+				classes/config/ConfigParser.server.class.cpp \
+				classes/config/configParserUtils.cpp \
 				classes/HTTP/HttpRequestContainer.class.cpp \
 				classes/HTTP/RequestHandler.class.cpp \
 				classes/HTTP/RequestParser.class.cpp \

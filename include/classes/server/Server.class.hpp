@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:10 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 02:58:36 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 03:13:14 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,8 +70,8 @@ class Server {
 
 		/* disallow copying or moving */
 		Server(const Server&) = delete;
-		Server&	operator=(const Server&) = delete;
 		Server(Server&&) = delete;
+		Server&	operator=(const Server&) = delete;
 		Server&	operator=(Server&&) = delete;
 
 };

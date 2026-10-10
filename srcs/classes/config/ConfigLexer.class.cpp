@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Lexer.class.cpp                                    :+:      :+:    :+:   */
+/*   ConfigLexer.class.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,13 +10,13 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "classes/config/Lexer.class.hpp"
+#include "classes/config/ConfigLexer.class.hpp"
 
-Lexer::Lexer(const std::string& source)
+ConfigLexer::ConfigLexer(const std::string& source)
 	: _source(source), _currentPos(0), _line(1), _column(1)
 {}
 
-std::vector<Token> Lexer::tokenize(void) {
+std::vector<Token> ConfigLexer::tokenize(void) {
 	std::vector<Token> tokens;
 
 	while (!_eof()) {
@@ -56,7 +56,7 @@ std::vector<Token> Lexer::tokenize(void) {
 
 /* private member functions */
 
-void Lexer::_advance(void) {
+void ConfigLexer::_advance(void) {
 	if (_eof())
 		return;
 
@@ -70,15 +70,15 @@ void Lexer::_advance(void) {
 	++_currentPos;
 }
 
-char Lexer::_current(void) const {
+char ConfigLexer::_current(void) const {
 	return _source[_currentPos];
 }
 
-bool Lexer::_eof(void) const {
+bool ConfigLexer::_eof(void) const {
 	return _currentPos >= _source.size();
 }
 
-char Lexer::_peek(void) const {
+char ConfigLexer::_peek(void) const {
 	if (_currentPos + 1 >= _source.size())
 		return '\0';
 
@@ -97,7 +97,7 @@ static bool isDelimiter(char c) {
 		|| c == '#';
 }
 
-Token Lexer::_readWord(void) {
+Token ConfigLexer::_readWord(void) {
 	const size_t startPos = _currentPos;
 	const size_t startLine = _line;
 	const size_t startCol = _column;
@@ -113,12 +113,12 @@ Token Lexer::_readWord(void) {
 	};
 }
 
-void Lexer::_skipComment(void) {
+void ConfigLexer::_skipComment(void) {
 	while (!_eof() && _current() != '\n')
 		_advance();
 }
 
-void Lexer::_skipWhitespace(void) {
+void ConfigLexer::_skipWhitespace(void) {
 	while (!_eof() && isWhitespace(_current()))
 		_advance();
 }

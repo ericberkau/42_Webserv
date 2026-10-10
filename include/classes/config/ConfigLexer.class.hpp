@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Lexer.class.hpp                                    :+:      :+:    :+:   */
+/*   ConfigLexer.class.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -15,12 +15,12 @@
 #include "token.hpp"
 #include <vector>
 
-class Lexer {
+class ConfigLexer {
 
 	public:
 
-		explicit Lexer(const std::string& source);
-		~Lexer(void) = default;
+		explicit ConfigLexer(const std::string& source);
+		~ConfigLexer(void) = default;
 
 		std::vector<Token>	tokenize(void);
 
@@ -41,9 +41,9 @@ class Lexer {
 		size_t		_column;
 
 		/* disallow copying or moving */
-		Lexer(const Lexer&) = delete;
-		Lexer&	operator=(const Lexer&) = delete;
-		Lexer(Lexer&&) = delete;
-		Lexer&	operator=(Lexer&&) = delete;
+		ConfigLexer(const ConfigLexer&) = delete;
+		ConfigLexer(ConfigLexer&&) = delete;
+		ConfigLexer&	operator=(const ConfigLexer&) = delete;
+		ConfigLexer&	operator=(ConfigLexer&&) = delete;
 
 };

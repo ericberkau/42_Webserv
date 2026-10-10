@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Parser.location.class.cpp                          :+:      :+:    :+:   */
+/*   ConfigParser.location.class.cpp                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,9 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "classes/config/Parser.class.hpp"
+#include "classes/config/ConfigParser.class.hpp"
 
-LocationConfig Parser::_parseLocation(void) {
+LocationConfig ConfigParser::_parseLocation(void) {
 	_advance();
 
 	_expect(TokenType::WORD, "expected path after 'location'");
@@ -34,7 +34,7 @@ LocationConfig Parser::_parseLocation(void) {
 	return location;
 }
 
-void Parser::_parseLocationDirective(LocationConfig& location) {
+void ConfigParser::_parseLocationDirective(LocationConfig& location) {
 	_expect(TokenType::WORD, "expected location directive");
 
 	const Token& directive = _current();
@@ -61,7 +61,7 @@ void Parser::_parseLocationDirective(LocationConfig& location) {
 		error(directive, "unknown location directive '" + directive.lexeme + "'");
 }
 
-void Parser::_parsePathSetting(std::string& configOption) {
+void ConfigParser::_parsePathSetting(std::string& configOption) {
 	const Token& directive = _current();
 	_advance();
 
@@ -73,7 +73,7 @@ void Parser::_parsePathSetting(std::string& configOption) {
 	_advance();
 }
 
-void Parser::_parseBoolSetting(bool& configOption) {
+void ConfigParser::_parseBoolSetting(bool& configOption) {
 	const Token& directive = _current();
 	_advance();
 
@@ -105,7 +105,7 @@ HttpMethod parseHttpMethod(const Token& token) {
 		error(token, "unknown HTTP method '" + token.lexeme + "'");
 }
 
-void Parser::_parseAllowMethods(LocationConfig& location) {
+void ConfigParser::_parseAllowMethods(LocationConfig& location) {
 	location.allowedMethods.clear(); // override constructor default
 	_advance();
 
@@ -121,7 +121,7 @@ void Parser::_parseAllowMethods(LocationConfig& location) {
 	_advance();
 }
 
-void Parser::_parseReturn(LocationConfig& location) {
+void ConfigParser::_parseReturn(LocationConfig& location) {
 	if (location.hasRedirect)
 		error(_current(), "duplicate return directive");
 	_advance();
@@ -139,7 +139,7 @@ void Parser::_parseReturn(LocationConfig& location) {
 	_advance();
 }
 
-void Parser::_parseCgi(LocationConfig& location) {
+void ConfigParser::_parseCgi(LocationConfig& location) {
 	_advance();
 
 	_expect(TokenType::WORD, "expected file extension after 'cgi'");

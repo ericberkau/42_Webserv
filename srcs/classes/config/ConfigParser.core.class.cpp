@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Parser.core.class.cpp                              :+:      :+:    :+:   */
+/*   ConfigParser.core.class.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,52 +10,52 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "classes/config/Parser.class.hpp"
-#include "classes/config/parserUtils.hpp"
+#include "classes/config/ConfigParser.class.hpp"
+#include "classes/config/configParserUtils.hpp"
 
 
 /* ------- public member functions ------- */
 
-Parser::Parser(const std::vector<Token>& tokens) : _tokens(tokens), _currentPos(0) {}
+ConfigParser::ConfigParser(const std::vector<Token>& tokens) : _tokens(tokens), _currentPos(0) {}
 
-Config Parser::parse(void) {
+Config ConfigParser::parse(void) {
 	return _parseConfig();
 }
 
 
 /* ------- token traversal ------- */
 
-void Parser::_advance(void) {
+void ConfigParser::_advance(void) {
 	if (!_atEnd())
 		++_currentPos;
 }
 
-bool Parser::_atEnd(void) const {
+bool ConfigParser::_atEnd(void) const {
 	return _current().type == TokenType::END;
 }
 
-const Token& Parser::_current(void) const {
+const Token& ConfigParser::_current(void) const {
 	return _tokens[_currentPos];
 }
 
 
 /* ------- parsing foundation ------- */
 
-bool Parser::_check(TokenType type) const {
+bool ConfigParser::_check(TokenType type) const {
 	return _current().type == type;
 }
 
-void Parser::_expect(TokenType type, const std::string& errMsg) {
+void ConfigParser::_expect(TokenType type, const std::string& errMsg) {
 	if (!_check(type))
 		error(_current(), errMsg);
 }
 
-void Parser::_expect(const std::string& keyword, const std::string& errMsg) {
+void ConfigParser::_expect(const std::string& keyword, const std::string& errMsg) {
 	if (!_check(TokenType::WORD) || _current().lexeme != keyword)
 		error(_current(), errMsg);
 }
 
-Config Parser::_parseConfig(void) {
+Config ConfigParser::_parseConfig(void) {
 	Config config;
 	
 	while (!_atEnd())

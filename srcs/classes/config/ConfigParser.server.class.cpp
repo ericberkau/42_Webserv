@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Parser.server.class.cpp                            :+:      :+:    :+:   */
+/*   ConfigParser.server.class.cpp                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,9 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "classes/config/Parser.class.hpp"
+#include "classes/config/ConfigParser.class.hpp"
 
-ServerConfig Parser::_parseServer(void) {
+ServerConfig ConfigParser::_parseServer(void) {
 	_expect("server", "expected 'server'"); // FIXME: might change, if _parseConfig() gets an if-elseif chain to account for 'events' as well
 	_advance();
 	_expect(TokenType::BRACE_LEFT, "expected '{' after 'server'");
@@ -31,7 +31,7 @@ ServerConfig Parser::_parseServer(void) {
 	return server;
 }
 
-void Parser::_parseServerDirective(ServerConfig& server) {
+void ConfigParser::_parseServerDirective(ServerConfig& server) {
 	_expect(TokenType::WORD, "expected server directive");
 	const Token& directive = _current();
 
@@ -61,7 +61,7 @@ bool isDuplicate(
 	return false;
 }
 
-void Parser::_parseListen(ServerConfig& server) {
+void ConfigParser::_parseListen(ServerConfig& server) {
 	_advance();
 
 	_expect(TokenType::WORD, "expected address after 'listen'");
@@ -107,7 +107,7 @@ void Parser::_parseListen(ServerConfig& server) {
 	server.listen.push_back(newListen);
 }
 
-void Parser::_parseErrorPage(ServerConfig& server) {
+void ConfigParser::_parseErrorPage(ServerConfig& server) {
 	_advance();
 
 	_expect(TokenType::WORD, "expected HTTP status code after 'error_page'");

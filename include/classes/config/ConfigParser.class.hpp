@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Parser.class.hpp                                   :+:      :+:    :+:   */
+/*   ConfigParser.class.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -13,15 +13,15 @@
 #pragma once
 
 #include "config.hpp"
-#include "parserUtils.hpp"
+#include "configParserUtils.hpp"
 #include "token.hpp"
 
-class Parser {
+class ConfigParser {
 
 	public:
 
-		explicit Parser(const std::vector<Token>& tokens);
-		~Parser(void) = default;
+		explicit ConfigParser(const std::vector<Token>& tokens);
+		~ConfigParser(void) = default;
 
 		Config	parse(void);
 
@@ -62,15 +62,15 @@ class Parser {
 		size_t						_currentPos;
 
 		/* disallow copying or moving */
-		Parser(const Parser&) = delete;
-		Parser&	operator=(const Parser&) = delete;
-		Parser(Parser&&) = delete;
-		Parser&	operator=(Parser&&) = delete;
+		ConfigParser(const ConfigParser&) = delete;
+		ConfigParser(ConfigParser&&) = delete;
+		ConfigParser&	operator=(const ConfigParser&) = delete;
+		ConfigParser&	operator=(ConfigParser&&) = delete;
 
 };
 
 template<typename ConfigType>
-void Parser::_parseClientMaxBodySize(ConfigType& targetConfig) {
+void ConfigParser::_parseClientMaxBodySize(ConfigType& targetConfig) {
 	_advance();
 
 	_expect(TokenType::WORD, "expected size value after 'client_max_body_size'");

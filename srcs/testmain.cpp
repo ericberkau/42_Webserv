@@ -6,14 +6,14 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:07:00 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 02:57:20 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 03:10:15 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 // #include "config.hpp"
 
 // /* testing lexer */
-// #include "classes/Lexer.class.hpp"
+// #include "classes/ConfigLexer.class.hpp"
 // #include <iostream>
 
 // static const char* tokenTypeName(TokenType type) {
@@ -39,7 +39,7 @@
 // 						"# for real} \n"
 // 						" root ./www;\n"
 // 						"}\n";
-// 	Lexer lexer(input);
+// 	ConfigLexer lexer(input);
 // 	std::vector<Token> tokens = lexer.tokenize();
 
 // 	for (const Token& token : tokens) {
@@ -54,8 +54,8 @@
 
 
 /* extended parser testing */
-#include "classes/config/Lexer.class.hpp"
-#include "classes/config/Parser.class.hpp"
+#include "classes/config/ConfigLexer.class.hpp"
+#include "classes/config/ConfigParser.class.hpp"
 #include "classes/server/Server.class.hpp"
 #include "signals.hpp"
 
@@ -262,7 +262,7 @@ int main(int argc, char** argv)
 
 		const std::string input = readFile(source);
 
-		Lexer lexer(input);
+		ConfigLexer lexer(input);
 
 		std::vector<Token> tokens = lexer.tokenize();
 
@@ -271,7 +271,7 @@ int main(int argc, char** argv)
 			<< tokens.size()
 			<< " ==\n";
 
-		Parser parser(tokens);
+		ConfigParser parser(tokens);
 
 		Config config = parser.parse();
 		std::cout << "\n===== CONFIG PARSED SUCCESSFULLY =====\n\n";
