@@ -6,13 +6,13 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:16 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/10 20:18:55 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 21:22:21 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "classes/HTTP/RequestHandler.class.hpp"
 #include "classes/HTTP/RequestParser.class.hpp"
-#include "classes/HTTP/StringUtils.hpp"
+#include "stringUtils.hpp"
 #include <sstream>
 
 static const size_t MAX_LINE_LENGTH = 8192; // longest single request/header/chunk-size line

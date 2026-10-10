@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   StringUtils.cpp                                    :+:      :+:    :+:   */
+/*   stringUtils.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/13 15:40:12 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/10 03:01:22 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 21:24:03 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "classes/HTTP/StringUtils.hpp"
+#include "stringUtils.hpp"
 
 std::string ft_toLower(const std::string& s)
 {

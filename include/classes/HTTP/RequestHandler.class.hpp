@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:55:03 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/10 02:56:44 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 21:22:05 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,10 @@
 #include "classes/CGI/CGIExecutor.class.hpp"
 #include "classes/HTTP/ResponseBuilder.class.hpp"
 #include "classes/HTTP/RequestParser.class.hpp"
-#include "classes/HTTP/StringUtils.hpp"
 #include "config.hpp"
 #include "HttpRequestContainer.class.hpp"
 #include "networking.hpp"
+#include "stringUtils.hpp"
 #include <cctype>
 #include <cstdio> // for std::remove
 #include <cstdlib>
