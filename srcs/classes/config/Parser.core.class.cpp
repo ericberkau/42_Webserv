@@ -6,12 +6,12 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:35:46 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/07 18:47:05 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 02:59:20 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "classes/Parser.class.hpp"
-#include "classes/parserUtils.hpp"
+#include "classes/config/Parser.class.hpp"
+#include "classes/config/parserUtils.hpp"
 
 
 /* ------- public member functions ------- */

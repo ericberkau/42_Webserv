@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.class.cpp                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/08 19:22:10 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/10 03:01:09 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "classes/RequestHandler.class.hpp"
+#include "classes/HTTP/RequestHandler.class.hpp"
 
 RequestHandler::RequestHandler(const ServerConfig* config) : _config(config) {}
 RequestHandler::~RequestHandler() {}

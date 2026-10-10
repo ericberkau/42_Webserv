@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   ResponseBuilder.class.cpp                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:26 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/06 23:39:11 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/10 03:01:15 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "classes/ResponseBuilder.class.hpp"
+#include "classes/HTTP/ResponseBuilder.class.hpp"
 
 ResponseBuilder::ResponseBuilder() : _httpVersion("HTTP/1.1"), _statusCode(200), _statusMessage("OK") {}
 ResponseBuilder::~ResponseBuilder() {}

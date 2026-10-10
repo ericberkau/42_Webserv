@@ -6,18 +6,18 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:55:03 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/10 02:38:33 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 02:56:44 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef REQUESTHANDLER_HPP
 #define REQUESTHANDLER_HPP
 
-#include "classes/CGIEnv.class.hpp"
-#include "classes/CGIExecutor.class.hpp"
-#include "classes/ResponseBuilder.class.hpp"
-#include "classes/RequestParser.class.hpp"
-#include "classes/StringUtils.hpp"
+#include "classes/CGI/CGIEnv.class.hpp"
+#include "classes/CGI/CGIExecutor.class.hpp"
+#include "classes/HTTP/ResponseBuilder.class.hpp"
+#include "classes/HTTP/RequestParser.class.hpp"
+#include "classes/HTTP/StringUtils.hpp"
 #include "config.hpp"
 #include "HttpRequestContainer.class.hpp"
 #include "networking.hpp"

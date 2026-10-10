@@ -6,11 +6,11 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/28 16:48:53 by eberkau           #+#    #+#             */
-/*   Updated: 2026/07/30 15:13:47 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 02:59:07 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "classes/Lexer.class.hpp"
+#include "classes/config/Lexer.class.hpp"
 
 Lexer::Lexer(const std::string& source)
 	: _source(source), _currentPos(0), _line(1), _column(1)

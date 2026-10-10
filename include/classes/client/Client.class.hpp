@@ -6,14 +6,14 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:06 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 02:27:19 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 02:56:04 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "classes/RequestParser.class.hpp"
-#include "classes/HttpRequestContainer.class.hpp"
+#include "classes/HTTP/RequestParser.class.hpp"
+#include "classes/HTTP/HttpRequestContainer.class.hpp"
 #include <arpa/inet.h>
 #include <chrono>
 #include <list>

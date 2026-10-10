@@ -6,11 +6,11 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 02:33:35 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 03:00:12 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "classes/Server.class.hpp"
+#include "classes/server/Server.class.hpp"
 #include "signals.hpp"
 #include <iostream>
 #include <sys/wait.h>

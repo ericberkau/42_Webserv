@@ -6,11 +6,11 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:11:44 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 02:33:48 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 03:00:35 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "classes/Server.class.hpp"
+#include "classes/server/Server.class.hpp"
 #include <fcntl.h>
 #include <memory>
 #include <unistd.h>

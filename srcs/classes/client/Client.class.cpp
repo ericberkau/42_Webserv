@@ -6,13 +6,13 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 02:31:58 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 02:59:00 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "classes/Client.class.hpp"
-#include "classes/RequestHandler.class.hpp"
-#include "classes/ResponseBuilder.class.hpp"
+#include "classes/client/Client.class.hpp"
+#include "classes/HTTP/RequestHandler.class.hpp"
+#include "classes/HTTP/ResponseBuilder.class.hpp"
 #include "signals.hpp"
 #include <iostream>
 #include <queue>

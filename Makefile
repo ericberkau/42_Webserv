@@ -6,7 +6,7 @@
 #    By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2026/05/11 14:54:40 by eberkau           #+#    #+#              #
-#    Updated: 2026/10/03 23:20:18 by eberkau          ###   ########.fr        #
+#    Updated: 2026/10/10 03:02:59 by eberkau          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -36,25 +36,25 @@ DEFAULT		=	\033[0m
 
 # list source files here
 CXXFILES	=	testmain.cpp \
+				classes/client/Client.class.cpp \
+				classes/config/Lexer.class.cpp \
+				classes/config/Parser.core.class.cpp \
+				classes/config/Parser.location.class.cpp \
+				classes/config/Parser.server.class.cpp \
+				classes/config/parserUtils.cpp \
+				classes/HTTP/HttpRequestContainer.class.cpp \
+				classes/HTTP/RequestHandler.class.cpp \
+				classes/HTTP/RequestParser.class.cpp \
+				classes/HTTP/ResponseBuilder.class.cpp \
+				classes/HTTP/StringUtils.cpp \
+				classes/server/Server.class.cpp \
+				classes/server/Server.cgi.class.cpp \
+				classes/server/Server.client.class.cpp \
+				classes/server/Server.setup.class.cpp \
+				classes/CGI/CGIEnv.class.cpp \
+				classes/CGI/CGIExecutor.class.cpp \
 				configValidation.cpp \
 				signals.cpp \
-				classes/Client.class.cpp \
-				classes/Lexer.class.cpp \
-				classes/Parser.core.class.cpp \
-				classes/Parser.location.class.cpp \
-				classes/Parser.server.class.cpp \
-				classes/parserUtils.cpp \
-				classes/Server.class.cpp \
-				classes/Server.cgi.class.cpp \
-				classes/Server.client.class.cpp \
-				classes/Server.setup.class.cpp \
-				classes/HttpRequestContainer.class.cpp \
-				classes/RequestParser.class.cpp \
-				classes/RequestHandler.class.cpp \
-				classes/ResponseBuilder.class.cpp \
-				classes/StringUtils.cpp \
-				classes/CGIExecutor.class.cpp \
-				classes/CGIEnv.class.cpp
 #				and_so_on.cpp
 
 

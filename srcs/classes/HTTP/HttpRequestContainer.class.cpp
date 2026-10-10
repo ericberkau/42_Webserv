@@ -6,12 +6,12 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:03:59 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/10 02:32:04 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 03:00:47 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "classes/HttpRequestContainer.class.hpp"
-#include "classes/StringUtils.hpp"
+#include "classes/HTTP/HttpRequestContainer.class.hpp"
+#include "classes/HTTP/StringUtils.hpp"
 #include <iostream>
 
 HttpRequestContainer::HttpRequestContainer() : _method(HttpMethod::INVALID) {}

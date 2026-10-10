@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   CGIExecutor.class.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 13:00:52 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/10/08 07:36:48 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/10 03:01:31 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "classes/CGIExecutor.class.hpp"
+#include "classes/CGI/CGIExecutor.class.hpp"
 #include <fcntl.h>
 
 CGIEnv& CGIExecutor::getEnv()

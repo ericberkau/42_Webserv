@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:07:00 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/07 17:52:00 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 02:57:20 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,9 +54,9 @@
 
 
 /* extended parser testing */
-#include "classes/Lexer.class.hpp"
-#include "classes/Parser.class.hpp"
-#include "classes/Server.class.hpp"
+#include "classes/config/Lexer.class.hpp"
+#include "classes/config/Parser.class.hpp"
+#include "classes/server/Server.class.hpp"
 #include "signals.hpp"
 
 #include <fstream>

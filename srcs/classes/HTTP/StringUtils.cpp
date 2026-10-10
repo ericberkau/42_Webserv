@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   StringUtils.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/13 15:40:12 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/24 14:02:59 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/10 03:01:22 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "classes/StringUtils.hpp"
+#include "classes/HTTP/StringUtils.hpp"
 
 std::string ft_toLower(const std::string& s)
 {

@@ -6,12 +6,12 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:14:29 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 02:33:29 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 03:00:23 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "classes/Server.class.hpp"
-#include "classes/RequestHandler.class.hpp"
+#include "classes/server/Server.class.hpp"
+#include "classes/HTTP/RequestHandler.class.hpp"
 #include <csignal>
 #include <iostream>
 #include <sys/wait.h>

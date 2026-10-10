@@ -6,13 +6,13 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/31 22:44:52 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/09 03:14:27 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 02:58:45 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "classes/Client.class.hpp"
+#include "classes/client/Client.class.hpp"
 #include "config.hpp"
 #include <list>
 #include <optional>

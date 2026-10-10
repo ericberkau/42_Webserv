@@ -6,11 +6,11 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/27 22:39:18 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/07 18:57:46 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 02:59:27 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "classes/Parser.class.hpp"
+#include "classes/config/Parser.class.hpp"
 
 LocationConfig Parser::_parseLocation(void) {
 	_advance();

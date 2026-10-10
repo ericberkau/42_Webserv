@@ -6,11 +6,11 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/27 22:50:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/07 17:56:56 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 03:00:05 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "classes/Parser.class.hpp"
+#include "classes/config/Parser.class.hpp"
 
 ServerConfig Parser::_parseServer(void) {
 	_expect("server", "expected 'server'"); // FIXME: might change, if _parseConfig() gets an if-elseif chain to account for 'events' as well

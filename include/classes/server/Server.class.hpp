@@ -6,13 +6,13 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:10 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 02:31:05 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 02:58:36 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-#include "classes/Client.class.hpp"
+#include "classes/client/Client.class.hpp"
 #include "config.hpp"
 #include "networking.hpp"
 #include <charconv> // BUG: remove if no debug printing?
