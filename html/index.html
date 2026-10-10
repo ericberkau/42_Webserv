@@ -1,1 +1,241 @@
-<html><body><h1>Welcome to the Main Server!</h1></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Webserv Playground</title>
+	<style>
+		:root {
+			color-scheme: dark;
+			font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+			background: #10131c;
+			color: #edf0f7;
+			font-synthesis: none;
+		}
+		* { box-sizing: border-box; }
+		body { margin: 0; min-height: 100vh; }
+		header { padding: 42px max(24px, calc((100vw - 1120px) / 2)); background: linear-gradient(120deg, #202947, #151a29 68%); border-bottom: 1px solid #30384c; text-align: center; }
+		header p { margin: 0; color: #aeb9d2; }
+		h1 { margin: 8px 0; font-size: clamp(2rem, 5vw, 3.3rem); letter-spacing: -0.05em; }
+		main { max-width: 1120px; margin: 30px auto; padding: 0 24px 48px; }
+		.intro { color: #aeb9d2; line-height: 1.6; margin: 0 0 24px; }
+		.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; }
+		.card { padding: 20px; border: 1px solid #30384c; border-radius: 14px; background: #191e2b; }
+		.card h2 { margin: 0 0 8px; font-size: 1.15rem; }
+		.card p { margin: 0 0 16px; color: #aeb9d2; font-size: .92rem; line-height: 1.5; }
+		label { display: block; margin: 12px 0 6px; color: #c7cee0; font-size: .88rem; }
+		input, textarea { width: 100%; padding: 10px 12px; border: 1px solid #3b455c; border-radius: 8px; color: #edf0f7; background: #111520; font: inherit; }
+		input[type="file"] { padding: 8px; }
+		textarea { min-height: 92px; resize: vertical; }
+		button { margin-top: 12px; padding: 10px 14px; border: 0; border-radius: 8px; background: #839bff; color: #12182b; font: inherit; font-weight: 700; cursor: pointer; }
+		button:hover { background: #a2b3ff; }
+		button.secondary { background: #30394d; color: #edf0f7; }
+		button.secondary:hover { background: #414d66; }
+		button.danger { margin: 0; padding: 7px 10px; background: #6c3444; color: #ffe7ed; }
+		.row { display: flex; align-items: center; gap: 8px; }
+		.row input { min-width: 0; }
+		#uploads { margin: 12px 0 0; padding: 0; list-style: none; }
+		#uploads li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 0; border-top: 1px solid #30384c; }
+		#uploads a { color: #a9bbff; overflow-wrap: anywhere; }
+		#uploads .empty { color: #8993aa; }
+		#result { margin-top: 20px; padding: 16px; border: 1px solid #30384c; border-radius: 12px; background: #0b0e15; }
+		.result-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+		.result-heading h2 { margin: 0; font-size: 1rem; }
+		#status { color: #aeb9d2; font-size: .88rem; }
+		pre { max-height: 320px; margin: 0; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; color: #d5dcef; font: .85rem/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; }
+		.note { margin-top: 16px; color: #8993aa; font-size: .82rem; line-height: 1.5; }
+		@media (max-width: 520px) { header { padding-top: 30px; padding-bottom: 30px; } main { margin-top: 20px; } .row { align-items: stretch; flex-direction: column; } }
+	</style>
+</head>
+<body>
+	<header>
+		<p>42 project · HTTP playground</p>
+		<h1>Webserv Playground</h1>
+		<p>Try the server’s HTTP methods, file uploads, and CGI handlers from one page.</p>
+	</header>
+	<main>
+		<p class="intro">Each action sends a real request to this server. The response status and body appear below.</p>
+		<div class="grid">
+			<section class="card">
+				<h2>Static GET</h2>
+				<p>Fetch a regular page or file served from the document root.</p>
+				<label for="get-path">Request path</label>
+				<div class="row">
+					<input id="get-path" type="text" value="/" aria-label="GET request path">
+					<button type="button" id="get-button">Send GET</button>
+				</div>
+			</section>
+			<section class="card">
+				<h2>POST a message</h2>
+				<p>Send a plain-text request body to the main route.</p>
+				<label for="post-message">Message</label>
+				<textarea id="post-message">Hello from the Webserv Playground!</textarea>
+				<button type="button" id="post-button">Send POST</button>
+			</section>
+			<section class="card">
+				<h2>Upload a file</h2>
+				<p>Uploads the selected file’s raw bytes to <code>/upload/</code>. Existing names are not overwritten.</p>
+				<label for="upload-file">Choose a file</label>
+				<input id="upload-file" type="file">
+				<button type="button" id="upload-button">Upload file</button>
+				<div class="row" style="justify-content: space-between; margin-top: 18px;">
+					<h2 style="margin: 0">Uploaded files</h2>
+					<button type="button" class="secondary" id="refresh-button">Refresh</button>
+				</div>
+				<ul id="uploads" aria-live="polite"><li class="empty">Choose Refresh to load the upload directory.</li></ul>
+			</section>
+			<section class="card">
+				<h2>CGI GET</h2>
+				<p>Run <code>hello.py</code> and pass a query parameter for the script to report.</p>
+				<label for="cgi-name">Name query value</label>
+				<input id="cgi-name" type="text" value="Webserv">
+				<button type="button" id="cgi-get-button">Run CGI GET</button>
+			</section>
+			<section class="card">
+				<h2>CGI POST</h2>
+				<p>Send text to <code>cgi_testscript.py</code>; its output echoes the request method and body.</p>
+				<label for="cgi-message">Request body</label>
+				<textarea id="cgi-message">This text is sent to the CGI script on stdin.</textarea>
+				<button type="button" id="cgi-post-button">Run CGI POST</button>
+			</section>
+			<section class="card">
+				<h2>Redirect</h2>
+				<p>Open <code>/redirect</code> in a new tab. The server should respond with a 301 redirect.</p>
+				<button type="button" id="redirect-button">Try redirect</button>
+			</section>
+			<section class="card">
+				<h2>Directory listing</h2>
+				<p>Fetch <code>/images/</code>, where autoindex is enabled in the server configuration.</p>
+				<button type="button" id="listing-button">List /images/</button>
+			</section>
+			<section class="card">
+				<h2>DELETE</h2>
+				<p>Remove a file you uploaded. Use the Delete button next to a file after refreshing the list.</p>
+				<button type="button" class="secondary" id="delete-help-button">How DELETE works</button>
+			</section>
+		</div>
+		<section id="result" aria-live="polite">
+			<div class="result-heading"><h2>Response</h2><span id="status">Ready</span></div>
+			<pre id="response">Choose an action above to send a request.</pre>
+		</section>
+		<p class="note">Uploads use a raw request body, which matches this server’s current upload implementation (rather than multipart form encoding). File size is subject to the active configuration’s client_max_body_size.</p>
+	</main>
+	<script>
+		const responseBody = document.getElementById("response");
+		const statusLabel = document.getElementById("status");
+		const uploadsList = document.getElementById("uploads");
+
+		async function request(path, options = {}) {
+			statusLabel.textContent = "Requesting…";
+			responseBody.textContent = "";
+			try {
+				const response = await fetch(path, options);
+				const body = await response.text();
+				statusLabel.textContent = `${response.status} ${response.statusText}`;
+				responseBody.textContent = body || "(empty response body)";
+				return response;
+			} catch (error) {
+				statusLabel.textContent = "Request failed";
+				responseBody.textContent = error.message;
+				return null;
+			}
+		}
+
+		document.getElementById("get-button").addEventListener("click", () => {
+			const path = document.getElementById("get-path").value.trim();
+			request(path.startsWith("/") ? path : `/${path}`);
+		});
+
+		document.getElementById("post-button").addEventListener("click", () => {
+	request("/upload/", {
+		method: "POST",
+		headers: { "Content-Type": "text/plain" },
+		body: document.getElementById("post-message").value
+		});
+	});
+
+		document.getElementById("cgi-get-button").addEventListener("click", () => {
+			const name = encodeURIComponent(document.getElementById("cgi-name").value);
+			request(`/cgi-bin/hello.py?name=${name}`);
+		});
+
+		document.getElementById("cgi-post-button").addEventListener("click", () => {
+			request("/cgi-bin/cgi_testscript.py", {
+				method: "POST",
+				headers: { "Content-Type": "text/plain" },
+				body: document.getElementById("cgi-message").value
+			});
+		});
+
+		document.getElementById("redirect-button").addEventListener("click", () => {
+			window.open("/redirect", "_blank", "noopener");
+			statusLabel.textContent = "Opened redirect test";
+			responseBody.textContent = "The new tab should receive a 301 response from /redirect and follow its Location header.";
+		});
+
+		document.getElementById("listing-button").addEventListener("click", () => {
+			request("/images/");
+		});
+
+		async function refreshUploads() {
+			uploadsList.replaceChildren();
+			const response = await request("/upload/");
+			if (!response || !response.ok) {
+				uploadsList.innerHTML = '<li class="empty">Could not load uploads. Check that the server config enables GET on /upload/.</li>';
+				return;
+			}
+			const listing = new DOMParser().parseFromString(responseBody.textContent, "text/html");
+			const names = [...listing.querySelectorAll("a")]
+				.map(link => link.getAttribute("href"))
+				.filter(href => href && href !== ".." && href !== "../" && href !== "./" && !href.startsWith(".") && !href.endsWith("/"));
+			if (names.length === 0) {
+				uploadsList.innerHTML = '<li class="empty">No uploaded files yet.</li>';
+				return;
+			}
+			for (const href of names) {
+				const fileUrl = new URL(href, `${location.origin}/upload/`);
+				const name = fileUrl.pathname.split("/").pop();
+				const item = document.createElement("li");
+				const link = document.createElement("a");
+				link.href = fileUrl.pathname;
+				link.textContent = decodeURIComponent(name);
+				link.target = "_blank";
+				link.rel = "noopener";
+				const remove = document.createElement("button");
+				remove.type = "button";
+				remove.className = "danger";
+				remove.textContent = "Delete";
+				remove.addEventListener("click", async () => {
+					const deleted = await request(fileUrl.pathname, { method: "DELETE" });
+					if (deleted && deleted.ok)
+						refreshUploads();
+				});
+				item.append(link, remove);
+				uploadsList.append(item);
+			}
+		}
+
+		document.getElementById("upload-button").addEventListener("click", async () => {
+			const file = document.getElementById("upload-file").files[0];
+			if (!file) {
+				statusLabel.textContent = "Choose a file first";
+				responseBody.textContent = "Select a file before uploading.";
+				return;
+			}
+			const response = await request(`/upload/${encodeURIComponent(file.name)}`, {
+				method: "POST",
+				headers: { "Content-Type": file.type || "application/octet-stream" },
+				body: file
+			});
+			if (response && response.ok)
+				refreshUploads();
+		});
+
+		document.getElementById("refresh-button").addEventListener("click", refreshUploads);
+		document.getElementById("delete-help-button").addEventListener("click", () => {
+			statusLabel.textContent = "DELETE /upload/<filename>";
+			responseBody.textContent = "Upload a file and click its Delete button in the uploaded files list. The server only permits deleting files, not directories.";
+		});
+	</script>
+</body>
+</html>

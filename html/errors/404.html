@@ -1,1 +1,27 @@
-<html><body><h1>Custom Error: 404 Not Found!</h1></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>404 · Page not found</title>
+	<style>
+		:root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #10131c; color: #edf0f7; }
+		* { box-sizing: border-box; }
+		body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 24px; }
+		main { width: min(620px, 100%); padding: clamp(28px, 6vw, 52px); border: 1px solid #303d58; border-radius: 20px; background: radial-gradient(ellipse at top left, #273657, #191e2b 60%); text-align: center; box-shadow: 0 24px 80px #0006; }
+		.code { margin: 0; color: #a9bbff; font: 800 clamp(4rem, 18vw, 8rem)/1 ui-monospace, monospace; letter-spacing: -.08em; }
+		h1 { margin: 18px 0 10px; font-size: clamp(1.6rem, 5vw, 2.2rem); }
+		p { color: #c4c9d8; line-height: 1.65; }
+		a { display: inline-block; margin-top: 14px; padding: 11px 16px; border-radius: 8px; background: #a9bbff; color: #141a2b; font-weight: 700; text-decoration: none; }
+		a:hover { background: #c4d0ff; }
+	</style>
+</head>
+<body>
+	<main>
+		<p class="code">404</p>
+		<h1>This page wandered off</h1>
+		<p>We couldn’t find the requested page. Check the URL for a typo, or head back to the playground and try another route.</p>
+		<a href="/index2.html">Back to Webserv Playground</a>
+	</main>
+</body>
+</html>

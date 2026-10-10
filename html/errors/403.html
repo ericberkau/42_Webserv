@@ -1,1 +1,27 @@
-<html><body><h1>Custom Error: 403 Forbidden!</h1></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>403 · Access denied</title>
+	<style>
+		:root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #10131c; color: #edf0f7; }
+		* { box-sizing: border-box; }
+		body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 24px; }
+		main { width: min(620px, 100%); padding: clamp(28px, 6vw, 52px); border: 1px solid #493342; border-radius: 20px; background: radial-gradient(ellipse at top right, #432b3b, #191e2b 60%); text-align: center; box-shadow: 0 24px 80px #0006; }
+		.code { margin: 0; color: #ff9db0; font: 800 clamp(4rem, 18vw, 8rem)/1 ui-monospace, monospace; letter-spacing: -.08em; }
+		h1 { margin: 18px 0 10px; font-size: clamp(1.6rem, 5vw, 2.2rem); }
+		p { color: #c4c9d8; line-height: 1.65; }
+		a { display: inline-block; margin-top: 14px; padding: 11px 16px; border-radius: 8px; background: #ff9db0; color: #27141b; font-weight: 700; text-decoration: none; }
+		a:hover { background: #ffc0cb; }
+	</style>
+</head>
+<body>
+	<main>
+		<p class="code">403</p>
+		<h1>This request is not allowed</h1>
+		<p>The server understood what you asked for, but access to this page or action is forbidden. Check the route’s allowed methods or return to the playground.</p>
+		<a href="/index2.html">Back to Webserv Playground</a>
+	</main>
+</body>
+</html>
