@@ -102,4 +102,10 @@ HTTP Semantics — RFC 9110
 
 [https://www.rfc-editor.org/rfc/rfc9110](https://datatracker.ietf.org/doc/html/rfc9110)
 
+CGI Digital Guide - What is CGI?
 
+https://www.ionos.com/digitalguide/websites/web-development/what-is-a-cgi/
+
+CGI book - CGI Programming on the World Wide Web
+
+https://www.oreilly.com/library/view/cgi-programming-on/9781565921689/04_chapter-01.html
