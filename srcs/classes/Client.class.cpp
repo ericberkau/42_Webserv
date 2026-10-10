@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/08 20:50:24 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 02:31:58 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 #include "classes/ResponseBuilder.class.hpp"
 #include "signals.hpp"
 #include <iostream>
-#include <unistd.h>
 #include <queue>
+#include <unistd.h>
 
 Client::Client(int fd, const sockaddr_in& addr, const ServerConfig* server)
 	:	_fd(fd),

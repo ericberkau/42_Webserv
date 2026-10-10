@@ -6,19 +6,19 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:56:06 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/10 00:48:26 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 02:40:21 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef REQUEST_PARSER_HPP
 #define REQUEST_PARSER_HPP
 
+#include "config.hpp"
 #include "HttpRequestContainer.class.hpp"
-#include "../config.hpp"
-#include <string>
-#include <stdexcept>
-#include <vector>
 #include <algorithm>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 struct NeedMoreInput {};
 
@@ -28,8 +28,8 @@ class HttpParseException : public std::exception
 	
 		HttpParseException(int statusCode);
 		
-		virtual				~HttpParseException() throw();
-		// virtual const char*	what() const throw();
+		virtual	~HttpParseException() throw(); // FIXME: talk about structure
+		// virtual const char*	what() const throw(); // TODO: remove?
 		
 		int		getStatusCode() const;
 		bool	isFatal() const;
@@ -58,10 +58,11 @@ class RequestParser
 		void	feed(const std::string& chunk, HttpRequestContainer& request, const ServerConfig* config);
 
 		// Getters for the server loop to know when a request is ready
+		void			discardBuffer();
 		ParsingState	getState() const;
 		void			reset();
-		void			discardBuffer();
-		
+
+
 	private:
 	
 		ParsingState	_state;
@@ -84,7 +85,6 @@ class RequestParser
 		void	_parseRequestHeader(HttpRequestContainer& request, const ServerConfig* config);
 		void	_parseRequestLine(const std::string& line, HttpRequestContainer& request); // Splits "METHOD URI VERSION" and validates each piece
 
-		
 };
 
 #endif

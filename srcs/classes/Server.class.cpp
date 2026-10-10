@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:21 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/09 03:42:32 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 02:33:35 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,6 @@
 #include <iostream>
 #include <sys/wait.h>
 #include <unistd.h>
-// #include "classes/RequestHandler.class.hpp"
-// #include "classes/ResponseBuilder.class.hpp"
-// #include <fcntl.h>
-// #include <memory>
-// #include <netdb.h>
-// #include <variant>
 
 Server::Server(const Config& config) : _config(config) {}
 
@@ -210,7 +204,7 @@ void Server::_handleCgiEvents(size_t& idx) {
 		_handleCgiInput(cgi, idx);
 }
 
-size_t Server::_findPollEntryIdxByFd(int fd) {
+size_t Server::_findPollEntryIdxByFd(int fd) const {
 	for (size_t i = 0; i < _pollfdArr.size(); ++i) {
 		if (_pollfdArr[i].fd == fd)
 			return i;

@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:10 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/08 21:59:38 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 02:31:05 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,11 @@
 #include "classes/Client.class.hpp"
 #include "config.hpp"
 #include "networking.hpp"
+#include <charconv> // BUG: remove if no debug printing?
 #include <poll.h>
 #include <set>
 #include <unordered_map>
 #include <vector>
-#include <charconv>
 
 class Server {
 
@@ -52,13 +52,13 @@ class Server {
 		void	_handlePendingConnections(int listeningSocket);
 		void	_handleSocketEvent(size_t& idx);
 		void	_handleTimeouts(void);
-		
+
 		/* helpers and cleanup */
 		void	_actOnFailedCgiRegistration(const CgiContext& cgi);
 		void	_checkIdleClients(const Clock::time_point now);
 		void	_cleanupCompleteCgi(const CgiContext& cgiInfo);
 		void	_disconnectFd(size_t& idx);
-		size_t	_findPollEntryIdxByFd(int fd);
+		size_t	_findPollEntryIdxByFd(int fd) const;
 		bool	_isDuplicateAddress(uint32_t host, uint16_t port);
 
 		/* server state */

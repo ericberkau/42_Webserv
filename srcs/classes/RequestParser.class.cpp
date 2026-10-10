@@ -6,14 +6,14 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:16 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/10 00:49:37 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 02:33:17 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "classes/RequestParser.class.hpp"
-#include <sstream>
-#include "classes/StringUtils.hpp"
 #include "classes/RequestHandler.class.hpp"
+#include "classes/RequestParser.class.hpp"
+#include "classes/StringUtils.hpp"
+#include <sstream>
 
 static const size_t MAX_LINE_LENGTH = 8192; // longest single request/header/chunk-size line
 static const size_t MAX_HEADER_BYTES = 32768; // all header lines together
@@ -26,7 +26,7 @@ HttpParseException::~HttpParseException() throw() {}
 // const char* HttpParseException::what() const throw()
 // {
 // 	return _reason.c_str();
-// }
+// } // TODO: remove?
 
 int HttpParseException::getStatusCode() const
 {

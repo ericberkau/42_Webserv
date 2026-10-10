@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:14:29 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/09 02:22:10 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 02:33:29 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,6 @@
 #include <iostream>
 #include <sys/wait.h>
 #include <unistd.h>
-// #include "classes/ResponseBuilder.class.hpp"
-// #include <fcntl.h>
-// #include <memory>
-// #include <netdb.h>
-// #include <variant>
 
 void Server::_registerCgi(CgiContext&& cgiInfo) {
 	const CgiContext cgiPreserve(cgiInfo, false);

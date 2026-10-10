@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   CGIEnv.class.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 12:31:01 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/10/06 20:07:39 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/10/10 02:31:39 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "classes/CGIExecutor.class.hpp"
 #include "classes/CGIEnv.class.hpp"
+#include "classes/CGIExecutor.class.hpp"
 #include <cstring>
 
 void CGIEnv::set(const std::string& key,

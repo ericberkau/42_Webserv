@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/09 20:26:46 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/09/25 02:34:33 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 02:36:24 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,9 @@ class CGIEnv
 {
 	public:
 
-		void		set(const std::string& key, const std::string& value);
 		char**		buildEnvp() const;
 		static void	freeEnvp(char** envp);
+		void		set(const std::string& key, const std::string& value);
 
 
 	private:

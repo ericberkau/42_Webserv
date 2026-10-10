@@ -3,21 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   ResponseBuilder.class.hpp                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:58:56 by djanardh          #+#    #+#             */
-/*   Updated: 2026/09/27 19:19:21 by djanardh         ###   ########.fr       */
+/*   Updated: 2026/10/10 02:41:20 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef RESPONSEBUILDER_HPP
 #define RESPONSEBUILDER_HPP
 
+#include "config.hpp"
+#include <fstream>
+#include <map>
 #include <sstream>
 #include <string>
-#include <map>
-#include <fstream>
-#include "config.hpp"
 #include <sys/stat.h> 
 
 class ResponseBuilder
@@ -28,19 +28,19 @@ class ResponseBuilder
 		~ResponseBuilder();
 
 		// Setters
-		void	setStatus(int code); // Automatically looks up the text message
-		void	setStatus(int code, const std::string& customMessage);
 		void	addHeader(const std::string& key, const std::string& value);
 		void	setBody(const std::string& body);
 		void	setHttpVersion(const std::string& version);
+		void	setStatus(int code); // Automatically looks up the text message
+		void	setStatus(int code, const std::string& customMessage);
 
 		// Helpers  for common headers
-		void	setContentType(const std::string& contentType);
 		void	setContentLength(size_t length);
+		void	setContentType(const std::string& contentType);
 
 		// Generates a proper HTML page for error codes
-		void	generateDefaultErrorPage(int code);
 		void	generateCustomErrorPage(int code, const ServerConfig& config);
+		void	generateDefaultErrorPage(int code);
 
 		std::string	buildString() const;
 
@@ -48,7 +48,8 @@ class ResponseBuilder
 		void	clear();
 
 		void	setContentTypeFromExtension(const std::string& physicalPath);
-		
+
+
 	private:
 	
 		std::string							_httpVersion;
@@ -59,6 +60,7 @@ class ResponseBuilder
 
 		// Internal helper to get standard HTTP status messages
 		std::string	_getStandardStatusMessage(int code) const;
+
 };
 
 #endif

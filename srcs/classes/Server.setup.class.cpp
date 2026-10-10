@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.setup.class.cpp                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:11:44 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/06 20:59:35 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/10/10 02:33:48 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,6 @@
 #include <fcntl.h>
 #include <memory>
 #include <unistd.h>
-// #include "classes/RequestHandler.class.hpp"
-// #include "classes/ResponseBuilder.class.hpp"
-// #include "signals.hpp"
-// #include <iostream>
-// #include <netdb.h>
-// #include <sys/wait.h>
-// #include <variant>
 
 void Server::_setupListeners(void) {
 	for (const ServerConfig& serverCfg : _config.servers) {

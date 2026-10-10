@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:06 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/05 22:02:03 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 02:27:19 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,11 @@ class Client {
 
 	private:
 
+
+		RequestResult						_handleRequest(void);
+		std::list<ResponseSlot>::iterator	_reserveResponseSlot(void);
+		void								_resetRequestState(void);
+
 		/* client state */
 		int						_fd;
 		std::string				_inputBuffer; // TODO: limit size later
@@ -71,10 +76,6 @@ class Client {
 		/* HTTP management */
 		RequestParser			_requestParser;
 		HttpRequestContainer	_httpRequest;
-
-		RequestResult						_handleRequest(void);
-		std::list<ResponseSlot>::iterator	_reserveResponseSlot(void);
-		void								_resetRequestState(void);
 
 		/* diallow copying */
 		Client(const Client&) = delete;

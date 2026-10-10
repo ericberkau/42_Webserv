@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:13:08 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/09 03:40:57 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/10 02:33:41 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,6 @@
 #include <fcntl.h>
 #include <iostream>
 #include <unistd.h>
-// #include "classes/RequestHandler.class.hpp"
-// #include "classes/ResponseBuilder.class.hpp"
-// #include <memory>
-// #include <netdb.h>
-// #include <sys/wait.h>
-// #include <variant>
 
 void Server::_handlePendingConnections(int listeningSocket) {
 	while (!g_shutdownRequested) {
