@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cgi.class.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:14:29 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 19:46:40 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/11 18:57:51 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,7 +140,21 @@ void Server::_handleCgiOutput(CgiContext& cgi, size_t& idx) {
 	}
 
 	if (bytes == 0) {
-		cgi.responseSlot->response = RequestHandler::buildResponseFromCgiOutput(cgi.output);
+		int status = 0;
+
+		if (waitpid(cgi.pid, &status, WNOHANG) == 0) {
+			kill(cgi.pid, SIGKILL);
+			waitpid(cgi.pid, &status, 0);
+		}
+
+		if (WEXITSTATUS(status) != 0) {
+			ResponseBuilder rb;
+			rb.generateDefaultErrorPage(502);
+
+			cgi.responseSlot->response = rb.buildString();
+		} else
+			cgi.responseSlot->response = RequestHandler::buildResponseFromCgiOutput(cgi.output);
+
 		cgi.responseSlot->ready = true;
 
 		owningClient.flushReadyResponses();
@@ -148,10 +162,6 @@ void Server::_handleCgiOutput(CgiContext& cgi, size_t& idx) {
 		if (owningClient.hasPendingOutput())
 			_pollfdArr[clientEntryIdx].events |= POLLOUT;
 
-		if (waitpid(cgi.pid, NULL, WNOHANG) == 0) {
-			kill(cgi.pid, SIGKILL);
-			waitpid(cgi.pid, NULL, 0);
-		}
 		_disconnectFd(idx);
 		return;
 	}
