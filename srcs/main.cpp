@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/08 18:07:00 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 22:17:07 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/11 19:46:00 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,8 @@ int main(int argc, char** argv) {
 			source = argv[1];
 		else
 			source = "configs/basic.conf";
+
+		std::cout << "\033[0;33m\nConfig file: '" << source << "'\033[0m" << std::endl;
 
 		const std::string input = readFile(source);
 
