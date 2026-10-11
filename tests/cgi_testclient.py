@@ -48,7 +48,7 @@ def recv_response(sock):
 
 
 with socket.create_connection((HOST, PORT)) as sock:
-    sock.settimeout(7.0)
+    sock.settimeout(10.0)
 
     print(f"Connected to {HOST}:{PORT}")
 
