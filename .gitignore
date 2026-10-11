@@ -1,7 +1,8 @@
 .objs/
 *.o
 .vscode
+*.DS_Store
 
 webserv
-srcs/.DS_Store
-.DS_Store
+html/uploads/*
+!html/uploads/.gitkeep
