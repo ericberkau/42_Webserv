@@ -1,6 +1,6 @@
-# Webserv
-
 _This project has been created as part of the 42 curriculum by djanardh, eberkau and skomyshe._
+
+# Webserv
 
 ## Description
 
