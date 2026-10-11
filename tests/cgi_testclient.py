@@ -5,7 +5,7 @@ PORT = 8080
 
 requests = {
     "GET CGI": (
-        "GET /cgi-bin/sleepy.py?name=world HTTP/1.1\r\n"
+        "GET /cgi-bin/cgi_testscript.py?name=world HTTP/1.1\r\n"
         "Host: localhost\r\n"
         "Connection: keep-alive\r\n"
         "\r\n"
