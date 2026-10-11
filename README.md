@@ -180,5 +180,6 @@ Typical use cases included:
 * Review of implementation approaches and edge cases
 * Identification of potential bugs and resource-management issues
 * Generation of testing scripts using Python
+* Generation of example HTML files to serve
 
 All architectural decisions, implementation work, debugging, testing, and final code were performed by the project authors.
