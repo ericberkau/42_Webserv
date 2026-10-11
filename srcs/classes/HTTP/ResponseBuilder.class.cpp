@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ResponseBuilder.class.cpp                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:26 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/10 03:01:15 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/11 19:03:20 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ std::string ResponseBuilder::_getStandardStatusMessage(int code) const
 		case 431: return "Request Header Fields Too Large";
 		case 500: return "Internal Server Error";
 		case 501: return "Not Implemented";
+		case 502: return "Bad Gateway";
 		case 504: return "Gateway Timeout";
 		default:  return "Unknown Status";
 	}
