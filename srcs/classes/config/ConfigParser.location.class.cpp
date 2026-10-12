@@ -14,8 +14,8 @@
 
 LocationConfig ConfigParser::_parseLocation(void) {
 	_advance();
-
 	_expect(TokenType::WORD, "expected path after 'location'");
+
 	LocationConfig location;
 	location.path = _current().lexeme;
 	_advance();
