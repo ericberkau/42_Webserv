@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:20 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 19:45:49 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/11 23:33:03 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,10 @@ size_t Client::getOutProgress(void) const {
 	return this->_outputWriteProgress;
 }
 
+const ServerConfig& Client::getServer(void) const {
+	return *this->_server;
+}
+
 bool Client::hasPendingOutput(void) const {
 	return !this->_outputBuffer.empty() && this->_outputWriteProgress < this->_outputBuffer.size();
 }
@@ -166,7 +170,7 @@ std::queue<RequestResult> Client::processInput(void) {
 		std::list<ResponseSlot>::iterator slot = _reserveResponseSlot();
 	
 		ResponseBuilder rb;
-		rb.generateCustomErrorPage(e.getStatusCode(), *_server);
+		rb.generateErrorPage(e.getStatusCode(), *_server);
 
 		slot->response = rb.buildString();
 		slot->ready = true;

@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 23:23:06 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 19:43:54 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/11 23:33:10 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@ class Client {
 		const std::string&	getOutBuf(void) const;
 		size_t				getOutProgress(void) const;
 		Clock::time_point	getLastActivity(void) const;
+		const ServerConfig&	getServer(void) const;
 		bool				hasPendingOutput(void) const;
 		bool				queueEmpty(void) const;
 		bool				shouldDisconnect(void) const;
