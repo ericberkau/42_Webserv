@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/10 03:01:09 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/12 02:05:47 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,7 +134,6 @@ std::string RequestHandler::_translateToPhysicalPath(const std::string& uri, con
 	if (location && !location->root.empty())
 	{
 		baseRoot = location->root;
-		// stripPrefix = true;
 		stripPrefix = !isExtensionLocation(*location); // "*.bla" is not a URL prefix
 	}
 	else if (!_config->root.empty())
@@ -281,7 +280,7 @@ static std::string generateUploadName()
 std::string RequestHandler::_handlePost(const HttpRequestContainer& request, const LocationConfig* location)
 {
 	// if (!location || !location->uploadEnabled)
-	// 	throw std::runtime_error("403");
+	// 	throw std::runtime_error("403"); // BUG: remove?
 
 	if (!location)
 		throw std::runtime_error("403");
@@ -371,13 +370,13 @@ std::string RequestHandler::_handleDelete(const std::string& physicalPath)
 	return response;
 }
 
-std::string RequestHandler::buildResponseFromCgiOutput(const std::string& cgiOutput)
+std::string RequestHandler::buildResponseFromCgiOutput(const std::string& cgiOutput, const ServerConfig& config)
 {
 	ResponseBuilder response;
 
 	if (cgiOutput.empty()) // handler produced nothing: crashed, missing script ???
 	{
-		response.generateDefaultErrorPage(500);
+		response.generateErrorPage(502, config);
 		return response.buildString();
 	}
 
@@ -449,7 +448,7 @@ CgiContext RequestHandler::_handleCgi(const std::string& physicalPath, const Htt
 	const std::string& handler = it->second;
 
 	// // requested file must exist
-	// struct stat pathStat;
+	// struct stat pathStat; // BUG: remove?
 	// if (stat(physicalPath.c_str(), &pathStat) != 0 || S_ISDIR(pathStat.st_mode))
 	// 	throw std::runtime_error("404");
 
@@ -564,13 +563,13 @@ RequestResult RequestHandler::processRequest(const HttpRequestContainer& request
 		if (statusCode == 0)
 			statusCode = 500; // Fallback to Internal Error if conversion fails
 
-		response.generateCustomErrorPage(statusCode, *_config);
+		response.generateErrorPage(statusCode, *_config);
 		return RequestResult(response.buildString());
 	}
 	catch (...)
 	{
 		// global safety net catch-all for any unexpected system failure
-		response.generateCustomErrorPage(500, *_config);
+		response.generateErrorPage(500, *_config);
 		return RequestResult(response.buildString());
 	}
 }

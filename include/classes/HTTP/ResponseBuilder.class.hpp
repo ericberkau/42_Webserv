@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:58:56 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/10 02:41:20 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/12 02:07:21 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,7 @@ class ResponseBuilder
 		void	setContentType(const std::string& contentType);
 
 		// Generates a proper HTML page for error codes
-		void	generateCustomErrorPage(int code, const ServerConfig& config);
-		void	generateDefaultErrorPage(int code);
+		void	generateErrorPage(int code, const ServerConfig& config);
 
 		std::string	buildString() const;
 
@@ -59,6 +58,7 @@ class ResponseBuilder
 		std::string							_body;
 
 		// Internal helper to get standard HTTP status messages
+		void		_generateDefaultErrorPage(int code);
 		std::string	_getStandardStatusMessage(int code) const;
 
 };

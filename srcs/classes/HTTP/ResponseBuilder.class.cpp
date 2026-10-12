@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ResponseBuilder.class.cpp                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:26 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/11 19:03:20 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/10/11 22:30:48 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,7 @@ void ResponseBuilder::setContentLength(size_t length)
 }
 
 // Generates a standard default fallback HTML view if no custom error file is found
-void ResponseBuilder::generateDefaultErrorPage(int code)
+void ResponseBuilder::_generateDefaultErrorPage(int code)
 {
 	setStatus(code);
 		
@@ -98,7 +98,7 @@ void ResponseBuilder::generateDefaultErrorPage(int code)
 	setBody(bodyStream.str());
 }
 
-void ResponseBuilder::generateCustomErrorPage(int code, const ServerConfig& config)
+void ResponseBuilder::generateErrorPage(int code, const ServerConfig& config)
 {
 	std::map<int, std::string>::const_iterator it = config.errorPages.find(code);
 	
@@ -126,7 +126,7 @@ void ResponseBuilder::generateCustomErrorPage(int code, const ServerConfig& conf
 		}
 	}
 	// If the file path is a directory, missing, or corrupt, generate hardcoded string fallback page
-	generateDefaultErrorPage(code);
+	_generateDefaultErrorPage(code);
 }
 
 // Merges everything into the byte packet the network socket needs

@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 10:55:03 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/10 21:22:05 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/11 23:32:27 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ class RequestHandler
 		RequestHandler(const ServerConfig* config);
 		~RequestHandler();
 
-		static std::string				buildResponseFromCgiOutput(const std::string& cgiOutput);
+		static std::string				buildResponseFromCgiOutput(const std::string& cgiOutput, const ServerConfig& config);
 		static size_t					bodyLimitFor(const ServerConfig& config, const LocationConfig* location);
 		static const LocationConfig*	matchLocation(const ServerConfig& config, const std::string& uri, HttpMethod method);
 
