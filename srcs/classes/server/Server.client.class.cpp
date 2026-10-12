@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:13:08 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 22:18:53 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/11 23:20:00 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,11 @@ void Server::_handlePendingConnections(int listeningSocket) {
 		pollfd newClientPoll;
 		newClientPoll.fd = newClientFd;
 		newClientPoll.events = POLLIN;
-		_pollfdArr.push_back(newClientPoll);
+		_pollMonitoring.push_back(newClientPoll);
 
 		const ServerConfig*	relatedServer = _fdCtx.at(listeningSocket).server;
+		if (!relatedServer)
+			throw std::logic_error("No server bound to listening socket");
 
 		bool inserted = false;
 		try {
@@ -77,7 +79,7 @@ void Server::_handlePendingConnections(int listeningSocket) {
 
 void Server::_handleIncomingData(size_t& idx) {
 	char msg[MSG_SIZE];
-	Client& currClient = _fdCtx.at(_pollfdArr[idx].fd).client.value();
+	Client& currClient = _fdCtx.at(_pollMonitoring[idx].fd).client.value();
 
 	ssize_t receivedBytes = recv(currClient.getFd(), msg, MSG_SIZE, 0);
 
@@ -93,7 +95,7 @@ void Server::_handleIncomingData(size_t& idx) {
 
 	// write(1, "Message arrived from ", 22);
 	// char buf[12];
-	// auto [p, ec] = std::to_chars(buf, buf + 12, _pollfdArr[idx].fd);
+	// auto [p, ec] = std::to_chars(buf, buf + 12, _pollMonitoring[idx].fd);
 	// write(1, buf, p - buf);
 	// write(1, " -> ", 5);
 	// write(1, "\n", 2);
@@ -109,8 +111,7 @@ void Server::_handleIncomingData(size_t& idx) {
 		if (std::holds_alternative<std::string>(singleResult.result)) {
 			singleResult.responseSlot->response = std::move(std::get<std::string>(singleResult.result));
 			singleResult.responseSlot->ready = true;
-		}
-		else {
+		} else {
 			CgiContext& cgi = std::get<CgiContext>(singleResult.result);
 
 			cgi.clientFd = currClient.getFd();
@@ -124,16 +125,16 @@ void Server::_handleIncomingData(size_t& idx) {
 	currClient.flushReadyResponses();
 
 	if (currClient.hasPendingOutput())
-		_pollfdArr[idx].events |= POLLOUT;
+		_pollMonitoring[idx].events |= POLLOUT;
 
 	if (currClient.shouldDisconnect())
-		_pollfdArr[idx].events &= ~POLLIN;
+		_pollMonitoring[idx].events &= ~POLLIN;
 
 	currClient.updateActivity();
 }
 
 void Server::_handleOutgoingData(size_t& idx) {
-	Client& currClient = _fdCtx.at(_pollfdArr[idx].fd).client.value();
+	Client& currClient = _fdCtx.at(_pollMonitoring[idx].fd).client.value();
 
 	if (!currClient.hasPendingOutput()) {
 		if (currClient.shouldDisconnect() && currClient.queueEmpty())
@@ -178,7 +179,7 @@ void Server::_handleOutgoingData(size_t& idx) {
 		}
 
 		currClient.clearOutBuf();
-		_pollfdArr[idx].events &= ~POLLOUT;
+		_pollMonitoring[idx].events &= ~POLLOUT;
 	}
 
 	currClient.updateActivity();

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cgi.class.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
+/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:14:29 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/11 18:57:51 by skomyshe         ###   ########.fr       */
+/*   Updated: 2026/10/11 23:33:31 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,21 +37,22 @@ void Server::_registerCgi(CgiContext&& cgiInfo) {
 }
 
 void Server::_actOnFailedCgiRegistration(const CgiContext& cgi) {
+	Client& owningClient = _fdCtx.at(cgi.clientFd).client.value();
+
 	ResponseBuilder rb;
-	rb.generateDefaultErrorPage(500);
+	rb.generateErrorPage(500, owningClient.getServer());
 
 	cgi.responseSlot->response = rb.buildString();
 	cgi.responseSlot->ready = true;
 
-	Client& owningClient = _fdCtx.at(cgi.clientFd).client.value();
 	owningClient.flushReadyResponses();
 
 	if (owningClient.hasPendingOutput()) {
 		size_t clientEntryIdx = _findPollEntryIdxByFd(cgi.clientFd);
-		if (clientEntryIdx == _pollfdArr.size())
+		if (clientEntryIdx == _pollMonitoring.size())
 			throw std::logic_error("owning client fd not found");
 
-		_pollfdArr[clientEntryIdx].events |= POLLOUT;
+		_pollMonitoring[clientEntryIdx].events |= POLLOUT;
 	}
 }
 
@@ -70,7 +71,7 @@ void Server::_registerCgiPipe(CgiContext&& cgiInfo, const short events) {
 	pollfd cgiPipe = {};
 	cgiPipe.fd = pipeFd;
 	cgiPipe.events = events;
-	_pollfdArr.push_back(cgiPipe);
+	_pollMonitoring.push_back(cgiPipe);
 }
 
 void Server::_handleCgiInput(CgiContext& cgi, size_t& idx) {
@@ -100,7 +101,7 @@ void Server::_handleCgiInput(CgiContext& cgi, size_t& idx) {
 }
 
 void Server::_handleCgiOutput(CgiContext& cgi, size_t& idx) {
-	if (!(_pollfdArr[idx].revents & (POLLIN | POLLHUP)))
+	if (!(_pollMonitoring[idx].revents & (POLLIN | POLLHUP)))
 		return;
 
 	auto it = _fdCtx.find(cgi.clientFd);
@@ -111,12 +112,12 @@ void Server::_handleCgiOutput(CgiContext& cgi, size_t& idx) {
 	Client& owningClient = it->second.client.value();
 
 	size_t clientEntryIdx = _findPollEntryIdxByFd(cgi.clientFd);
-	if (clientEntryIdx == _pollfdArr.size())
+	if (clientEntryIdx == _pollMonitoring.size())
 		throw std::logic_error("owning client fd not found");
 
 	if (cgi.aborted) {
 		ResponseBuilder rb;
-		rb.generateDefaultErrorPage(504);
+		rb.generateErrorPage(504, owningClient.getServer());
 
 		cgi.responseSlot->response = rb.buildString();
 		cgi.responseSlot->ready = true;
@@ -124,7 +125,7 @@ void Server::_handleCgiOutput(CgiContext& cgi, size_t& idx) {
 		owningClient.flushReadyResponses();
 
 		if (owningClient.hasPendingOutput())
-			_pollfdArr[clientEntryIdx].events |= POLLOUT;
+			_pollMonitoring[clientEntryIdx].events |= POLLOUT;
 
 		_cleanupCompleteCgi(cgi);
 		return;
@@ -149,18 +150,18 @@ void Server::_handleCgiOutput(CgiContext& cgi, size_t& idx) {
 
 		if (WEXITSTATUS(status) != 0) {
 			ResponseBuilder rb;
-			rb.generateDefaultErrorPage(502);
+			rb.generateErrorPage(502, owningClient.getServer());
 
 			cgi.responseSlot->response = rb.buildString();
 		} else
-			cgi.responseSlot->response = RequestHandler::buildResponseFromCgiOutput(cgi.output);
+			cgi.responseSlot->response = RequestHandler::buildResponseFromCgiOutput(cgi.output, owningClient.getServer());
 
 		cgi.responseSlot->ready = true;
 
 		owningClient.flushReadyResponses();
 
 		if (owningClient.hasPendingOutput())
-			_pollfdArr[clientEntryIdx].events |= POLLOUT;
+			_pollMonitoring[clientEntryIdx].events |= POLLOUT;
 
 		_disconnectFd(idx);
 		return;
@@ -179,12 +180,12 @@ void Server::_cleanupCompleteCgi(const CgiContext& cgiInfo) {
 	_fdCtx.erase(readPipe);
 	_fdCtx.erase(writePipe);
 
-	for (size_t i = 0; i < _pollfdArr.size();) {
-		if (_pollfdArr[i].fd == readPipe ||
-			_pollfdArr[i].fd == writePipe)
+	for (size_t i = 0; i < _pollMonitoring.size();) {
+		if (_pollMonitoring[i].fd == readPipe ||
+			_pollMonitoring[i].fd == writePipe)
 		{
-			_pollfdArr[i] = _pollfdArr.back();
-			_pollfdArr.pop_back();
+			_pollMonitoring[i] = _pollMonitoring.back();
+			_pollMonitoring.pop_back();
 			continue;
 		}
 

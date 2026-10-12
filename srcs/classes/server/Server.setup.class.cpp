@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:11:44 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 19:55:11 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/11 21:22:08 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ int Server::_setupListeningSocket(const ListenDirective& listenCfg) {
 	pollfd serverPoll;
 	serverPoll.fd = serverFd;
 	serverPoll.events = POLLIN;
-	_pollfdArr.push_back(serverPoll);
+	_pollMonitoring.push_back(serverPoll);
 
 	return serverFd;
 }

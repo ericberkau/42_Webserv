@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/01 23:02:10 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/10 20:36:40 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/11 21:22:08 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ class Server {
 		const Config&							_config;
 		std::unordered_map<int, FdContext>		_fdCtx;
 		Clock::time_point						_lastTimeoutCheck;
-		std::vector<pollfd>						_pollfdArr;
+		std::vector<pollfd>						_pollMonitoring;
 		std::set<std::pair<uint32_t, uint16_t>>	_usedAddresses;
 
 		/* disallow copying or moving */
