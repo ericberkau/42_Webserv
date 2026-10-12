@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestHandler.class.cpp                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: djanardh <djanardh@student.42heilbronn.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/12 02:37:41 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/13 01:00:31 by djanardh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -204,7 +204,7 @@ std::string RequestHandler::_handleGet(const std::string& physicalPath, const Lo
 		// if location is NULL, autoIndex defaults to false
 		bool isAutoindexEnabled = location ? location->autoIndex : false;
 		if (!isAutoindexEnabled)
-			throw std::runtime_error("404"); // If autoindex is turned off and we have no valid index file path, deny access
+			throw std::runtime_error("403"); // If autoindex is turned off and we have no valid index file path, deny access
 
 		// Opening directory folder stream
 		DIR* dir = opendir(physicalPath.c_str());
