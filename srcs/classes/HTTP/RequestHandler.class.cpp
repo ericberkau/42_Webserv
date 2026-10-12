@@ -444,6 +444,15 @@ CgiContext RequestHandler::_handleCgi(const std::string& physicalPath, const Htt
 		throw std::runtime_error("500");
 	const std::string& handler = it->second;
 
+	// A "*.ext" location sends every matching URL to the handler (handler decides what the URL means)
+	// A cgi directive inside a normal location runs files from that directory, so the file must exist
+	if (!isExtensionLocation(*location))
+	{
+		struct stat pathStat;
+		if (stat(physicalPath.c_str(), &pathStat) != 0 || S_ISDIR(pathStat.st_mode))
+			throw std::runtime_error("404");
+	}
+
 	// configured handler must be runnable, otherwise server misconfiguration?
 	if (access(handler.c_str(), X_OK) != 0)
 		throw std::runtime_error("500");
