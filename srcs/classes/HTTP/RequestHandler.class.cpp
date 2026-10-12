@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/07 11:04:08 by djanardh          #+#    #+#             */
-/*   Updated: 2026/10/12 02:05:47 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/12 02:37:41 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -279,9 +279,6 @@ static std::string generateUploadName()
 
 std::string RequestHandler::_handlePost(const HttpRequestContainer& request, const LocationConfig* location)
 {
-	// if (!location || !location->uploadEnabled)
-	// 	throw std::runtime_error("403"); // BUG: remove?
-
 	if (!location)
 		throw std::runtime_error("403");
 
@@ -446,11 +443,6 @@ CgiContext RequestHandler::_handleCgi(const std::string& physicalPath, const Htt
 	if (it == location->cgiHandlers.end())
 		throw std::runtime_error("500");
 	const std::string& handler = it->second;
-
-	// // requested file must exist
-	// struct stat pathStat; // BUG: remove?
-	// if (stat(physicalPath.c_str(), &pathStat) != 0 || S_ISDIR(pathStat.st_mode))
-	// 	throw std::runtime_error("404");
 
 	// configured handler must be runnable, otherwise server misconfiguration?
 	if (access(handler.c_str(), X_OK) != 0)
