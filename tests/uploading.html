@@ -1,0 +1,194 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Server Upload Speed Test</title>
+  <style>
+    body {
+      font: 16px system-ui, sans-serif;
+      max-width: 680px;
+      margin: 50px auto;
+      padding: 0 20px;
+      background: #f4f6f8;
+      color: #202833;
+    }
+    main {
+      background: white;
+      padding: 28px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px #0001;
+    }
+    label { display: block; margin-top: 18px; }
+    input, button {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 12px;
+      margin-top: 7px;
+      font: inherit;
+    }
+    button {
+      cursor: pointer;
+      border: 0;
+      border-radius: 6px;
+      background: #1769d2;
+      color: white;
+      font-weight: 600;
+      margin-top: 22px;
+    }
+    button:disabled { opacity: .5; cursor: wait; }
+    progress { width: 100%; height: 22px; margin-top: 18px; }
+    .result {
+      margin-top: 22px;
+      padding: 16px;
+      background: #eef4fb;
+      border-radius: 8px;
+      overflow-wrap: anywhere;
+    }
+    .speed { font-size: 2rem; font-weight: 700; }
+    .muted { color: #637080; font-size: .9rem; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Upload Speed Test</h1>
+  <p>Upload generated test data to your web server and measure performance.</p>
+
+  <label for="endpoint">Upload endpoint URL</label>
+  <input id="endpoint" value="http://localhost:8080/upload"
+         placeholder="https://example.com/upload-test">
+
+  <label for="size">Test size (MB)</label>
+  <input id="size" type="number" min="1" max="1000"
+         value="10" step="1">
+
+  <button id="start">Start upload test</button>
+
+  <progress id="progress" value="0" max="100"></progress>
+  <p id="status" role="status">Ready</p>
+
+  <section class="result">
+    <div>Upload speed</div>
+    <div class="speed" id="speed">— Mbps</div>
+    <p id="details">Run a test to see the results.</p>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+
+$("start").addEventListener("click", async () => {
+  const mb = Number($("size").value);
+  const endpoint = $("endpoint").value.trim();
+
+  if (!Number.isFinite(mb) || mb < 1 || mb > 1000) {
+    alert("Choose a test size between 1 and 1000 MB.");
+    return;
+  }
+
+  if (!endpoint) {
+    alert("Enter your server's upload endpoint.");
+    return;
+  }
+
+  const bytes = Math.round(mb * 1024 * 1024);
+  const button = $("start");
+
+  button.disabled = true;
+  $("progress").value = 0;
+  $("speed").textContent = "— Mbps";
+  $("details").textContent = "";
+  $("status").textContent = "Generating test data...";
+
+  try {
+    // Generate incompressible test data so compression is
+    // less likely to distort the upload measurement.
+    const data = new Uint8Array(bytes);
+    const chunkSize = 65536;
+
+    for (let offset = 0; offset < bytes; offset += chunkSize) {
+      crypto.getRandomValues(
+        data.subarray(offset, Math.min(offset + chunkSize, bytes))
+      );
+    }
+
+    const blob = new Blob([data], {
+      type: "application/octet-stream"
+    });
+
+    // Release the large temporary array before uploading.
+    // The Blob retains its own data.
+    $("status").textContent = "Uploading...";
+    const startTime = performance.now();
+
+    const xhr = new XMLHttpRequest();
+    const url = new URL(endpoint, window.location.href);
+    url.searchParams.set("filename", "speed-test.bin");
+
+    xhr.open("POST", url.href);
+    xhr.setRequestHeader(
+      "Content-Type", "application/octet-stream"
+    );
+
+    xhr.upload.onprogress = event => {
+      if (event.lengthComputable) {
+        $("progress").value =
+          (event.loaded / event.total) * 100;
+
+        $("status").textContent =
+          `Uploading: ${(event.loaded / 1048576).toFixed(2)} MB`;
+      }
+    };
+
+    xhr.onload = () => {
+      const seconds = (performance.now() - startTime) / 1000;
+      const mbps = (bytes * 8) / seconds / 1e6;
+      const mbs = (bytes / 1048576) / seconds;
+
+      $("progress").value = 100;
+      $("speed").textContent = `${mbps.toFixed(2)} Mbps`;
+
+      $("details").innerHTML =
+        `Payload: ${(bytes / 1048576).toFixed(2)} MiB<br>` +
+        `Duration: ${seconds.toFixed(3)} seconds<br>` +
+        `Throughput: ${mbs.toFixed(2)} MiB/s<br>` +
+        `HTTP status: ${xhr.status}<br>` +
+        `Response: ${escapeHtml(xhr.responseText.slice(0, 500))}`;
+
+      $("status").textContent =
+        xhr.status >= 200 && xhr.status < 300
+          ? "Upload completed successfully."
+          : "Server returned an error.";
+      button.disabled = false;
+    };
+
+    xhr.onerror = () => {
+      $("status").textContent =
+        "Network error. Check the endpoint, CORS and server logs.";
+      $("details").textContent =
+        "The browser could not complete the request.";
+      button.disabled = false;
+    };
+
+    xhr.onabort = () => {
+      $("status").textContent = "Upload aborted.";
+      button.disabled = false;
+    };
+
+    xhr.send(blob);
+  } catch (error) {
+    $("status").textContent = `Error: ${error.message}`;
+    button.disabled = false;
+  }
+});
+
+function escapeHtml(value) {
+  return value.replace(/[&<>"']/g, char => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+    '"': "&quot;", "'": "&#39;"
+  })[char]);
+}
+</script>
+</body>
+</html>
