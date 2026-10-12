@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CGIEnv.class.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
+/*   By: skomyshe <skomyshe@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/04 12:31:01 by skomyshe          #+#    #+#             */
-/*   Updated: 2026/10/10 03:01:39 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/12 02:12:39 by skomyshe         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,8 @@ char** CGIEnv::buildEnvp() const
 		std::string entry = it->first + "=" + it->second;
 
 		envp[i] = new char[entry.size() + 1];
-		std::strcpy(envp[i], entry.data());
+		std::strcpy(envp[i], entry.c_str());
+		envp[i][entry.size()] = '\0';
 
 		++i;
 	}
