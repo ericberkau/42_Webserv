@@ -6,7 +6,7 @@
 /*   By: eberkau <eberkau@student.42heilbronn.de    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/10/03 23:14:29 by eberkau           #+#    #+#             */
-/*   Updated: 2026/10/11 23:33:31 by eberkau          ###   ########.fr       */
+/*   Updated: 2026/10/13 13:50:40 by eberkau          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,17 @@ void Server::_registerCgi(CgiContext&& cgiInfo) {
 
 		_registerCgiPipe(std::move(cgiInfo), POLLOUT);
 		_registerCgiPipe(std::move(cgiEmptyBuffers), POLLIN);
-	} catch (const std::logic_error&) {
+
+		write(1, "\033[0;32mCGI registered -> input: \033[0m", 37);
+		char buf[12];
+		auto [iPtr, ec1] = std::to_chars(buf, buf + 12, cgiPreserve.writePipeFd);
+		write(1, buf, iPtr - buf);
+		write(1, "\033[0;32m, output: \033[0m", 22);
+		auto [oPtr, ec2] = std::to_chars(buf, buf + 12, cgiPreserve.readPipeFd);
+		write(1, buf, oPtr - buf);
+		write(1, "\n", 2);
+	}
+	catch (const std::logic_error&) {
 		_actOnFailedCgiRegistration(cgiPreserve);
 		_cleanupCompleteCgi(cgiPreserve);
 		throw;
